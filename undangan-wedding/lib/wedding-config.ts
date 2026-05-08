@@ -11,19 +11,19 @@ export const weddingConfig = {
   groom: {
     fullName: "Andyka Eka Putra",
     nickname: "Andyka",
-    fatherName: "Bapak [Nama Ayah Andyka]",
-    motherName: "Ibu [Nama Ibu Andyka]",
+    fatherName: "Bapak Sunarto",
+    motherName: "Ibu Rusmini",
     childOrder: "Putra dari", // "Putra pertama dari" etc
-    instagram: "andyka",
+    instagram: "Andyka_Eka_Putra",
     photo: "/images/groom.jpg", // placeholder for now
   },
   bride: {
     fullName: "Khusnul Maulida",
-    nickname: "Khusnul",
-    fatherName: "Bapak [Nama Ayah Khusnul]",
+    nickname: "Maulida",
+    fatherName: "Bapak Alm Abbs",
     motherName: "Ibu [Nama Ibu Khusnul]",
     childOrder: "Putri dari",
-    instagram: "khusnul",
+    instagram: "khusnulmaulida_",
     photo: "/images/bride.jpg",
   },
 
@@ -36,7 +36,7 @@ export const weddingConfig = {
       id: "akad",
       label: "Akad Nikah",
       date: "2026-06-14",
-      time: "08:00 - 10:00 WITA",
+      time: "08:00 - 15:00 WITA",
       venue: "Lokasi Akad (TBD)",
       address: "Alamat lengkap akan diisi nanti",
       mapsUrl: "https://maps.google.com",
@@ -75,7 +75,7 @@ export const weddingConfig = {
       description: "Memutuskan untuk menjalani hubungan yang serius.",
     },
     {
-      year: "2025",
+      year: "2026 Januari",
       title: "Lamaran",
       description: "Hari di mana kedua keluarga akhirnya bersatu.",
     },
