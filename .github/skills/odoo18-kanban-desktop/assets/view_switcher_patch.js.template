@@ -1,0 +1,76 @@
+/** @odoo-module **/
+
+import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { patch } from "@web/core/utils/patch";
+
+// Replace with the default action XML-ID you want to fallback to.
+// Consider injecting this dynamically via context if building a generic module.
+const DEFAULT_ACTION_XMLID = "module_name.default_action_xml_id";
+const CUSTOM_ACTION_XMLID = "module_name.custom_kanban_action_xml_id";
+const CUSTOM_JS_CLASS = "custom_kanban_js_class";
+
+patch(ControlPanel.prototype, {
+    setup() {
+        super.setup(...arguments);
+        this._navigating = false;
+    },
+
+    get showCustomKanbanButton() {
+        const resModel = this.env.searchModel && this.env.searchModel.resModel;
+        return resModel === "target.model.name";
+    },
+
+    get isCustomKanbanActive() {
+        const cfg = this.env.config;
+        if (!cfg) return false;
+        if (cfg.viewArch && cfg.viewArch.getAttribute && cfg.viewArch.getAttribute("js_class") === CUSTOM_JS_CLASS) {
+            return true;
+        }
+        if (cfg.actionXmlId === CUSTOM_ACTION_XMLID) {
+            return true;
+        }
+        return false;
+    },
+
+    async openCustomKanban() {
+        if (this.isCustomKanbanActive || this._navigating) return;
+        this._navigating = true;
+        try {
+            await this.actionService.doAction(CUSTOM_ACTION_XMLID, { stackPosition: "replaceCurrentAction" });
+        } catch (e) {
+            console.warn("Navigation failed:", e);
+        } finally {
+            this._navigating = false;
+        }
+    },
+
+    async openDefaultKanban() {
+        if (this._navigating) return;
+        this._navigating = true;
+        try {
+            await this.actionService.doAction(DEFAULT_ACTION_XMLID, {
+                stackPosition: "replaceCurrentAction",
+                viewType: "kanban",
+            });
+        } catch (e) {
+            console.warn("Navigation failed:", e);
+        } finally {
+            this._navigating = false;
+        }
+    },
+
+    onSwitchNavClick(ev) {
+        if (!this.isCustomKanbanActive) return;
+        const btn = ev.target.closest("button.o_switch_view");
+        if (!btn) return;
+        // Let our custom button run its own click handler
+        if (btn.classList.contains("custom_kanban_btn_class")) return;
+        
+        // Intercept native kanban button click
+        if (btn.classList.contains("o_kanban")) {
+            ev.stopPropagation();
+            ev.preventDefault();
+            this.openDefaultKanban();
+        }
+    }
+});

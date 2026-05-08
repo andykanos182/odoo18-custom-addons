@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_product_checker_print_list_user,product.checker.print.list.user,model_product_checker_print_list,base.group_user,1,1,1,1
+access_product_checker_saved_filter_user,andykanoz_product_checker.saved_filter.user,model_andykanoz_product_checker_saved_filter,base.group_user,1,1,1,1

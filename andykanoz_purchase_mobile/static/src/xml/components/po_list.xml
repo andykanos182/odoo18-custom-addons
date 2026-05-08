@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_purchase_mobile.POList">
+        <div class="pm-po-list">
+            <div class="pm-po-list-header">
+                <span class="pm-po-list-title">Draft Purchase Orders</span>
+                <button class="pm-btn pm-btn-ghost"
+                        t-on-click="load"
+                        title="Reload">⟳</button>
+            </div>
+
+            <div t-if="state.loading" class="pm-po-list-state">Loading...</div>
+
+            <div t-elif="state.error" class="pm-po-list-state pm-po-list-error">
+                <div class="pm-po-list-state-title">Error loading orders</div>
+                <div class="pm-po-list-state-msg" t-esc="state.error"/>
+            </div>
+
+            <div t-elif="!state.orders.length" class="pm-po-list-state">
+                No draft purchase orders yet. Create a PO in desktop Odoo
+                as draft to see it here.
+            </div>
+
+            <div t-else="" class="pm-po-list-items">
+                <div t-foreach="state.orders"
+                     t-as="order"
+                     t-key="order.id"
+                     class="pm-po-item"
+                     t-on-click="() => this.onItemClick(order)">
+
+                    <div class="pm-po-item-row">
+                        <div class="pm-po-item-name" t-esc="order.name"/>
+                        <div class="pm-po-item-total"
+                             t-esc="formatMoney(order.amount_total, order.currency)"/>
+                    </div>
+
+                    <div class="pm-po-item-row pm-po-item-subrow">
+                        <div class="pm-po-item-vendor"
+                             t-esc="(order.partner and order.partner.name) or '— no vendor —'"/>
+                        <span t-if="order.created_via_mobile"
+                              class="pm-badge pm-badge-mobile">Mobile</span>
+                    </div>
+
+                    <div class="pm-po-item-meta">
+                        <span t-esc="order.line_count + ' item' + (order.line_count === 1 ? '' : 's')"/>
+                        <span> · </span>
+                        <span t-esc="formatDate(order.date_order)"/>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

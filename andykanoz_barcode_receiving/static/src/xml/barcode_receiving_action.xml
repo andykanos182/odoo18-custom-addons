@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_barcode_receiving.BarcodeReceivingAction">
+        <div class="o_barcode_receiving h-100 d-flex flex-column">
+
+            <!-- HEADER -->
+            <div class="o_br_header d-flex align-items-center px-3 py-2">
+                <button class="btn btn-link text-white p-0 me-3" t-on-click="onBack">
+                    <i class="fa fa-arrow-left fa-lg"/>
+                </button>
+                <div class="flex-grow-1" t-if="state.picking">
+                    <div class="o_br_title fw-bold">
+                        <t t-esc="state.picking.name"/>
+                    </div>
+                    <div class="o_br_subtitle small opacity-75">
+                        <t t-if="state.picking.origin">
+                            <span t-esc="state.picking.origin"/>
+                            <span t-if="state.picking.partner_name"> — </span>
+                        </t>
+                        <span t-if="state.picking.partner_name" t-esc="state.picking.partner_name"/>
+                    </div>
+                </div>
+                <button class="btn btn-success btn-sm ms-2"
+                        t-on-click="onValidate"
+                        t-att-disabled="!allReceived"
+                        t-attf-class="btn btn-sm ms-2 #{allReceived ? 'btn-success' : 'btn-outline-light'}">
+                    <i class="fa fa-check me-1"/> Validate
+                </button>
+            </div>
+
+            <!-- PROGRESS BAR -->
+            <div class="o_br_progress px-3 py-2">
+                <div class="d-flex justify-content-between mb-1 small">
+                    <span class="text-muted">
+                        Progress: <t t-esc="state.received.length"/> / <t t-esc="state.pending.length + state.received.length"/> lines
+                    </span>
+                    <span class="fw-bold"><t t-esc="progress"/>%</span>
+                </div>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-success"
+                         role="progressbar"
+                         t-attf-style="width: #{progress}%"/>
+                </div>
+            </div>
+
+            <!-- SCAN INPUT + CAMERA BUTTON -->
+            <div class="o_br_scan_area px-3 py-2">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-white">
+                        <i class="fa fa-barcode"/>
+                    </span>
+                    <input type="text"
+                           t-ref="barcodeInput"
+                           class="form-control"
+                           placeholder="Scan barcode or type here..."
+                           t-on-keydown="onInputKeydown"
+                           t-on-click="focusInput"/>
+                    <button class="btn btn-primary o_br_camera_btn"
+                            t-on-click="openCamera"
+                            title="Scan with Camera">
+                        <i class="fa fa-camera"/>
+                    </button>
+                </div>
+                <!-- Scan message -->
+                <div t-if="state.scanMessage"
+                     t-attf-class="o_br_scan_message mt-2 p-2 rounded text-center fw-bold #{state.scanMessageType === 'success' ? 'o_br_msg_success' : 'o_br_msg_error'}">
+                    <i t-attf-class="fa #{state.scanMessageType === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-1"/>
+                    <t t-esc="state.scanMessage"/>
+                </div>
+            </div>
+
+            <!-- CAMERA SCANNER MODAL -->
+            <div t-if="state.showCamera" class="o_br_camera_modal">
+                <div class="o_br_camera_container">
+                    <!-- Camera Header -->
+                    <div class="o_br_camera_header">
+                        <span class="fw-bold">Scan Barcode</span>
+                        <button class="o_br_camera_close" t-on-click="closeCamera">
+                            <i class="fa fa-times"/>
+                        </button>
+                    </div>
+
+                    <!-- Camera Loading -->
+                    <div t-if="state.cameraLoading" class="o_br_camera_loading">
+                        <div class="spinner-border text-light" role="status"/>
+                        <p class="mt-2 text-light">Opening camera...</p>
+                    </div>
+
+                    <!-- Camera Error -->
+                    <div t-if="state.cameraError" class="o_br_camera_error p-4 text-center">
+                        <i class="fa fa-exclamation-triangle fa-2x text-warning mb-2"/>
+                        <p class="text-light" t-esc="state.cameraError"/>
+                        <button class="btn btn-outline-light btn-sm mt-2" t-on-click="closeCamera">Close</button>
+                    </div>
+
+                    <!-- Camera Video -->
+                    <div t-if="!state.cameraError and !state.cameraLoading" class="o_br_camera_video_wrap">
+                        <video t-ref="cameraVideo"
+                               autoplay="true"
+                               playsinline="true"
+                               muted="true"/>
+                        <!-- Scan overlay -->
+                        <div class="o_br_camera_overlay">
+                            <div class="o_br_camera_target"/>
+                        </div>
+                    </div>
+
+                    <!-- Camera Footer -->
+                    <div class="o_br_camera_footer">
+                        <div class="o_br_camera_hint">
+                            Point camera at a barcode...
+                        </div>
+                        <div class="o_br_camera_actions">
+                            <button t-if="state.torchSupported"
+                                    class="btn btn-outline-light btn-sm"
+                                    t-on-click="toggleTorch">
+                                <i class="fa fa-bolt"/>
+                                <t t-if="state.torchOn"> Flash On</t>
+                                <t t-else=""> Flash Off</t>
+                            </button>
+                            <button class="btn btn-danger btn-sm" t-on-click="closeCamera">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOADING -->
+            <div t-if="state.loading" class="flex-grow-1 d-flex align-items-center justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <!-- CONTENT AREA -->
+            <div t-if="!state.loading" class="o_br_content flex-grow-1 overflow-auto px-3 pb-3">
+
+                <!-- ALL DONE MESSAGE -->
+                <div t-if="allReceived" class="o_br_all_done text-center py-4">
+                    <i class="fa fa-check-circle fa-3x text-success mb-2"/>
+                    <h4 class="text-success">All items received!</h4>
+                    <p class="text-muted">Click "Validate" to confirm this receipt.</p>
+                </div>
+
+                <!-- PENDING LIST -->
+                <div t-if="state.pending.length > 0" class="o_br_section mb-3">
+                    <div class="o_br_section_header d-flex align-items-center mb-2">
+                        <span class="badge bg-warning text-dark me-2">
+                            <t t-esc="state.pending.length"/>
+                        </span>
+                        <h6 class="mb-0 fw-bold text-warning">Waiting to Receive</h6>
+                    </div>
+                    <t t-foreach="state.pending" t-as="item" t-key="item.move_id">
+                        <div class="o_br_item o_br_item_pending d-flex align-items-center p-2 mb-1 rounded">
+                            <img t-att-src="item.product_image"
+                                 class="o_br_item_img rounded me-3"
+                                 alt="Product"/>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">
+                                    <t t-esc="item.product_name"/>
+                                </div>
+                                <div class="small text-muted" t-if="item.product_barcode">
+                                    <i class="fa fa-barcode me-1"/>
+                                    <t t-esc="item.product_barcode"/>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="o_br_qty_badge badge bg-warning text-dark fs-6">
+                                    <t t-esc="item.remaining"/> <t t-esc="item.uom_name"/>
+                                </div>
+                                <div class="small text-muted" t-if="item.done > 0">
+                                    (<t t-esc="item.done"/>/<t t-esc="item.demand"/>)
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- RECEIVED LIST -->
+                <div t-if="state.received.length > 0" class="o_br_section">
+                    <div class="o_br_section_header d-flex align-items-center mb-2">
+                        <span class="badge bg-success me-2">
+                            <t t-esc="state.received.length"/>
+                        </span>
+                        <h6 class="mb-0 fw-bold text-success">Received</h6>
+                    </div>
+                    <t t-foreach="state.received" t-as="item" t-key="item.move_id">
+                        <div t-attf-class="o_br_item o_br_item_received d-flex align-items-center p-2 mb-1 rounded #{state.lastScannedId === item.move_id ? 'o_br_item_just_received' : ''}">
+                            <img t-att-src="item.product_image"
+                                 class="o_br_item_img rounded me-3"
+                                 alt="Product"/>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold text-success">
+                                    <i class="fa fa-check me-1"/>
+                                    <t t-esc="item.product_name"/>
+                                </div>
+                                <div class="small text-muted" t-if="item.product_barcode">
+                                    <i class="fa fa-barcode me-1"/>
+                                    <t t-esc="item.product_barcode"/>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="o_br_qty_badge badge bg-success fs-6">
+                                    <t t-esc="item.demand"/> <t t-esc="item.uom_name"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div t-if="state.pending.length === 0 and state.received.length === 0"
+                     class="text-center py-5 text-muted">
+                    <i class="fa fa-inbox fa-3x mb-3"/>
+                    <h5>No items to receive</h5>
+                </div>
+
+            </div>
+
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Client action that mounts the OWL component "andykanoz_quick_purchase.QuickPurchase".
+        The component itself lives in static/src/js/quick_purchase.js and is
+        registered in the action_registry under the same tag.
+    -->
+    <record id="action_quick_purchase" model="ir.actions.client">
+        <field name="name">Quick Purchase Entry</field>
+        <field name="tag">andykanoz_quick_purchase.QuickPurchase</field>
+        <field name="target">current</field>
+    </record>
+</odoo>

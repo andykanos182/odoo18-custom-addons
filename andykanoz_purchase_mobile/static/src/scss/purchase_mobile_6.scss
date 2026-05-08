@@ -1,0 +1,93 @@
+// Purchase Mobile — Phase 6 extensions (Save / Confirm / Delete UI).
+// Picked up by the scss/**/*.scss glob in the manifest.
+
+// ======================================================================
+// Header buttons — delete + save loading
+// ======================================================================
+
+.pm-editor-btn-delete {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 10px;
+    font-size: 14px;
+    &:hover { background: rgba(255, 100, 100, 0.3); }
+}
+
+// Dirty indicator next to the state label — subtle bullet that
+// tells the user they have unsaved changes.
+.pm-dirty-dot {
+    margin-left: 6px;
+    color: #FAD77A;
+    font-size: 16px;
+    line-height: 1;
+    font-weight: bold;
+}
+
+// ======================================================================
+// Error banner (save / confirm / delete failures)
+// ======================================================================
+
+.pm-editor-error-banner {
+    background: #FCEBEB;
+    color: #A32D2D;
+    padding: 10px 14px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #F5C6C6;
+
+    span {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+.pm-editor-error-close {
+    background: transparent;
+    border: none;
+    color: #A32D2D;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: inherit;
+
+    &:hover  { background: rgba(163, 45, 45, 0.12); }
+    &:active { transform: scale(0.95); }
+}
+
+// ======================================================================
+// Confirm button (prominent CTA in the footer)
+// ======================================================================
+
+.pm-editor-confirm-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    background: #0F6E56;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+
+    &:hover    { background: #15896D; }
+    &:active   { transform: scale(0.99); }
+    &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+}
+
+.pm-editor-confirmed-note {
+    margin-top: 10px;
+    font-size: 12px;
+    text-align: center;
+    opacity: 0.7;
+    font-style: italic;
+}

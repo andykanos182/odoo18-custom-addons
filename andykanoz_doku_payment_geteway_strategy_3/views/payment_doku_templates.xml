@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================== -->
+    <!-- DOKU Redirect Form Template                    -->
+    <!--                                                -->
+    <!-- Menggunakan standar Odoo 18 (Full Redirect).   -->
+    <!-- Odoo akan otomatis melakukan auto-submit form  -->
+    <!-- ini menuju URL pembayaran DOKU.                -->
+    <!-- ============================================== -->
+    <template id="redirect_form" name="DOKU Redirect Form">
+        <form t-att-action="doku_payment_url" method="get"/>
+    </template>
+
+</odoo>

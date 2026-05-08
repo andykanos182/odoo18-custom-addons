@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Set noupdate="0" sementara agar perubahan ter-update saat module di-upgrade -->
+    <data noupdate="0">
+
+        <!-- ============================================== -->
+        <!-- DOKU Payment Provider Record                   -->
+        <!-- ============================================== -->
+        <record id="payment_provider_doku" model="payment.provider">
+            <field name="name">DOKU</field>
+            <field name="code">doku</field>
+            <field name="state">disabled</field>
+            <field name="module_id" ref="base.module_andykanoz_doku_payment_geteway"/>
+            <field name="redirect_form_view_id" ref="redirect_form"/>
+            <field name="image_128" type="base64" file="andykanoz_doku_payment_geteway/static/description/icon.png"/>
+            <field name="pre_msg">
+                You will be redirected to DOKU's secure payment page.
+                You can pay using QRIS, Virtual Account, or E-Wallet.
+            </field>
+            <!-- Link ke metode pembayaran bawaan Odoo 18 (Core) yang didukung DOKU -->
+            <field name="payment_method_ids" eval="[(6, 0, [
+                       ref('payment.payment_method_qris'),
+                       ref('payment.payment_method_bank_bca'),
+                       ref('payment.payment_method_mandiri'),
+                       ref('payment.payment_method_bank_permata'),
+                       ref('payment.payment_method_bni'),
+                       ref('payment.payment_method_bri'),
+                       ref('payment.payment_method_cimb_niaga'),
+                       ref('payment.payment_method_ovo'),
+                       ref('payment.payment_method_dana'),
+                       ref('payment.payment_method_shopeepay'),
+                       ref('payment.payment_method_kredivo'),
+                       ref('payment.payment_method_akulaku'),
+                       ref('payment.payment_method_card')
+                   ])]"/>
+            <field name="allow_tokenization" eval="False"/>
+            <field name="capture_manually" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

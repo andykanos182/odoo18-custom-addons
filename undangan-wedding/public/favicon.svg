@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#2C3E2D" rx="14"/>
+  <!-- Frangipani simplified -->
+  <g transform="translate(32 32)" opacity="1">
+    <ellipse cx="0" cy="-12" rx="10" ry="16" fill="#F2D5A5"/>
+    <ellipse cx="11" cy="-3" rx="10" ry="16" fill="#F2D5A5" transform="rotate(72 11 -3)"/>
+    <ellipse cx="7" cy="10" rx="10" ry="16" fill="#F2D5A5" transform="rotate(144 7 10)"/>
+    <ellipse cx="-7" cy="10" rx="10" ry="16" fill="#F2D5A5" transform="rotate(216 -7 10)"/>
+    <ellipse cx="-11" cy="-3" rx="10" ry="16" fill="#F2D5A5" transform="rotate(288 -11 -3)"/>
+    <circle cx="0" cy="0" r="4" fill="#C97B5B"/>
+  </g>
+</svg>

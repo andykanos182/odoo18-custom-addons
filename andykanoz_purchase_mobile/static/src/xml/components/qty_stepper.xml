@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_purchase_mobile.QtyStepper">
+        <div class="pm-qty-stepper">
+            <button class="pm-qty-btn pm-qty-minus"
+                    t-on-click="onMinusClick"
+                    t-att-disabled="props.value &lt;= props.min"
+                    tabindex="-1">−</button>
+            <input type="text"
+                   inputmode="decimal"
+                   class="pm-qty-input"
+                   t-att-value="formattedValue"
+                   t-on-change="onInputChange"/>
+            <button class="pm-qty-btn pm-qty-plus"
+                    t-on-click="onPlusClick"
+                    tabindex="-1">+</button>
+        </div>
+    </t>
+
+</templates>

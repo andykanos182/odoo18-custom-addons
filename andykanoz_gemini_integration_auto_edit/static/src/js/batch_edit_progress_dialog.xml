@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_gemini_integration_auto_edit.BatchEditProgressDialog">
+        <Dialog title.translate="Auto White BG — Processing"
+                size="'md'"
+                contentClass="'o_andykanoz_gemini_integration_auto_edit_progress_dialog'">
+            <div t-if="!job">
+                <p>No active batch job.</p>
+            </div>
+            <div t-else="">
+                <div class="progress">
+                    <div class="progress-bar"
+                         t-att-class="{ 'bg-success': state === 'done',
+                                        'bg-danger': state === 'failed',
+                                        'bg-secondary': state === 'cancelled' }"
+                         role="progressbar"
+                         t-att-style="'width: ' + progressPercent + '%'"
+                         t-att-aria-valuenow="progressPercent"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        <t t-esc="progressPercent"/>%
+                    </div>
+                </div>
+                <div class="o_progress_status">
+                    <strong t-esc="statusLabel"/>:
+                    <span t-esc="processed"/> of <span t-esc="total"/> done
+                    <t t-if="failed">(<span t-esc="failed"/> failed)</t>
+                </div>
+                <div t-if="!isTerminal and currentProductName" class="o_current_product">
+                    Processing: <span t-esc="currentProductName"/>
+                </div>
+                <div t-if="isTerminal" class="o_summary_block">
+                    <t t-if="state === 'done'">
+                        Completed: <t t-esc="processed"/> succeeded, <t t-esc="failed"/> failed.
+                    </t>
+                    <t t-if="state === 'cancelled'">
+                        Cancelled. <t t-esc="processed"/> succeeded, <t t-esc="failed"/> failed,
+                        <t t-esc="total - processed - failed"/> not processed.
+                    </t>
+                    <t t-if="state === 'failed'">
+                        Job failed.
+                    </t>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <t t-if="isTerminal">
+                    <button class="btn btn-primary" t-on-click="onClickHide">Close</button>
+                </t>
+                <t t-else="">
+                    <button class="btn btn-secondary" t-on-click="onClickHide">Hide</button>
+                    <button class="btn btn-danger" t-on-click="onClickCancel">Cancel Batch</button>
+                </t>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

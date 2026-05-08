@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_product_checker.BarcodeCameraField">
+        <t t-if="props.readonly">
+            <span t-esc="formattedValue" />
+        </t>
+        <t t-else="">
+            <div class="o_field_barcode_camera d-flex align-items-center gap-1 w-100">
+                <input
+                    class="o_input flex-grow-1"
+                    t-att-class="{
+                        'o_field_translate': isTranslatable,
+                        'o_field_placeholder': hasDynamicPlaceholder
+                    }"
+                    t-att-id="props.id"
+                    t-att-type="props.isPassword ? 'password' : 'text'"
+                    t-att-autocomplete="props.autocomplete or (props.isPassword ? 'new-password' : 'off')"
+                    t-att-maxlength="maxLength > 0 and maxLength"
+                    t-att-placeholder="placeholder"
+                    t-on-blur="onBlur"
+                    t-ref="input"
+                />
+                <div class="o_field_input_buttons">
+                    <t t-if="isTranslatable">
+                        <TranslationButton
+                            fieldName="props.name"
+                            record="props.record"
+                        />
+                    </t>
+                    <button t-if="hasDynamicPlaceholder"
+                        class="btn m-0 py-0 px-2 fa fa-magic"
+                        title="Insert Field"
+                        t-on-click="onDynamicPlaceholderOpen"
+                    />
+                </div>
+                <button class="btn btn-outline-secondary o_barcode_camera_btn flex-shrink-0"
+                        t-on-click="openCamera"
+                        title="Scan Barcode with Camera"
+                        type="button">
+                    <i class="fa fa-camera"/>
+                </button>
+            </div>
+        </t>
+
+        <!-- Camera modal -->
+        <div t-if="cameraState.showModal" class="o_pc_camera_backdrop">
+            <div class="o_pc_camera_modal">
+                <!-- Header -->
+                <div class="o_pc_camera_header">
+                    <span>Scan Barcode</span>
+                    <button class="o_pc_camera_close" t-on-click="closeCamera" title="Close Camera">&#215;</button>
+                </div>
+
+                <!-- Video preview -->
+                <div class="o_pc_camera_video_wrap">
+                    <video t-ref="cameraVideo" autoplay="autoplay" playsinline="playsinline" muted="muted"/>
+                    <div class="o_pc_camera_overlay">
+                        <div class="o_pc_camera_target"/>
+                    </div>
+                </div>
+
+                <!-- Status bar -->
+                <div class="o_pc_camera_status">
+                    <t t-if="cameraState.cameraError">
+                        <span class="text-danger"><t t-esc="cameraState.cameraError"/></span>
+                    </t>
+                    <t t-elif="cameraState.lastDetected">
+                        Detected: <strong><t t-esc="cameraState.lastDetected"/></strong>
+                    </t>
+                    <t t-else="">Point camera at a barcode...</t>
+                </div>
+
+                <!-- Controls -->
+                <div class="o_pc_camera_controls">
+                    <button class="btn btn-secondary"
+                            t-on-click="toggleTorch"
+                            t-att-disabled="!cameraState.torchSupported ? 'disabled' : null">
+                        <i class="fa fa-bolt"/>
+                        <span class="ms-1">
+                            <t t-if="cameraState.torchOn">Flash On</t>
+                            <t t-else="">Flash Off</t>
+                        </span>
+                    </button>
+                    <button class="btn btn-secondary o_pc_camera_switch_btn"
+                            t-on-click="switchCamera"
+                            title="Switch Camera">
+                        <i class="fa fa-refresh"/>
+                        <span class="ms-1">
+                            <t t-if="cameraState.cameraFacing === 'environment'">Front</t>
+                            <t t-else="">Back</t>
+                        </span>
+                    </button>
+                    <button class="btn btn-secondary" t-on-click="closeCamera">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

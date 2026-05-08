@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    DOKU Payment Provider Data
+
+    Pattern verified against payment_xendit (Odoo Enterprise official module).
+
+    KEY DIFFERENCES from previous version:
+    1. noupdate="1" on <odoo> tag (not <data>) — prevents reset on upgrade
+       Previous version had noupdate="0" which RESET state="disabled" and
+       payment_method_ids on EVERY upgrade, breaking user customizations.
+
+    2. NO manual payment_method_ids linking. Methods are auto-linked by
+       setup_provider() helper called in post_init_hook (see hooks.py).
+
+    3. NO state field. User controls state via UI (Disabled/Test/Enabled).
+
+    4. NO module_id field. Auto-set by Odoo.
+
+    5. Minimal field set: code, redirect_form_view_id, name, image_128, pre_msg.
+-->
+<odoo noupdate="1">
+
+    <!-- ============================================== -->
+    <!-- DOKU Payment Provider Record                   -->
+    <!-- ============================================== -->
+    <record id="payment_provider_doku" model="payment.provider">
+        <field name="name">DOKU</field>
+        <field name="code">doku</field>
+        <field name="redirect_form_view_id" ref="redirect_form"/>
+        <field name="image_128"
+               type="base64"
+               file="andykanoz_doku_payment_geteway/static/description/icon.png"/>
+        <field name="pre_msg">
+            You will be redirected to DOKU's secure payment page.
+            You can pay using QRIS, Virtual Account, or E-Wallet.
+        </field>
+    </record>
+
+</odoo>

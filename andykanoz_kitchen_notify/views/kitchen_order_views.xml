@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================ -->
+    <!-- kitchen.order views                                               -->
+    <!-- ================================================================ -->
+    <record id="view_kitchen_order_tree" model="ir.ui.view">
+        <field name="name">kitchen.order.tree</field>
+        <field name="model">kitchen.order</field>
+        <field name="arch" type="xml">
+            <list string="Kitchen Orders" decoration-warning="status=='waiting'"
+                  decoration-info="status=='cooking'" decoration-success="status=='done'">
+                <field name="order_time"/>
+                <field name="pos_order_ref"/>
+                <field name="product_name"/>
+                <field name="qty"/>
+                <field name="status" widget="badge"/>
+                <field name="production_id"/>
+                <field name="cook_start_time" optional="hide"/>
+                <field name="done_time" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kitchen_order_form" model="ir.ui.view">
+        <field name="name">kitchen.order.form</field>
+        <field name="model">kitchen.order</field>
+        <field name="arch" type="xml">
+            <form string="Kitchen Order">
+                <header>
+                    <button name="action_start_cooking" type="object"
+                            string="Mulai Masak" class="btn-primary"
+                            invisible="status != 'waiting'"/>
+                    <button name="action_mark_done" type="object"
+                            string="Selesai" class="btn-primary"
+                            invisible="status != 'cooking'"/>
+                    <button name="action_reset_to_waiting" type="object"
+                            string="Reset ke Menunggu"
+                            invisible="status == 'waiting'"/>
+                    <field name="status" widget="statusbar"
+                           statusbar_visible="waiting,cooking,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="pos_order_id"/>
+                            <field name="pos_order_ref"/>
+                            <field name="production_id"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="product_name"/>
+                            <field name="qty"/>
+                            <field name="note"/>
+                        </group>
+                    </group>
+                    <group string="Timing">
+                        <field name="order_time"/>
+                        <field name="cook_start_time"/>
+                        <field name="done_time"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_kitchen_order_search" model="ir.ui.view">
+        <field name="name">kitchen.order.search</field>
+        <field name="model">kitchen.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="pos_order_ref"/>
+                <field name="product_name"/>
+                <filter name="filter_waiting" string="Menunggu"
+                        domain="[('status','=','waiting')]"/>
+                <filter name="filter_cooking" string="Sedang Dimasak"
+                        domain="[('status','=','cooking')]"/>
+                <filter name="filter_done" string="Selesai"
+                        domain="[('status','=','done')]"/>
+                <separator/>
+                <filter name="filter_today" string="Hari Ini"
+                        domain="[('order_time','&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_status" string="Status" context="{'group_by':'status'}"/>
+                    <filter name="group_product" string="Produk" context="{'group_by':'product_id'}"/>
+                    <filter name="group_day" string="Hari" context="{'group_by':'order_time:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_kitchen_order" model="ir.actions.act_window">
+        <field name="name">Kitchen Orders</field>
+        <field name="res_model">kitchen.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_kitchen_order_search"/>
+        <field name="context">{'search_default_filter_today': 1}</field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!-- kitchen.push.subscription views                                   -->
+    <!-- ================================================================ -->
+    <record id="view_kitchen_push_subscription_tree" model="ir.ui.view">
+        <field name="name">kitchen.push.subscription.tree</field>
+        <field name="model">kitchen.push.subscription</field>
+        <field name="arch" type="xml">
+            <list string="Push Subscriptions" decoration-muted="not is_active">
+                <field name="device_name"/>
+                <field name="user_id"/>
+                <field name="is_active" widget="boolean_toggle"/>
+                <field name="last_notif_at"/>
+                <field name="fail_count"/>
+                <field name="create_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kitchen_push_subscription_form" model="ir.ui.view">
+        <field name="name">kitchen.push.subscription.form</field>
+        <field name="model">kitchen.push.subscription</field>
+        <field name="arch" type="xml">
+            <form string="Push Subscription">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="device_name"/>
+                            <field name="user_id"/>
+                            <field name="employee_id"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group>
+                            <field name="last_notif_at"/>
+                            <field name="fail_count"/>
+                            <field name="create_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Technical">
+                        <field name="endpoint"/>
+                        <field name="p256dh"/>
+                        <field name="auth" password="True"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_kitchen_push_subscription" model="ir.actions.act_window">
+        <field name="name">Push Subscriptions</field>
+        <field name="res_model">kitchen.push.subscription</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

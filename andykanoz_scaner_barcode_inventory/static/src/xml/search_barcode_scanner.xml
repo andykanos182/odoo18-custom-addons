@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="andykanoz_scaner_barcode_inventory.BarcodeScannerMobileButton">
+        <!-- Floating Camera FAB — only rendered on mobile/tablet AND allowed page -->
+        <div t-if="state.isMobile &amp;&amp; state.allowedPage" class="o_mobile_barcode_fab" t-on-click="openScanner">
+            <i class="fa fa-camera"/>
+        </div>
+
+        <!-- Camera Scanner Modal (same style as existing scanner) -->
+        <div t-if="state.showScanner &amp;&amp; state.allowedPage" class="o_barcode_scanner_modal">
+            <div class="o_scanner_container">
+                <div class="o_scanner_header">
+                    <span>Scan Barcode to Search</span>
+                    <button class="o_close_scanner" t-on-click="closeScanner">&#215;</button>
+                </div>
+
+                <div class="o_scanner_video_wrap">
+                    <video t-ref="searchCameraVideo" autoplay="autoplay" playsinline="playsinline" muted="muted"/>
+                    <div class="o_scanner_overlay">
+                        <div class="o_scanner_target"/>
+                    </div>
+                </div>
+
+                <div class="o_scanner_footer">
+                    <div class="o_scanner_status">
+                        <t t-if="state.cameraError">
+                            <span class="text-danger">
+                                <t t-esc="state.cameraError"/>
+                            </span>
+                        </t>
+                        <t t-else="">
+                            Point camera at a barcode...
+                        </t>
+                    </div>
+                    <div class="o_scanner_actions">
+                        <button class="btn btn-outline-light" t-on-click="toggleTorch" t-if="state.torchSupported">
+                            <i class="fa fa-bolt"/>
+                            <t t-if="state.torchOn"> Flash On</t>
+                            <t t-else=""> Flash Off</t>
+                        </button>
+                        <button class="btn btn-danger" t-on-click="closeScanner">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

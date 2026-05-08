@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="action_server_batch_auto_edit" model="ir.actions.server">
+        <field name="name">Auto White BG (Bulk)</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Auto White BG (Bulk)',
+    'res_model': 'andykanoz.batch.edit.wizard',
+    'view_mode': 'form',
+    'target': 'new',
+    'context': dict(env.context, active_ids=records.ids, active_model='product.template'),
+}
+        </field>
+    </record>
+
+    <record id="action_server_batch_auto_edit_pro_variant" model="ir.actions.server">
+        <field name="name">Auto Pro Edit (Bulk) - Variants</field>
+        <field name="model_id" ref="product.model_product_product"/>
+        <field name="binding_model_id" ref="product.model_product_product"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Auto Pro Edit (Bulk)',
+    'res_model': 'andykanoz.batch.edit.wizard',
+    'view_mode': 'form',
+    'target': 'new',
+    'context': dict(env.context, active_ids=records.ids, active_model='product.product', andykanoz_professional_preset=True),
+}
+        </field>
+    </record>
+
+    <record id="action_server_batch_auto_edit_pro" model="ir.actions.server">
+        <field name="name">Auto Pro Edit (Bulk)</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Auto Pro Edit (Bulk)',
+    'res_model': 'andykanoz.batch.edit.wizard',
+    'view_mode': 'form',
+    'target': 'new',
+    'context': dict(env.context, active_ids=records.ids, active_model='product.template', andykanoz_professional_preset=True),
+}
+        </field>
+    </record>
+
+</odoo>

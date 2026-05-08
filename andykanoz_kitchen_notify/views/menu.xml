@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root menu: Kitchen (top level app) -->
+    <menuitem id="menu_kitchen_root"
+              name="Kitchen"
+              web_icon="andykanoz_kitchen_notify,static/description/icon.png"
+              sequence="25"/>
+
+    <!-- Shortcut to open the Kitchen Display PWA page -->
+    <record id="action_open_kitchen_display" model="ir.actions.act_url">
+        <field name="name">Open Kitchen Display</field>
+        <field name="url">/kitchen</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_kitchen_display_open"
+              name="Kitchen Display (PWA)"
+              parent="menu_kitchen_root"
+              action="action_open_kitchen_display"
+              sequence="1"/>
+
+    <menuitem id="menu_kitchen_orders"
+              name="Kitchen Orders"
+              parent="menu_kitchen_root"
+              action="action_kitchen_order"
+              sequence="10"/>
+
+    <menuitem id="menu_kitchen_config"
+              name="Configuration"
+              parent="menu_kitchen_root"
+              sequence="90"/>
+
+    <menuitem id="menu_kitchen_push_subscriptions"
+              name="Push Subscriptions"
+              parent="menu_kitchen_config"
+              action="action_kitchen_push_subscription"
+              sequence="10"/>
+
+</odoo>

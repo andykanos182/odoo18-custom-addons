@@ -1,0 +1,3074 @@
+// ========================================
+// Product Checker - Responsive Styling
+// Optimized for: Desktop, Tablet, Mobile
+// ========================================
+
+.o_product_checker_page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #f4f6f9;
+    overflow: hidden;
+
+    // ============ TOP BAR ============
+    .o_pc_topbar {
+        background: #fff;
+        padding: 12px 16px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+
+        .o_pc_title {
+            margin: 0;
+            font-size: 20px;
+            color: #2c3e50;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .o_pc_search_box {
+            display: flex;
+            gap: 6px;
+            flex: 1 1 300px;
+
+            .o_pc_barcode_input {
+                flex: 1 1 auto;
+                min-width: 0;
+                font-size: 16px; // min 16px to prevent iOS zoom
+                padding: 10px 14px;
+                border: 2px solid #ced4da;
+                border-radius: 6px;
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                width: 100%;
+
+                &:focus {
+                    border-color: #7c7bad;
+                    outline: none;
+                    box-shadow: 0 0 0 3px rgba(124, 123, 173, 0.2);
+                }
+            }
+
+            .btn {
+                white-space: nowrap;
+                font-size: 14px;
+                padding: 8px 14px;
+                flex-shrink: 0;
+
+                // Hide text labels, show icons only on small screens
+                .o_pc_btn_text {
+                    display: inline;
+                }
+            }
+        }
+
+        .o_pc_pricelist_selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+
+            label {
+                margin: 0;
+                font-weight: 600;
+                color: #495057;
+                font-size: 14px;
+                white-space: nowrap;
+            }
+
+            .form-select {
+                min-width: 160px;
+                font-size: 14px;
+            }
+        }
+
+        // Mobile history toggle button (hidden on desktop)
+        .o_pc_history_toggle {
+            display: none;
+            flex-shrink: 0;
+        }
+
+        // Auto-add switch
+        .o_pc_auto_add {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 6px;
+            flex-shrink: 0;
+
+            .form-check-input {
+                margin: 0;
+                cursor: pointer;
+            }
+
+            .form-check-label {
+                margin: 0;
+                font-size: 13px;
+                font-weight: 600;
+                color: #795548;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+        }
+
+        // Print list toggle button with badge
+        .o_pc_printlist_toggle {
+            position: relative;
+            flex-shrink: 0;
+            font-size: 14px;
+
+            .o_pc_printlist_badge {
+                position: absolute;
+                top: -6px;
+                right: -6px;
+                background: #dc3545;
+                color: #fff;
+                border-radius: 50%;
+                min-width: 20px;
+                height: 20px;
+                font-size: 11px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                padding: 0 4px;
+                border: 2px solid #fff;
+            }
+        }
+    }
+
+    // ============ BODY LAYOUT ============
+    .o_pc_body {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+        position: relative;
+
+        .o_pc_main {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            min-width: 0;
+        }
+
+        .o_pc_sidebar {
+            width: 320px;
+            background: #fff;
+            border-left: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+
+            .o_pc_sidebar_header {
+                padding: 14px 16px;
+                border-bottom: 1px solid #dee2e6;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: #f8f9fa;
+
+                h3 {
+                    margin: 0;
+                    font-size: 15px;
+                    color: #2c3e50;
+                    font-weight: 600;
+                }
+
+                .o_pc_sidebar_close {
+                    display: none;
+                    background: transparent;
+                    border: none;
+                    font-size: 20px;
+                    cursor: pointer;
+                    color: #6c757d;
+                    padding: 0 8px;
+                }
+            }
+
+            .o_pc_history_list {
+                flex: 1;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                padding: 8px;
+            }
+
+            .o_pc_history_empty {
+                text-align: center;
+                padding: 40px 20px;
+                color: #adb5bd;
+            }
+
+            .o_pc_history_item {
+                display: flex;
+                gap: 10px;
+                padding: 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                margin-bottom: 6px;
+                transition: background 0.15s;
+
+                &:hover,
+                &:active {
+                    background: #f1f3f5;
+                }
+
+                .o_pc_history_image {
+                    width: 56px;
+                    height: 56px;
+                    object-fit: cover;
+                    border-radius: 4px;
+                    border: 1px solid #dee2e6;
+                    background: #fff;
+                    flex-shrink: 0;
+                }
+
+                .o_pc_history_info {
+                    flex: 1;
+                    min-width: 0;
+                }
+
+                .o_pc_history_name {
+                    font-weight: 600;
+                    font-size: 13px;
+                    color: #2c3e50;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .o_pc_history_code {
+                    font-size: 11px;
+                    color: #6c757d;
+                    font-family: monospace;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .o_pc_history_meta {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 11px;
+                    margin-top: 2px;
+                    gap: 4px;
+
+                    .o_pc_history_price {
+                        color: #28a745;
+                        font-weight: 600;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                }
+
+                .o_pc_history_time {
+                    font-size: 10px;
+                    color: #adb5bd;
+                }
+            }
+        }
+
+        // Mobile backdrop for sidebar drawer
+        .o_pc_sidebar_backdrop {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+        }
+    }
+
+    // ============ PRODUCT CARD ============
+    .o_pc_product_card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 20px;
+        display: flex;
+        gap: 20px;
+
+        .o_pc_product_image {
+            flex: 0 0 380px;
+
+            img {
+                width: 100%;
+                max-width: 380px;
+                height: auto;
+                max-height: 380px;
+                object-fit: contain;
+                border-radius: 8px;
+                border: 1px solid #dee2e6;
+                background: #f8f9fa;
+            }
+        }
+
+        .o_pc_product_info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .o_pc_product_name {
+            margin: 0 0 12px 0;
+            font-size: 24px;
+            color: #2c3e50;
+            font-weight: 700;
+            word-wrap: break-word;
+        }
+
+        .o_pc_product_name_row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+
+            .o_pc_titlecase_btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                padding: 6px;
+                border-radius: 6px;
+                font-size: 14px;
+                color: #495057;
+                background: #fff;
+                border: 1px solid #ced4da;
+                transition: background-color 0.12s, color 0.12s;
+
+                &:hover {
+                    background: #f8f9fa;
+                }
+
+                &:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+            }
+
+            .o_pc_undo_name_btn {
+                color: #0d6efd;
+                padding: 0 6px;
+                font-size: 13px;
+                line-height: 1;
+            }
+        }
+
+        .o_pc_product_meta {
+            margin-bottom: 18px;
+            font-size: 14px;
+
+            .o_pc_meta_item {
+                margin-bottom: 4px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+
+                .d-flex {
+                    align-items: center;
+                }
+
+                .o_pc_create_category_btn {
+                    white-space: nowrap;
+                }
+
+                .o_pc_create_category_btn .o_pc_btn_text {
+                    display: inline;
+                }
+            }
+
+            /* Category autocomplete dropdown */
+            .o_pc_meta_autocomplete {
+                width: 100%;
+            }
+
+            .o_pc_meta_autocomplete .o_pc_meta_ac_input {
+                width: 100%;
+                padding: 8px 10px;
+                border-radius: 6px;
+            }
+
+            .o_pc_meta_autocomplete .o_dropdown_button {
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 100%;
+                transition: background-color 0.2s;
+            }
+
+            .o_pc_meta_autocomplete .o_dropdown_button:hover {
+                background-color: rgba(0, 0, 0, 0.05);
+            }
+
+            .o_pc_meta_autocomplete .o_pc_meta_ac_dropdown {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: calc(100% + 6px);
+                z-index: 1100;
+                background: #fff;
+                border: 1px solid #ced4da;
+                border-radius: 8px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+                max-height: 280px;
+                overflow-y: auto;
+                padding: 6px;
+            }
+
+            .o_pc_meta_autocomplete .o_pc_meta_ac_item {
+                padding: 10px 14px;
+                cursor: pointer;
+                font-size: 14px;
+                border-radius: 6px;
+                margin-bottom: 2px;
+                display: flex;
+                align-items: center;
+                color: #495057;
+                transition: background-color 0.1s, color 0.1s;
+            }
+
+            .o_pc_meta_autocomplete .o_pc_meta_ac_item.o_pc_active,
+            .o_pc_meta_autocomplete .o_pc_meta_ac_item:hover {
+                background: #f0f4f8;
+                color: #0d6efd;
+            }
+
+            .o_pc_categ_ext_btn {
+                position: absolute;
+                right: 28px;
+                top: 50%;
+                transform: translateY(-50%);
+                padding: 2px 6px;
+                z-index: 2;
+                opacity: 0.5;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+
+            /* Ecommerce Category — many2many tags widget */
+            .o_pc_m2m_tags {
+                width: 100%;
+            }
+
+            .o_pc_m2m_container {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 4px;
+                padding: 3px 6px;
+                border: 1px solid #ced4da;
+                border-radius: 6px;
+                background: #fff;
+                min-height: 38px;
+                cursor: text;
+                transition: border-color 0.15s, box-shadow 0.15s;
+
+                &:focus-within {
+                    border-color: #80bdff;
+                    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+                }
+            }
+
+            .o_pc_m2m_tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 2px;
+                padding: 2px 6px 2px 8px;
+                border-radius: 4px;
+                font-size: 12.5px;
+                font-weight: 500;
+                line-height: 1.5;
+                white-space: nowrap;
+                max-width: 200px;
+                background: #d4edfc;
+                color: #0c5aa0;
+                border: 1px solid #b8daff;
+                animation: o_pc_tag_in 0.15s ease-out;
+            }
+
+            @keyframes o_pc_tag_in {
+                from {
+                    opacity: 0;
+                    transform: scale(0.85);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            .o_pc_m2m_tag_label {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .o_pc_m2m_tag_delete {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 10px;
+                color: #0c5aa0;
+                opacity: 0.6;
+                transition: opacity 0.1s, background 0.1s;
+
+                &:hover {
+                    opacity: 1;
+                    background: rgba(0, 0, 0, 0.08);
+                }
+            }
+
+            .o_pc_m2m_input {
+                flex: 1;
+                min-width: 60px;
+                border: none;
+                outline: none;
+                padding: 4px 2px;
+                font-size: 14px;
+                background: transparent;
+
+                &::placeholder {
+                    color: #adb5bd;
+                    font-size: 13px;
+                }
+            }
+
+            .o_pc_m2m_arrow {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 4px;
+                cursor: pointer;
+                color: #6c757d;
+                font-size: 14px;
+                flex-shrink: 0;
+                transition: color 0.15s;
+
+                &:hover {
+                    color: #212529;
+                }
+            }
+
+            .o_pc_m2m_dropdown {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: calc(100% + 4px);
+                z-index: 1100;
+                background: #fff;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+                max-height: 300px;
+                overflow-y: auto;
+                padding: 4px;
+            }
+
+            .o_pc_m2m_dropdown_item {
+                display: flex;
+                align-items: center;
+                padding: 8px 12px;
+                cursor: pointer;
+                font-size: 13.5px;
+                border-radius: 6px;
+                color: #495057;
+                transition: background-color 0.1s;
+
+                &.o_pc_active,
+                &:hover {
+                    background: #f0f4f8;
+                }
+
+                &.o_pc_m2m_selected {
+                    color: #0d6efd;
+                    font-weight: 500;
+                }
+
+                .fa-check-square-o,
+                .fa-square-o {
+                    font-size: 14px;
+                    width: 18px;
+                    flex-shrink: 0;
+                }
+
+                .fa-plus {
+                    width: 18px;
+                    flex-shrink: 0;
+                }
+            }
+
+            .o_pc_meta_item_pubcateg {
+                align-items: flex-start;
+            }
+
+            .o_pc_label {
+                color: #6c757d;
+                font-weight: 600;
+                display: inline-block;
+                min-width: 100px;
+            }
+
+            .o_pc_value {
+                color: #2c3e50;
+                font-family: monospace;
+                word-break: break-all;
+                flex: 1;
+                min-width: 0;
+            }
+        }
+
+        .o_pc_price_stock_grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+
+            .o_pc_kpi {
+                padding: 14px;
+                position: relative;
+                border-radius: 8px;
+                background: #f8f9fa;
+                border-left: 4px solid #7c7bad;
+                min-width: 0;
+
+                &.o_pc_kpi_price {
+                    border-left-color: #28a745;
+                }
+
+                &.o_pc_kpi_cost {
+                    border-left-color: #fd7e14;
+                }
+
+                &.o_pc_kpi_stock {
+                    border-left-color: #17a2b8;
+                }
+
+                &.o_pc_kpi_profit {
+                    border-left-color: #9c27b0;
+                }
+
+                &.o_pc_negative_profit {
+                    border-left-color: #dc3545;
+                    background: #fff5f5;
+                }
+
+                &.o_pc_out_of_stock {
+                    border-left-color: #dc3545;
+                    background: #fff5f5;
+                }
+
+                .o_pc_kpi_label {
+                    font-size: 11px;
+                    color: #6c757d;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    margin-bottom: 6px;
+
+                    small {
+                        text-transform: none;
+                        font-weight: normal;
+                        display: block;
+                        font-size: 10px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                }
+
+                .o_pc_kpi_value {
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: #2c3e50;
+                    overflow-wrap: break-word;
+                    padding-right: 48px; // space for action button on the right
+
+                    small {
+                        font-size: 12px;
+                        font-weight: normal;
+                        color: #6c757d;
+                        margin-left: 4px;
+                    }
+                }
+
+                .o_pc_kpi_action_btn {
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    padding: 6px 8px;
+                    border-radius: 6px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 36px;
+                }
+            }
+        }
+
+        .o_pc_extra_info {
+            padding-top: 14px;
+            border-top: 1px solid #dee2e6;
+
+            .o_pc_info_row {
+                margin-bottom: 8px;
+                font-size: 14px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                align-items: center;
+
+                .o_pc_label {
+                    color: #6c757d;
+                    font-weight: 600;
+                }
+            }
+        }
+
+        .o_pc_actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+
+            .btn {
+                font-size: 14px;
+            }
+        }
+    }
+
+    // ============ PRINT LIST MODAL ============
+    .o_pc_printlist_backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1050;
+    }
+
+    .o_pc_printlist_modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 600px;
+        max-height: 85vh;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        z-index: 1051;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        .o_pc_printlist_header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff8e1;
+
+            h3 {
+                margin: 0;
+                font-size: 18px;
+                color: #2c3e50;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+            }
+
+            .o_pc_printlist_close {
+                background: transparent;
+                border: none;
+                font-size: 22px;
+                cursor: pointer;
+                color: #6c757d;
+                padding: 4px 10px;
+                border-radius: 4px;
+
+                &:hover {
+                    background: rgba(0, 0, 0, 0.05);
+                    color: #dc3545;
+                }
+            }
+        }
+
+        .o_pc_printlist_body {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px;
+            min-height: 200px;
+            max-height: 60vh;
+        }
+
+        .o_pc_printlist_empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #adb5bd;
+
+            p {
+                margin: 16px 0 4px 0;
+                font-size: 16px;
+                color: #6c757d;
+            }
+
+            small {
+                font-size: 13px;
+            }
+        }
+
+        .o_pc_printlist_item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            background: #f8f9fa;
+            align-items: center;
+            transition: background 0.15s;
+
+            &:hover {
+                background: #f1f3f5;
+            }
+
+            .o_pc_printlist_image {
+                width: 50px;
+                height: 50px;
+                object-fit: cover;
+                border-radius: 4px;
+                border: 1px solid #dee2e6;
+                background: #fff;
+                flex-shrink: 0;
+            }
+
+            .o_pc_printlist_info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .o_pc_printlist_name {
+                font-weight: 600;
+                font-size: 14px;
+                color: #2c3e50;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .o_pc_printlist_code {
+                font-size: 12px;
+                color: #6c757d;
+                font-family: monospace;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+
+        .o_pc_printlist_footer {
+            padding: 14px 20px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            background: #f8f9fa;
+            flex-wrap: wrap;
+
+            .btn {
+                font-size: 14px;
+                flex: 1;
+                min-width: 140px;
+            }
+        }
+    }
+
+    // ============ NOT FOUND STATE ============
+    .o_pc_not_found {
+        background: #fff;
+        border-radius: 8px;
+        padding: 50px 30px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+        h2 {
+            margin-top: 16px;
+            color: #2c3e50;
+            font-size: 22px;
+        }
+
+        p {
+            color: #6c757d;
+            font-size: 15px;
+            margin-bottom: 20px;
+            word-wrap: break-word;
+        }
+
+        .btn {
+            font-size: 15px;
+        }
+    }
+
+    // ============ EMPTY STATE ============
+    .o_pc_empty_state {
+        background: #fff;
+        border-radius: 8px;
+        padding: 60px 30px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        color: #adb5bd;
+
+        h2 {
+            margin-top: 20px;
+            color: #6c757d;
+            font-size: 22px;
+        }
+
+        p {
+            color: #adb5bd;
+            font-size: 14px;
+        }
+    }
+
+    // ============ LOADING ============
+    .o_pc_loading {
+        text-align: center;
+        padding: 60px 30px;
+        color: #7c7bad;
+    }
+
+    // ============ CREATE FORM ============
+    .o_pc_create_form {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+        h2 {
+            margin: 0 0 18px 0;
+            color: #2c3e50;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 14px;
+        }
+
+        .o_pc_public_categs {
+            max-height: 150px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 8px;
+        }
+
+        .o_pc_form_actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 16px;
+            border-top: 1px solid #dee2e6;
+            flex-wrap: wrap;
+        }
+    }
+}
+
+// ============================================================
+// RESPONSIVE BREAKPOINTS
+// ============================================================
+
+// --- TABLET LANDSCAPE & below (≤1200px) ---
+@media (max-width: 1200px) {
+    .o_product_checker_page {
+        .o_pc_topbar {
+
+            // Hide text on buttons to save space and prevent overlap
+            .o_pc_search_box .btn {
+                padding: 10px 12px;
+                min-width: 42px;
+
+                .o_pc_btn_text {
+                    display: none;
+                }
+
+                i {
+                    margin: 0;
+                }
+            }
+
+            .o_pc_pricelist_selector {
+                flex: 1 1 100%;
+                margin-top: 4px;
+
+                .form-select {
+                    flex: 1;
+                    min-width: 0;
+                }
+            }
+        }
+
+        .o_pc_product_card {
+            flex-direction: column;
+
+            .o_pc_product_image {
+                flex: 0 0 auto;
+                text-align: center;
+                align-self: center;
+
+                img {
+                    max-width: 320px;
+                    max-height: 320px;
+                }
+            }
+        }
+
+        .o_pc_body .o_pc_sidebar {
+            width: 280px;
+        }
+    }
+}
+
+// --- TABLET PORTRAIT (≤992px) ---
+@media (max-width: 992px) {
+    .o_product_checker_page {
+        .o_pc_topbar {
+            padding: 10px 12px;
+
+            .o_pc_title {
+                font-size: 18px;
+            }
+
+            .o_pc_pricelist_selector {
+                flex: 1 1 100%;
+                margin-top: 4px;
+
+                .form-select {
+                    flex: 1;
+                    min-width: 0;
+                }
+            }
+        }
+
+        .o_pc_body .o_pc_sidebar {
+            width: 260px;
+        }
+
+        .o_pc_product_card {
+            padding: 16px;
+
+            .o_pc_product_image img {
+                max-width: 280px;
+                max-height: 280px;
+            }
+
+            .o_pc_product_name {
+                font-size: 20px;
+            }
+
+            .o_pc_price_stock_grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+
+                .o_pc_kpi {
+                    padding: 10px;
+
+                    .o_pc_kpi_value {
+                        font-size: 16px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// --- MOBILE & small tablet (≤768px): Sidebar becomes drawer ---
+@media (max-width: 768px) {
+    .o_product_checker_page {
+        .o_pc_topbar {
+            padding: 10px;
+            gap: 8px;
+
+            .o_pc_title {
+                font-size: 16px;
+                flex: 1 1 auto;
+            }
+
+            // Show history toggle button
+            .o_pc_history_toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                padding: 0;
+                font-size: 18px;
+                position: relative;
+            }
+
+            .o_pc_history_badge {
+                position: absolute;
+                top: -4px;
+                right: -4px;
+                background: #dc3545;
+                color: #fff;
+                border-radius: 50%;
+                width: 18px;
+                height: 18px;
+                font-size: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+            }
+
+            .o_pc_search_box {
+                flex: 1 1 100%;
+                order: 10;
+
+                // Hide text, show only icons in buttons
+                .btn {
+                    padding: 10px 12px;
+                    min-width: 42px;
+
+                    .o_pc_btn_text {
+                        display: none;
+                    }
+
+                    i {
+                        margin: 0;
+                    }
+                }
+
+                .o_pc_barcode_input {
+                    padding: 10px 12px;
+                    font-size: 16px;
+                }
+            }
+
+            .o_pc_pricelist_selector {
+                flex: 1 1 100%;
+                order: 20;
+
+                label {
+                    font-size: 13px;
+                }
+            }
+
+            // Hide Auto-add label text on mobile, keep checkbox only with icon
+            .o_pc_auto_add {
+                order: 15;
+                padding: 6px 10px;
+
+                .form-check-label {
+                    font-size: 12px;
+                }
+            }
+
+            // Print list and product list button: icon + badge only
+            .o_pc_printlist_toggle,
+            .o_pc_productlist_toggle {
+                padding: 10px 12px;
+                min-width: 42px;
+
+                .o_pc_btn_text {
+                    display: none;
+                }
+            }
+        }
+
+        // Sidebar becomes drawer
+        .o_pc_body {
+            .o_pc_sidebar {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 85%;
+                max-width: 340px;
+                border-left: 1px solid #dee2e6;
+                box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+                transform: translateX(100%);
+                transition: transform 0.25s ease;
+                z-index: 999;
+
+                &.o_pc_sidebar_open {
+                    transform: translateX(0);
+                }
+
+                .o_pc_sidebar_header .o_pc_sidebar_close {
+                    display: block;
+                }
+            }
+
+            .o_pc_sidebar_backdrop.o_pc_backdrop_visible {
+                display: block;
+            }
+
+            .o_pc_main {
+                padding: 12px;
+            }
+        }
+
+        .o_pc_product_card {
+            padding: 14px;
+            gap: 14px;
+
+            .o_pc_product_image img {
+                max-width: 100%;
+                max-height: 260px;
+            }
+
+            // Mobile tweak: make category dropdown slightly wider for narrow screens.
+            // If you need it wider/narrower, edit the `left`/`right` offsets below.
+            .o_pc_product_meta {
+                .o_pc_meta_autocomplete {
+                    .o_pc_meta_ac_dropdown {
+                        left: -50px;
+                        right: -50px;
+                    }
+                }
+            }
+
+            .o_pc_product_name {
+                font-size: 18px;
+            }
+
+            .o_pc_product_meta {
+
+                /* Prevent label/value from wrapping on small screens and
+                   keep the input + "New" button on a single line. */
+                .o_pc_meta_item {
+                    flex-wrap: nowrap;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .o_pc_label {
+                    min-width: 72px;
+                    font-size: 13px;
+                    white-space: nowrap;
+                }
+
+                .o_pc_value {
+                    font-size: 13px;
+                    flex: 1;
+                    min-width: 0;
+                }
+
+                .o_pc_meta_autocomplete {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    width: 100%;
+                }
+
+                /* Ensure the input area can shrink when space is tight */
+                .o_pc_meta_autocomplete>.flex-grow-1 {
+                    flex: 1;
+                    min-width: 0;
+                    margin-right: 8px;
+                    /* override original .me-2 spacing */
+                }
+
+                .o_pc_meta_autocomplete .o_pc_meta_ac_input {
+                    min-width: 0;
+                    flex: 1;
+                }
+
+                /* Keep the New button compact and avoid wrapping its label */
+                .o_pc_create_category_btn {
+                    flex: 0 0 auto;
+                    white-space: nowrap;
+                }
+
+                /* On mobile, hide the text label so the icon stays visible
+                   and the layout never breaks to two lines. Remove if you
+                   prefer the full "New" text to remain visible. */
+                .o_pc_create_category_btn .o_pc_btn_text {
+                    display: none;
+                }
+
+                /* Dropdown spans the full width of autocomplete container */
+                .o_pc_meta_autocomplete .o_pc_meta_ac_dropdown {
+                    left: 0;
+                    right: 0;
+                }
+            }
+
+            .o_pc_price_stock_grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+
+                .o_pc_kpi {
+                    padding: 12px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    .o_pc_kpi_label {
+                        margin-bottom: 0;
+                        flex: 1;
+                    }
+
+                    .o_pc_kpi_value {
+                        font-size: 20px;
+                        text-align: right;
+                        padding-right: 0; // no extra right padding on small screens
+                    }
+
+                    .o_pc_kpi_action_btn {
+                        position: static;
+                        margin-left: 8px;
+                        padding: 6px 8px;
+                    }
+                }
+            }
+
+            .o_pc_actions .btn {
+                width: 100%;
+            }
+        }
+
+        .o_pc_not_found {
+            padding: 40px 20px;
+
+            .fa-4x {
+                font-size: 3em;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .o_pc_empty_state {
+            padding: 40px 20px;
+
+            .fa-5x {
+                font-size: 3em;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+        }
+
+        .o_pc_create_form {
+            padding: 14px;
+
+            h2 {
+                font-size: 18px;
+            }
+
+            .row>[class*="col-"] {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .o_pc_form_actions {
+                .btn {
+                    flex: 1;
+                    min-width: 120px;
+                }
+            }
+        }
+    }
+}
+
+// --- SMALL MOBILE (≤480px) ---
+@media (max-width: 480px) {
+    .o_product_checker_page {
+        .o_pc_topbar {
+            .o_pc_title {
+                font-size: 15px;
+
+                i {
+                    display: none;
+                }
+            }
+        }
+
+        .o_pc_product_card {
+            padding: 12px;
+
+            .o_pc_product_name {
+                font-size: 16px;
+            }
+
+            .o_pc_price_stock_grid .o_pc_kpi .o_pc_kpi_value {
+                font-size: 18px;
+            }
+        }
+    }
+}
+
+// ============================================================
+// PRINT LIST PANEL & AUTO-ADD TOGGLE
+// ============================================================
+
+.o_product_checker_page {
+
+    // Auto-add checkbox in top bar
+    .o_pc_autoadd_toggle {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+        flex-shrink: 0;
+
+        .form-check-input {
+            margin: 0;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .form-check-label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+
+            i {
+                color: #7c7bad;
+                margin-right: 4px;
+            }
+        }
+    }
+
+    // Print list toggle button badge
+    .o_pc_printlist_toggle {
+        position: relative;
+        flex-shrink: 0;
+
+        &.active {
+            background: #7c7bad;
+            color: #fff;
+            border-color: #7c7bad;
+        }
+    }
+
+    .o_pc_printlist_badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background: #28a745;
+        color: #fff;
+        border-radius: 50%;
+        min-width: 20px;
+        height: 20px;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        padding: 0 4px;
+    }
+
+    // Actions container - flex wrap buttons
+    .o_pc_product_card .o_pc_actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    // ============ PRINT LIST PANEL ============
+    .o_pc_printlist_panel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 360px;
+        background: #fff;
+        border-left: 1px solid #dee2e6;
+        box-shadow: -4px 0 12px rgba(0, 0, 0, 0.12);
+        transform: translateX(100%);
+        transition: transform 0.25s ease;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        &.o_pc_printlist_open {
+            transform: translateX(0);
+        }
+
+        .o_pc_printlist_header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+
+            h3 {
+                margin: 0;
+                font-size: 15px;
+                color: #2c3e50;
+                font-weight: 600;
+
+                .o_pc_printlist_count {
+                    display: inline-block;
+                    background: #7c7bad;
+                    color: #fff;
+                    border-radius: 12px;
+                    padding: 2px 10px;
+                    font-size: 12px;
+                    margin-left: 6px;
+                }
+            }
+        }
+
+        .o_pc_panel_close {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 4px 10px;
+            border-radius: 4px;
+
+            &:hover {
+                background: #e9ecef;
+            }
+        }
+
+        .o_pc_printlist_actions {
+            padding: 12px;
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid #dee2e6;
+
+            .btn {
+                font-size: 14px;
+            }
+
+            .flex-grow-1 {
+                flex: 1;
+            }
+        }
+
+        .o_pc_printlist_items {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px;
+        }
+
+        .o_pc_printlist_empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #adb5bd;
+
+            p {
+                margin: 10px 0 4px 0;
+                font-weight: 600;
+            }
+
+            small {
+                font-size: 11px;
+            }
+        }
+
+        .o_pc_printlist_item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            background: #f8f9fa;
+            transition: background 0.15s;
+
+            &:hover {
+                background: #e9ecef;
+            }
+
+            .o_pc_printlist_image {
+                width: 48px;
+                height: 48px;
+                object-fit: cover;
+                border-radius: 4px;
+                border: 1px solid #dee2e6;
+                background: #fff;
+                flex-shrink: 0;
+            }
+
+            .o_pc_printlist_info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .o_pc_printlist_name {
+                font-weight: 600;
+                font-size: 13px;
+                color: #2c3e50;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .o_pc_printlist_code {
+                font-size: 11px;
+                color: #6c757d;
+                font-family: monospace;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .o_pc_printlist_remove {
+                flex-shrink: 0;
+                width: 32px;
+                height: 32px;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+}
+
+// --- Tablet & Mobile adjustments for print list ---
+@media (max-width: 992px) {
+    .o_product_checker_page .o_pc_printlist_panel {
+        width: 320px;
+    }
+}
+
+@media (max-width: 768px) {
+    .o_product_checker_page {
+        .o_pc_autoadd_toggle {
+            flex: 1 1 100%;
+            order: 30;
+            justify-content: center;
+
+            .form-check-label {
+                font-size: 12px;
+            }
+        }
+
+        .o_pc_printlist_toggle {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+
+            .o_pc_btn_text {
+                display: none;
+            }
+        }
+
+        .o_pc_printlist_panel {
+            width: 90%;
+            max-width: 380px;
+        }
+    }
+}
+
+// --- TOUCH-FRIENDLY IMPROVEMENTS ---
+@media (hover: none) and (pointer: coarse) {
+    .o_product_checker_page {
+        .o_pc_history_item {
+            padding: 12px;
+        }
+
+        .btn {
+            min-height: 42px;
+        }
+
+        .form-control,
+        .form-select {
+            min-height: 42px;
+        }
+    }
+}
+
+
+/* ==============================================================
+   Camera Scanner Modal Styles
+   ============================================================== */
+
+.o_pc_camera_backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.o_pc_camera_modal {
+    background: #1a1a1a;
+    color: #ffffff;
+    border-radius: 10px;
+    width: 95%;
+    max-width: 480px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.o_pc_camera_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #000000;
+    font-weight: 600;
+
+    .o_pc_camera_close {
+        background: transparent;
+        border: none;
+        color: #ffffff;
+        font-size: 24px;
+        line-height: 1;
+        cursor: pointer;
+        opacity: 0.8;
+        padding: 0;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+}
+
+.o_pc_camera_video_wrap {
+    position: relative;
+    aspect-ratio: 4/3;
+    background: #000000;
+    overflow: hidden;
+
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+}
+
+.o_pc_camera_overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .o_pc_camera_target {
+        width: 70%;
+        height: 30%;
+        border: 3px solid rgba(255, 255, 255, 0.85);
+        border-radius: 8px;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+        /* Spotlight effect */
+    }
+}
+
+/* Keyframe for scan feedback flash */
+@keyframes fadeOutFlash {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.o_pc_camera_flash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: fadeOutFlash 2s forwards;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 20%;
+
+    &.o_pc_flash_success {
+        background: rgba(40, 167, 69, 0.4);
+        /* Green */
+    }
+
+    &.o_pc_flash_duplicate {
+        background: rgba(255, 193, 7, 0.4);
+        /* Yellow */
+    }
+
+    &.o_pc_flash_notfound {
+        background: rgba(220, 53, 69, 0.4);
+        /* Red */
+    }
+}
+
+.o_pc_camera_toast {
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    text-align: center;
+    max-width: 90%;
+    word-break: break-word;
+}
+
+.o_pc_camera_status {
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    background: #222222;
+    color: #ffffff;
+    min-height: 40px;
+    /* Prevent jitter when text changes */
+
+    strong {
+        color: #4db8ff;
+    }
+}
+
+.o_pc_camera_controls {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #111111;
+
+    .btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &.btn-secondary {
+            background: #333333;
+            color: #ffffff;
+            border: 1px solid #555555;
+
+            &:hover:not(:disabled) {
+                background: #444444;
+            }
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}
+
+/* Switch Camera Button */
+.o_pc_camera_switch_btn {
+    background: #2a6496 !important;
+    border-color: #2a6496 !important;
+    color: #ffffff !important;
+
+    &:hover:not(:disabled) {
+        background: #1e4f78 !important;
+        border-color: #1e4f78 !important;
+    }
+
+    i.fa-refresh {
+        transition: transform 0.3s ease;
+    }
+
+    &:active i.fa-refresh {
+        transform: rotate(180deg);
+    }
+}
+
+/* Topbar Camera Buttons Styling */
+.o_pc_camera_once_btn {
+    background-color: #17a2b8;
+    color: #ffffff;
+    border-color: #17a2b8;
+
+    &:hover {
+        background-color: #138496;
+        border-color: #117a8b;
+        color: #ffffff;
+    }
+}
+
+.o_pc_camera_continuous_btn {
+    background-color: #ffc107;
+    color: #212529;
+    border-color: #ffc107;
+
+    &:hover {
+        background-color: #e0a800;
+        border-color: #d39e00;
+        color: #212529;
+    }
+}
+
+/* ==============================================================
+   Image & Cost Update Modal Styles
+   ============================================================== */
+.o_pc_imgupdate_backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.o_pc_imgupdate_modal {
+    background: #ffffff;
+    color: #333333;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    position: relative;
+    animation: fadeInScale 0.2s ease-out;
+
+    h4 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: #2c3e50;
+        font-weight: 700;
+    }
+
+    .o_pc_imgupdate_options {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .o_pc_imgupdate_option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 20px;
+        flex: 1;
+        border-radius: 8px;
+        transition: all 0.2s;
+
+        span {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 480px) {
+    .o_pc_imgupdate_modal {
+        padding: 20px;
+
+        .o_pc_imgupdate_options {
+            flex-direction: column;
+        }
+
+        .o_pc_imgupdate_option {
+            padding: 16px;
+        }
+    }
+}
+
+/* ============ BARCODE CAMERA FIELD WIDGET ============ */
+.o_field_barcode_camera {
+    .o_input {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .o_barcode_camera_btn {
+        padding: 6px 10px;
+        border-color: #ced4da;
+        color: #495057;
+        background: #fff;
+
+        &:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+
+        .fa-camera {
+            font-size: 14px;
+        }
+    }
+}
+
+/* ==========================================
+   IMAGE UPDATE — Button + Modal
+   ========================================== */
+
+/* Button overlay pada product image */
+.o_pc_product_image {
+    position: relative;
+    /* agar container bisa absolute di dalamnya */
+
+    .o_pc_image_actions {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .o_pc_image_actions>button {
+        opacity: 0.85;
+        font-size: 12px;
+        padding: 4px 10px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        backdrop-filter: blur(4px);
+        transition: opacity 0.2s;
+        white-space: nowrap;
+
+        &:hover {
+            opacity: 1;
+            background: #fff;
+        }
+
+        i {
+            margin-right: 4px;
+        }
+    }
+}
+
+/* Make product image clearly clickable when it opens the detail view */
+.o_pc_clickable_image {
+    cursor: zoom-in;
+    transition: transform 0.15s ease;
+}
+
+.o_pc_clickable_image:hover {
+    transform: scale(1.02);
+}
+
+/* Image update source selection modal */
+.o_pc_imgupdate_backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.o_pc_imgupdate_modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+
+    h4 {
+        margin-top: 0;
+        margin-bottom: 8px;
+    }
+}
+
+.o_pc_imgupdate_options {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.o_pc_imgupdate_option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 28px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 120px;
+    transition: transform 0.15s, box-shadow 0.15s;
+
+    &:active {
+        transform: scale(0.96);
+    }
+
+    i {
+        font-size: 28px;
+    }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .o_pc_image_actions {
+        /* On mobile the action buttons should not overlay the image.
+           Make them flow below the image and center-aligned. */
+        position: static !important;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        bottom: auto !important;
+        right: auto !important;
+        margin-top: 8px;
+    }
+
+    .o_pc_image_actions>button {
+        /* Tombol lebih besar di mobile agar mudah ditekan */
+        padding: 6px 14px !important;
+        font-size: 13px !important;
+    }
+
+    .o_pc_imgupdate_option {
+        padding: 16px 20px;
+        min-width: 100px;
+    }
+}
+
+/* Image Detail modal (opened on image tap) */
+.o_pc_imgdetail_modal {
+    background: transparent;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    max-width: 960px;
+    box-shadow: none;
+    text-align: center;
+    position: relative;
+}
+
+.o_pc_imgdetail_body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.o_pc_imgdetail_body img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+.o_pc_imgdetail_close {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    z-index: 5;
+}
+
+/* Desktop: hide SelectMenu clear toggler inside product checker; show on mobile */
+.o_product_checker_page .o_select_menu_toggler_clear {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .o_product_checker_page .o_select_menu_toggler_clear {
+        display: inline-flex;
+    }
+
+    .o_product_checker_page .o_pc_create_category_btn .o_pc_btn_text {
+        display: none;
+    }
+
+    .o_product_checker_page .o_pc_create_category_btn {
+        min-width: 42px;
+        padding: 6px 10px;
+    }
+}
+
+/* ============================================================
+   PRODUCT LIST — Left-side drawer (desktop-only)
+   Overlay drawer style, does NOT push main content.
+   Search filter is preserved when the drawer is hidden.
+   ============================================================ */
+
+.o_product_checker_page .o_pc_body .o_pc_product_list_sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 380px;
+    max-width: 100%;
+    background: #ffffff;
+    border-right: 1px solid #dee2e6;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.06);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease-out;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    &.o_pc_product_list_open {
+        transform: translateX(0);
+    }
+
+    .o_pc_product_list_header {
+        padding: 12px 16px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+        flex-shrink: 0;
+
+        h3 {
+            margin: 0;
+            font-size: 15px;
+            color: #2c3e50;
+            font-weight: 600;
+
+            i {
+                color: #7c7bad;
+                margin-right: 6px;
+            }
+        }
+
+        .o_pc_product_list_close {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 2px 10px;
+            border-radius: 4px;
+            transition: background 0.15s, color 0.15s;
+
+            &:hover {
+                background: #e9ecef;
+                color: #212529;
+            }
+        }
+    }
+
+    .o_pc_product_list_search {
+        padding: 10px 12px;
+        border-bottom: 1px solid #dee2e6;
+        background: #ffffff;
+        flex-shrink: 0;
+
+        .form-control {
+            font-size: 14px;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+
+            &:focus {
+                border-color: #7c7bad;
+                box-shadow: 0 0 0 3px rgba(124, 123, 173, 0.15);
+                outline: none;
+            }
+        }
+    }
+
+    .o_pc_product_list_body {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 8px;
+    }
+
+    .o_pc_product_list_empty,
+    .o_pc_product_list_loading {
+        text-align: center;
+        padding: 30px 20px;
+        color: #adb5bd;
+        font-size: 13px;
+
+        .fa-spinner {
+            color: #7c7bad;
+        }
+    }
+
+    .o_pc_product_list_item {
+        display: flex;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 6px;
+        border: 1px solid transparent;
+        transition: background 0.15s, border-color 0.15s;
+
+        &:hover {
+            background: #f1f3f5;
+            border-color: #dee2e6;
+        }
+
+        &:active {
+            background: #e9ecef;
+        }
+
+        .o_pc_product_list_image {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            background: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .o_pc_product_list_info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .o_pc_product_list_name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #2c3e50;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            word-break: break-word;
+        }
+
+        .o_pc_product_list_code {
+            font-size: 11px;
+            color: #6c757d;
+            font-family: monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            i {
+                margin-right: 2px;
+            }
+        }
+
+        .o_pc_product_list_meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            font-size: 11px;
+            margin-top: 2px;
+
+            .o_pc_product_list_price {
+                color: #28a745;
+                font-weight: 600;
+                white-space: nowrap;
+
+                i {
+                    margin-right: 2px;
+                }
+            }
+
+            .o_pc_product_list_cost {
+                color: #fd7e14;
+                font-weight: 600;
+                white-space: nowrap;
+
+                i {
+                    margin-right: 2px;
+                }
+            }
+        }
+
+        .o_pc_product_list_stock {
+            font-size: 11px;
+            color: #17a2b8;
+            font-weight: 500;
+
+            &.text-danger {
+                color: #dc3545 !important;
+            }
+
+            i {
+                margin-right: 2px;
+            }
+        }
+    }
+
+    .o_pc_product_list_loadmore {
+        margin-top: 8px;
+        width: 100%;
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .o_pc_product_list_footer_info {
+        padding: 8px 12px;
+        font-size: 11px;
+        color: #adb5bd;
+        text-align: center;
+        border-top: 1px solid #eee;
+        flex-shrink: 0;
+    }
+}
+
+/* ============================================================
+   CUSTOM FILTER BUTTON — inside Product List drawer header
+   ============================================================ */
+
+.o_product_checker_page .o_pc_product_list_sidebar .o_pc_product_list_search {
+    .input-group {
+        flex-wrap: nowrap;
+        align-items: stretch;
+
+        .form-control {
+            border-right: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+
+            &:focus {
+                box-shadow: none;
+                border-color: #7c7bad;
+                z-index: 2;
+            }
+        }
+
+        .o_pc_productlist_filter_btn {
+            position: relative;
+            border-color: #ced4da;
+            background: #fff;
+            color: #495057;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+
+            &:hover {
+                background: #e9ecef;
+                color: #212529;
+            }
+
+            &.o_pc_has_filters {
+                background: #7c7bad;
+                color: #fff;
+                border-color: #7c7bad;
+
+                &:hover {
+                    background: #6a6994;
+                    border-color: #6a6994;
+                }
+            }
+
+            .o_pc_productlist_filter_badge {
+                position: absolute;
+                top: -6px;
+                right: -6px;
+                background: #dc3545;
+                color: #fff;
+                border-radius: 50%;
+                min-width: 18px;
+                height: 18px;
+                font-size: 10px;
+                font-weight: bold;
+                padding: 0 4px;
+                border: 2px solid #fff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+}
+
+/* ============================================================
+   FILTER CHIP SUMMARY — footer of drawer when filter is active
+   ============================================================ */
+
+.o_product_checker_page .o_pc_productlist_chip_summary {
+    padding: 8px 12px;
+    font-size: 12px;
+    background: #e8f5fd;
+    border-top: 1px solid #b8daff;
+    color: #0c5aa0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+
+    i {
+        color: #0c5aa0;
+    }
+
+    strong {
+        font-weight: 600;
+    }
+
+    .o_pc_chip_clear {
+        margin-left: auto;
+        padding: 2px 6px;
+        font-size: 12px;
+        color: #dc3545;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+
+        &:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        i {
+            color: #dc3545;
+            margin-right: 2px;
+        }
+    }
+}
+
+/* ============================================================
+   INLINE PRODUCT OPTIONS — Sales / Purchase / POS / Track / Published
+   Compact horizontal row of form-switches on the product card.
+   ============================================================ */
+
+.o_product_checker_page .o_pc_options_row {
+    margin-bottom: 18px;
+    padding: 10px 14px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #6f42c1;
+
+    .o_pc_options_label {
+        font-size: 11px;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: block;
+
+        i {
+            color: #6f42c1;
+            margin-right: 4px;
+        }
+    }
+
+    .o_pc_options_grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 20px;
+    }
+
+    .o_pc_option_item {
+        margin: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        min-height: auto;
+
+        .form-check-input {
+            cursor: pointer;
+            margin-top: 0.25em;
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: wait;
+            }
+        }
+
+        .form-check-label {
+            font-size: 13px;
+            color: #495057;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+
+            i {
+                margin-right: 4px;
+                color: #adb5bd;
+                width: 14px;
+                text-align: center;
+                transition: color 0.15s;
+            }
+        }
+
+        .form-check-input:checked~.form-check-label i {
+            color: #28a745;
+        }
+    }
+}
+
+/* Mobile: stack options vertically on narrow screens */
+@media (max-width: 576px) {
+    .o_product_checker_page .o_pc_options_row .o_pc_options_grid {
+        flex-direction: column;
+        gap: 6px;
+    }
+}
+
+/* ============================================================
+   TRACK INVENTORY ERROR MODAL
+   Reuses .o_pc_imgupdate_backdrop + .o_pc_imgupdate_modal base,
+   adds .o_pc_track_inventory_modal variant for sizing & content.
+   ============================================================ */
+
+.o_pc_track_inventory_modal {
+    max-width: 520px !important;
+    text-align: left !important;
+
+    h4 {
+        text-align: center;
+        margin-bottom: 16px;
+        color: #856404;
+
+        i {
+            margin-right: 8px;
+        }
+    }
+
+    .o_pc_ti_error_message {
+        background: #fff3cd;
+        border: 1px solid #ffeeba;
+        border-radius: 6px;
+        padding: 10px 12px;
+        color: #856404;
+        font-size: 12.5px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        max-height: 160px;
+        overflow-y: auto;
+        word-break: break-word;
+    }
+
+    .o_pc_ti_explainer {
+        margin-top: 16px;
+        color: #495057;
+        font-size: 13.5px;
+    }
+
+    ul.o_pc_ti_steps {
+        padding-left: 20px;
+        margin-top: 8px;
+        color: #495057;
+        font-size: 13px;
+
+        li {
+            margin-bottom: 4px;
+        }
+    }
+}
+
+/* ============================================================
+   FAVORITES DROPDOWN — saved search menu in drawer header
+   Mimics Odoo's favorite menu (star icon + list + Save current search)
+   ============================================================ */
+
+/* When placed inside an input-group, the wrap needs to behave like a
+   Bootstrap input-group child so its button inherits full height and
+   aligns with the adjacent input and filter button. */
+.o_product_checker_page .o_pc_product_list_sidebar .o_pc_product_list_search .input-group .o_pc_favorites_wrap {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+.o_product_checker_page .o_pc_favorites_wrap {
+    position: relative;
+}
+
+.o_product_checker_page .o_pc_productlist_favorites_btn {
+    position: relative;
+    border: 1px solid #ced4da;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    background: #fff;
+    color: #495057;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+
+    &:hover {
+        background: #fff8e1;
+        color: #f0ad4e;
+    }
+
+    &.o_pc_fav_active {
+        background: #fff8e1;
+        color: #f0ad4e;
+        border-color: #ffe082;
+    }
+
+    .fa-star,
+    .fa-star-o {
+        font-size: 14px;
+    }
+}
+
+.o_product_checker_page .o_pc_favorites_dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 1050;
+    width: 280px;
+    max-height: 420px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    padding: 8px 0;
+
+    .o_pc_fav_header {
+        padding: 4px 16px 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        i {
+            color: #f0ad4e;
+        }
+    }
+
+    .o_pc_fav_empty {
+        padding: 12px 16px;
+        font-size: 12px;
+        color: #adb5bd;
+        text-align: center;
+        font-style: italic;
+    }
+
+    .o_pc_fav_item {
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #495057;
+        transition: background 0.15s;
+
+        &:hover {
+            background: #f1f3f5;
+        }
+
+        &.o_pc_fav_selected {
+            background: #e8f5fd;
+            color: #0c5aa0;
+            font-weight: 500;
+        }
+
+        .o_pc_fav_check {
+            width: 14px;
+            flex-shrink: 0;
+            color: #0c5aa0;
+        }
+
+        .o_pc_fav_name {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .o_pc_fav_default_badge {
+            font-size: 10px;
+            padding: 1px 6px;
+            background: #ffe082;
+            color: #856404;
+            border-radius: 10px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .o_pc_fav_delete {
+            background: transparent;
+            border: none;
+            padding: 2px 6px;
+            color: #adb5bd;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            flex-shrink: 0;
+            transition: color 0.15s, background 0.15s;
+
+            &:hover {
+                color: #dc3545;
+                background: rgba(220, 53, 69, 0.1);
+            }
+        }
+    }
+
+    .o_pc_fav_divider {
+        margin: 6px 0;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .o_pc_fav_save_toggle {
+        width: 100%;
+        text-align: left;
+        padding: 8px 16px;
+        background: transparent;
+        border: none;
+        font-size: 13px;
+        color: #495057;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+
+        &:hover {
+            background: #f1f3f5;
+        }
+
+        .fa-caret-up,
+        .fa-caret-down {
+            color: #adb5bd;
+        }
+    }
+
+    .o_pc_fav_save_form {
+        padding: 10px 16px 12px;
+        background: #fcfcfd;
+        border-top: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .o_pc_fav_save_title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 2px;
+        }
+
+        .form-control {
+            font-size: 13px;
+            padding: 6px 10px;
+        }
+
+        .form-check {
+            padding-left: 1.8em;
+        }
+
+        .form-check-label {
+            font-size: 12.5px;
+            color: #495057;
+        }
+
+        .btn-primary {
+            font-size: 13px;
+            padding: 6px 10px;
+            align-self: stretch;
+        }
+    }
+}
+
+/* Favorites button sits between search input and filter button */
+.o_product_checker_page .o_pc_product_list_sidebar .o_pc_product_list_search .input-group .o_pc_productlist_favorites_btn+.o_pc_productlist_filter_btn {
+    border-left: 0;
+}
+
+/* ============================================================
+   CREATE FORM — Name field with Title Case helper button
+   + Product Options (default-checked toggles)
+   ============================================================ */
+
+.o_product_checker_page .o_pc_create_form {
+    .o_pc_name_input_group {
+        display: flex;
+        align-items: stretch;
+
+        .btn.o_pc_titlecase_btn {
+            flex: 0 0 auto;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: 0;
+            background: #f8f9fa;
+            color: #495057;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.15s, color 0.15s;
+
+            &:hover {
+                background: #6f42c1;
+                color: #fff;
+                border-color: #6f42c1;
+            }
+
+            &:active {
+                transform: scale(0.96);
+            }
+
+            i {
+                font-size: 14px;
+            }
+        }
+
+        .form-control {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+    }
+
+    /* Generic title-case button for Product Name fields and translation editors */
+    .o_pc_titlecase_btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 38px;
+        padding: 0 10px;
+        margin-left: 0.35rem;
+        border-radius: 0.35rem;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .oe_title .d-flex>.o_pc_titlecase_btn {
+        align-self: center;
+    }
+
+    /* Inline options section inside the create form — same visual
+       language as the main product card's options row */
+    .o_pc_create_options_row {
+        margin-bottom: 1rem;
+        padding: 10px 14px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #6f42c1;
+
+        .o_pc_create_options_label {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+
+            i {
+                color: #6f42c1;
+                margin-right: 4px;
+            }
+        }
+
+        .o_pc_create_options_grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 20px;
+        }
+
+        .o_pc_create_option_item {
+            margin: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            min-height: auto;
+
+            .form-check-input {
+                cursor: pointer;
+                margin-top: 0.25em;
+            }
+
+            .form-check-label {
+                font-size: 13px;
+                color: #495057;
+                cursor: pointer;
+                user-select: none;
+                white-space: nowrap;
+
+                i {
+                    margin-right: 4px;
+                    color: #adb5bd;
+                    width: 14px;
+                    text-align: center;
+                    transition: color 0.15s;
+                }
+            }
+
+            .form-check-input:checked~.form-check-label i {
+                color: #28a745;
+            }
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .o_product_checker_page .o_pc_create_form .o_pc_create_options_row .o_pc_create_options_grid {
+        flex-direction: column;
+        gap: 6px;
+    }
+}

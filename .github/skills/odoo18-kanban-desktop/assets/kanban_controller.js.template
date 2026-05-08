@@ -1,0 +1,75 @@
+/** @odoo-module **/
+
+import { KanbanController } from "@web/views/kanban/kanban_controller";
+import { useService } from "@web/core/utils/hooks";
+import { onWillStart, useState } from "@odoo/owl";
+
+export class CustomKanbanController extends KanbanController {
+    setup() {
+        super.setup();
+        this.orm = useService("orm");
+
+        // 1. Define reactive state for custom control panel filters
+        this.customState = useState({
+            filterData: [],
+            selectedFilterId: "",
+        });
+
+        // 2. Fetch data before rendering
+        onWillStart(async () => {
+            await this.fetchFilterData();
+            // Optional: read existing context
+            const currentContext = (this.env.searchModel && this.env.searchModel.context) || {};
+            if (currentContext.custom_filter_key) {
+                this.customState.selectedFilterId = String(currentContext.custom_filter_key);
+            }
+        });
+    }
+
+    async fetchFilterData() {
+        try {
+            // Fetch records for the custom dropdown
+            // const data = await this.orm.searchRead("your.model", [], ["id", "name"]);
+            // this.customState.filterData = data;
+        } catch (e) {
+            console.error("Error loading filter data:", e);
+        }
+    }
+
+    onFilterChange(ev) {
+        const val = ev.target.value;
+        this.customState.selectedFilterId = val;
+        this.updateViewWithContext();
+    }
+
+    updateViewWithContext() {
+        const filterId = this.customState.selectedFilterId
+            ? parseInt(this.customState.selectedFilterId)
+            : undefined;
+
+        // Update the model config context
+        if (this.model && this.model.config) {
+            this.model.config.context = this.model.config.context || {};
+            if (filterId) this.model.config.context.custom_filter_key = filterId;
+            else delete this.model.config.context.custom_filter_key;
+        }
+
+        // Update the search model context
+        if (this.env.searchModel) {
+            let newContext = { ...(this.env.searchModel.context || {}) };
+            if (filterId) newContext.custom_filter_key = filterId;
+            else delete newContext.custom_filter_key;
+            
+            try {
+                this.env.searchModel.update({ context: newContext });
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        // Reload the kanban data
+        if (this.model && typeof this.model.load === "function") {
+            this.model.load();
+        }
+    }
+}

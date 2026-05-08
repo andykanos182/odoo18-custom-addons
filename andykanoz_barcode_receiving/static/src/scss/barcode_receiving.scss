@@ -1,0 +1,324 @@
+.o_barcode_receiving {
+    background: #f0f2f5;
+    font-family: inherit;
+
+    // ─── HEADER ───
+    .o_br_header {
+        background: #2c3e50;
+        color: white;
+        min-height: 56px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+
+        .o_br_title {
+            font-size: 1.1rem;
+        }
+
+        .o_br_subtitle {
+            font-size: 0.8rem;
+        }
+    }
+
+    // ─── PROGRESS ───
+    .o_br_progress {
+        background: white;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    // ─── SCAN AREA ───
+    .o_br_scan_area {
+        background: white;
+        border-bottom: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+        .form-control {
+            font-size: 1.1rem;
+            border-left: none;
+
+            &:focus {
+                box-shadow: none;
+                border-color: #ced4da;
+            }
+        }
+
+        .input-group-text {
+            border-right: none;
+            font-size: 1.3rem;
+            color: #6c757d;
+        }
+
+        .o_br_camera_btn {
+            font-size: 1.2rem;
+            padding: 0.375rem 0.9rem;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+    }
+
+    .o_br_scan_message {
+        font-size: 0.9rem;
+        animation: brFadeIn 0.3s ease;
+    }
+
+    .o_br_msg_success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .o_br_msg_error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    // ─── CONTENT ───
+    .o_br_content {
+        padding-top: 12px;
+    }
+
+    .o_br_section_header h6 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    // ─── ITEMS ───
+    .o_br_item {
+        background: white;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+
+        &:hover {
+            border-color: #adb5bd;
+        }
+    }
+
+    .o_br_item_img {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+
+    .o_br_item_pending {
+        border-left: 3px solid #ffc107;
+    }
+
+    .o_br_item_received {
+        border-left: 3px solid #28a745;
+        opacity: 0.85;
+    }
+
+    .o_br_item_just_received {
+        animation: brSlideIn 0.5s ease;
+        border-color: #28a745;
+        box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+    }
+
+    .o_br_qty_badge {
+        min-width: 70px;
+    }
+
+    // ─── ALL DONE ───
+    .o_br_all_done {
+        animation: brFadeIn 0.5s ease;
+    }
+
+    // ─── CAMERA MODAL ───
+    .o_br_camera_modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: brFadeIn 0.2s ease;
+    }
+
+    .o_br_camera_container {
+        width: 95%;
+        max-width: 520px;
+        background: #1a1a1a;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh;
+    }
+
+    .o_br_camera_header {
+        padding: 14px 16px;
+        background: #222;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+        border-bottom: 1px solid #333;
+
+        .o_br_camera_close {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+
+            &:hover {
+                color: white;
+                background: rgba(255, 255, 255, 0.1);
+            }
+        }
+    }
+
+    .o_br_camera_loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+    }
+
+    .o_br_camera_error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .o_br_camera_video_wrap {
+        position: relative;
+        width: 100%;
+        background: #000;
+        line-height: 0;
+
+        video {
+            width: 100%;
+            height: auto;
+            max-height: 55vh;
+            object-fit: cover;
+        }
+
+        .o_br_camera_overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .o_br_camera_target {
+            width: 75%;
+            height: 35%;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.3);
+            position: relative;
+
+            // Scan line animation
+            &::after {
+                content: "";
+                position: absolute;
+                left: 5%;
+                width: 90%;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, #ff4444, transparent);
+                box-shadow: 0 0 8px rgba(255, 68, 68, 0.6);
+                animation: brScanLine 2s ease-in-out infinite;
+            }
+
+            // Corner markers
+            &::before {
+                content: "";
+                position: absolute;
+                top: -2px;
+                left: -2px;
+                right: -2px;
+                bottom: -2px;
+                border: 2px solid transparent;
+                border-radius: 8px;
+                background:
+                    // Top-left
+                    linear-gradient(white, white) top left,
+                    linear-gradient(white, white) top left,
+                    // Top-right
+                    linear-gradient(white, white) top right,
+                    linear-gradient(white, white) top right,
+                    // Bottom-left
+                    linear-gradient(white, white) bottom left,
+                    linear-gradient(white, white) bottom left,
+                    // Bottom-right
+                    linear-gradient(white, white) bottom right,
+                    linear-gradient(white, white) bottom right;
+                background-size: 20px 3px, 3px 20px;
+                background-repeat: no-repeat;
+            }
+        }
+    }
+
+    .o_br_camera_footer {
+        padding: 14px 16px;
+        background: #222;
+        border-top: 1px solid #333;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        color: white;
+
+        .o_br_camera_hint {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .o_br_camera_actions {
+            display: flex;
+            gap: 10px;
+        }
+    }
+
+    // ─── ANIMATIONS ───
+    @keyframes brFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes brSlideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes brScanLine {
+        0% {
+            top: 10%;
+        }
+        50% {
+            top: 85%;
+        }
+        100% {
+            top: 10%;
+        }
+    }
+}

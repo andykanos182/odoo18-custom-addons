@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================================================== -->
+    <!-- Customer Portal: Sale Order — DOKU Pending Override -->
+    <!--                                                      -->
+    <!-- When a Sale Order has a PENDING DOKU transaction,   -->
+    <!-- replace Odoo's generic "Pay Now" with a clear        -->
+    <!-- "Lanjutkan Pembayaran" link to our custom            -->
+    <!-- pending payment page.                                -->
+    <!--                                                      -->
+    <!-- This prevents customers from creating duplicate     -->
+    <!-- transactions when they want to resume payment.       -->
+    <!-- ==================================================== -->
+    <template id="portal_sale_order_doku_pending"
+              inherit_id="sale.sale_order_portal_template"
+              name="Portal Sale Order: DOKU Pending Banner">
+
+        <!-- Inject our pending banner BEFORE the standard payment area -->
+        <xpath expr="//*[hasclass('o_portal_sale_sidebar')]" position="before">
+            <t t-set="doku_pending_tx" t-value="
+                sale_order.transaction_ids.filtered(
+                    lambda t: t.provider_code == 'doku'
+                              and t.state in ('draft', 'pending')
+                              and t.doku_payment_url
+                )[:1]
+            "/>
+
+            <div class="alert alert-warning d-flex align-items-center mb-3"
+                 role="alert"
+                 t-if="doku_pending_tx">
+                <i class="fa fa-clock-o fa-2x me-3"/>
+                <div class="flex-grow-1">
+                    <h5 class="mb-1">Pembayaran Sedang Menunggu</h5>
+                    <p class="mb-2 small">
+                        Anda memiliki pembayaran DOKU yang belum selesai untuk pesanan ini.
+                    </p>
+                    <a t-attf-href="/payment/doku/pending/#{doku_pending_tx.id}"
+                       class="btn btn-warning btn-sm">
+                        <i class="fa fa-arrow-right me-1"/>
+                        Lanjutkan Pembayaran
+                    </a>
+                </div>
+            </div>
+        </xpath>
+
+    </template>
+
+    <!-- ==================================================== -->
+    <!-- DOKU Pending: Portal Breadcrumbs                     -->
+    <!-- ==================================================== -->
+    <template id="portal_my_home_menu_doku_pending" name="Portal layout : DOKU pending menu entries" inherit_id="portal.portal_breadcrumbs" priority="30">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'doku_pending'" class="breadcrumb-item active">
+                Menunggu Pembayaran
+            </li>
+        </xpath>
+    </template>
+
+    <!-- ==================================================== -->
+    <!-- DOKU Pending: Portal Dashboard Menu (Alert Category) -->
+    <!-- ==================================================== -->
+    <template id="portal_my_home_doku_pending" name="Show Pending Payments" customize_show="True" inherit_id="portal.portal_my_home" priority="30">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_alert_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_alert_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="bg_color" t-value="'alert alert-warning align-items-center'"/>
+                <t t-set="placeholder_count" t-value="'doku_pending_count'"/>
+                <t t-set="title">Menunggu Pembayaran</t>
+                <t t-set="url" t-value="'/my/doku/pending'"/>
+                <t t-set="show_count" t-value="True"/>
+            </t>
+        </div>
+    </template>
+
+    <!-- ==================================================== -->
+    <!-- DOKU Pending: List View Page                         -->
+    <!-- ==================================================== -->
+    <template id="portal_my_doku_pending" name="My Pending Payments">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Menunggu Pembayaran</t>
+            </t>
+
+            <t t-if="not transactions">
+                <p class="alert alert-warning mt-4">Saat ini Anda tidak memiliki pembayaran yang tertunda.</p>
+            </t>
+
+            <t t-if="transactions" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Nomor Referensi</th>
+                        <th>Invoice DOKU</th>
+                        <th class="text-end">Jumlah</th>
+                        <th class="text-center">Batas Pembayaran</th>
+                        <th>Status</th>
+                        <th class="text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <t t-foreach="transactions" t-as="tx">
+                    <tr>
+                        <td>
+                            <a t-attf-href="/payment/doku/pending/#{tx.id}">
+                                <t t-out="tx.reference"/>
+                            </a>
+                        </td>
+                        <td>
+                            <span t-out="tx.doku_invoice_number"/>
+                        </td>
+                        <td class="text-end">
+                            <span t-field="tx.amount" t-options='{"widget": "monetary", "display_currency": tx.currency_id}'/>
+                        </td>
+                        <td class="text-center">
+                            <span t-field="tx.doku_expired_at" t-options='{"widget": "datetime"}'/>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill text-bg-warning">Pending</span>
+                        </td>
+                        <td class="text-end">
+                            <a t-attf-href="/payment/doku/pending/#{tx.id}" class="btn btn-sm btn-primary">
+                                Bayar
+                            </a>
+                        </td>
+                    </tr>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ==================================================== -->
+    <!-- Invoice Portal: Overdue Invoices DOKU Pending        -->
+    <!-- ==================================================== -->
+    <template id="portal_overdue_invoices_page_doku_pending"
+              inherit_id="account_payment.portal_overdue_invoices_page"
+              name="Portal Overdue: DOKU Pending Banner">
+
+        <xpath expr="//div[hasclass('mt-4')]" position="before">
+            <t t-set="doku_pending_tx" t-value="
+                request.env['payment.transaction'].sudo().search([
+                    ('partner_id', 'child_of', request.env.user.partner_id.commercial_partner_id.id),
+                    ('provider_code', '=', 'doku'),
+                    ('state', 'in', ['draft', 'pending']),
+                    ('doku_payment_url', '!=', False)
+                ], limit=1)
+            "/>
+
+            <div class="alert alert-warning d-flex align-items-center mt-4"
+                 role="alert"
+                 t-if="doku_pending_tx">
+                <i class="fa fa-clock-o fa-2x me-3"/>
+                <div class="flex-grow-1">
+                    <h5 class="mb-1">Pembayaran Sedang Menunggu</h5>
+                    <p class="mb-2 small">
+                        Anda memiliki pembayaran DOKU yang belum selesai.
+                        Silakan lanjutkan pembayaran tersebut, atau batalkan tagihan jika ingin mengubah metode pembayaran.
+                    </p>
+                    <a t-attf-href="/payment/doku/pending/#{doku_pending_tx.id}"
+                       class="btn btn-warning btn-sm fw-bold">
+                        <i class="fa fa-arrow-right me-1"/>
+                        Lanjutkan Pembayaran
+                    </a>
+                </div>
+            </div>
+        </xpath>
+        
+        <xpath expr="//div[hasclass('mt-4')]" position="attributes">
+            <attribute name="t-if">not doku_pending_tx</attribute>
+        </xpath>
+    </template>
+
+    <!-- ==================================================== -->
+    <!-- Invoice Portal: Single Invoice DOKU Pending          -->
+    <!-- ==================================================== -->
+    <template id="portal_invoice_page_doku_pending"
+              inherit_id="account.portal_invoice_page"
+              name="Portal Invoice: DOKU Pending Banner">
+
+        <!-- Add Banner at the top of the invoice content -->
+        <xpath expr="//div[@id='invoice_content']" position="before">
+            <t t-set="doku_pending_tx" t-value="
+                invoice.transaction_ids.filtered(
+                    lambda t: t.provider_code == 'doku'
+                              and t.state in ('draft', 'pending')
+                              and t.doku_payment_url
+                )[:1]
+            "/>
+
+            <div class="alert alert-warning d-flex align-items-center mb-3"
+                 role="alert"
+                 t-if="doku_pending_tx">
+                <i class="fa fa-clock-o fa-2x me-3"/>
+                <div class="flex-grow-1">
+                    <h5 class="mb-1">Pembayaran Sedang Menunggu</h5>
+                    <p class="mb-2 small">
+                        Faktur ini memiliki pembayaran DOKU yang belum selesai.
+                    </p>
+                    <a t-attf-href="/payment/doku/pending/#{doku_pending_tx.id}"
+                       class="btn btn-warning btn-sm fw-bold">
+                        <i class="fa fa-arrow-right me-1"/>
+                        Lanjutkan Pembayaran
+                    </a>
+                </div>
+            </div>
+        </xpath>
+        
+        <!-- Hide the 'Pay Now' button modal trigger if DOKU is pending -->
+        <xpath expr="//t[@t-call='portal.portal_record_sidebar']//div[hasclass('o_download_pdf')]" position="before">
+            <t t-set="doku_pending_tx" t-value="
+                invoice.transaction_ids.filtered(
+                    lambda t: t.provider_code == 'doku'
+                              and t.state in ('draft', 'pending')
+                              and t.doku_payment_url
+                )[:1]
+            "/>
+            <style t-if="doku_pending_tx">
+                /* Hide the default Pay Now button from account_payment */
+                a[data-bs-target="#pay_with"] {
+                    display: none !important;
+                }
+            </style>
+            
+            <a t-if="invoice._has_to_be_paid() and doku_pending_tx"
+                t-attf-href="/payment/doku/pending/#{doku_pending_tx.id}"
+                class="btn btn-warning mb-2 w-100">
+                <i class="fa fa-fw fa-clock-o"/> Lanjutkan Pembayaran
+            </a>
+        </xpath>
+    </template>
+
+</odoo>

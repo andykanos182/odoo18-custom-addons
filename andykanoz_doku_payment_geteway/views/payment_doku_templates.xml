@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================================================== -->
+    <!-- DOKU Redirect Form Template                          -->
+    <!--                                                      -->
+    <!-- Standard Odoo 18 Full Redirect.                      -->
+    <!-- Odoo will auto-submit this form to DOKU's URL.      -->
+    <!-- ==================================================== -->
+    <template id="redirect_form" name="DOKU Redirect Form">
+        <form t-att-action="doku_payment_url" method="get"/>
+    </template>
+
+
+    <!-- ==================================================== -->
+    <!-- eCommerce Checkout: DOKU Pending Override            -->
+    <!--                                                      -->
+    <!-- Show a warning banner and hide other payment methods -->
+    <!-- if the user already has a pending DOKU transaction.  -->
+    <!-- ==================================================== -->
+    <template id="website_sale_payment_doku_pending"
+              inherit_id="website_sale.payment"
+              name="Checkout: DOKU Pending Banner">
+
+        <xpath expr="//div[@name='website_sale_non_free_cart']" position="before">
+            <!-- Check for pending DOKU transaction -->
+            <t t-set="doku_pending_tx" t-value="
+                website_sale_order.transaction_ids.filtered(
+                    lambda t: t.provider_code == 'doku'
+                              and t.state in ('draft', 'pending')
+                              and t.doku_payment_url
+                )[:1]
+            "/>
+
+            <div class="alert alert-warning d-flex align-items-center mb-3"
+                 role="alert"
+                 t-if="doku_pending_tx">
+                <i class="fa fa-clock-o fa-2x me-3"/>
+                <div class="flex-grow-1">
+                    <h5 class="mb-1">Pembayaran Sedang Menunggu</h5>
+                    <p class="mb-2 small">
+                        Anda memiliki tagihan DOKU yang belum dibayar untuk pesanan ini.
+                        Silakan lanjutkan pembayaran, atau batalkan tagihan tersebut jika ingin mengubah metode pembayaran.
+                    </p>
+                    <a t-attf-href="/payment/doku/pending/#{doku_pending_tx.id}"
+                       class="btn btn-warning btn-sm fw-bold">
+                        <i class="fa fa-arrow-right me-1"/>
+                        Lanjutkan Pembayaran
+                    </a>
+                </div>
+            </div>
+        </xpath>
+        
+        <!-- Hide standard payment methods if there is a pending tx -->
+        <xpath expr="//div[@name='website_sale_non_free_cart']" position="attributes">
+            <attribute name="t-if">not errors and website_sale_order.amount_total and not doku_pending_tx</attribute>
+        </xpath>
+    </template>
+
+
+    <!-- ==================================================== -->
+    <!-- DOKU Pending Payment Page (Strategy 2 - Semi Tokopedia) -->
+    <!--                                                      -->
+    <!-- Custom Odoo page shown when customer returns from   -->
+    <!-- DOKU checkout without completing payment, OR when   -->
+    <!-- customer clicks "Lanjutkan Pembayaran" from portal. -->
+    <!--                                                      -->
+    <!-- Features:                                            -->
+    <!-- - Tokopedia-style waiting layout                    -->
+    <!-- - Live countdown timer to expiry                    -->
+    <!-- - Order summary                                      -->
+    <!-- - "Lihat Instruksi Pembayaran" button (opens DOKU)  -->
+    <!-- - "Batalkan Pembayaran" link                         -->
+    <!-- ==================================================== -->
+    <template id="doku_pending_payment_page" name="DOKU Pending Payment Page">
+        <t t-call="portal.portal_layout">
+            <t t-set="title">Menunggu Pembayaran</t>
+
+            <div class="container my-4">
+                <!-- Header Card -->
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-body text-center py-4">
+                        <div class="mb-3">
+                            <i class="fa fa-clock-o fa-3x text-warning"/>
+                        </div>
+                        <h2 class="mb-2">Menunggu Pembayaran</h2>
+                        <p class="text-muted mb-0">
+                            Silakan selesaikan pembayaran Anda sebelum waktu habis
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Countdown Timer Card -->
+                <div class="card shadow-sm border-0 mb-3"
+                     t-if="transaction.doku_expired_at">
+                    <div class="card-body">
+                        <div class="text-center">
+                            <p class="text-muted mb-2 small">Bayar dalam</p>
+                            <div id="doku_countdown"
+                                 class="d-flex justify-content-center gap-2"
+                                 t-att-data-expiry="transaction.doku_expired_at">
+                                <div class="bg-danger text-white px-3 py-2 rounded">
+                                    <div class="h3 mb-0" id="doku_countdown_hours">--</div>
+                                    <small>Jam</small>
+                                </div>
+                                <div class="bg-danger text-white px-3 py-2 rounded">
+                                    <div class="h3 mb-0" id="doku_countdown_minutes">--</div>
+                                    <small>Menit</small>
+                                </div>
+                                <div class="bg-danger text-white px-3 py-2 rounded">
+                                    <div class="h3 mb-0" id="doku_countdown_seconds">--</div>
+                                    <small>Detik</small>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-2 small mb-0" id="doku_expired_message"
+                               style="display: none;">
+                                <i class="fa fa-times-circle text-danger"/>
+                                Waktu pembayaran telah habis. Silakan buat pesanan baru.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary Card -->
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title border-bottom pb-2 mb-3">
+                            <i class="fa fa-receipt me-2"/>Ringkasan Pesanan
+                        </h5>
+
+                        <div class="row mb-2">
+                            <div class="col-6 text-muted">Nomor Referensi</div>
+                            <div class="col-6 text-end fw-bold">
+                                <t t-out="transaction.reference"/>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2" t-if="transaction.doku_invoice_number">
+                            <div class="col-6 text-muted">DOKU Invoice</div>
+                            <div class="col-6 text-end">
+                                <code><t t-out="transaction.doku_invoice_number"/></code>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2" t-if="transaction.partner_id">
+                            <div class="col-6 text-muted">Pelanggan</div>
+                            <div class="col-6 text-end">
+                                <t t-out="transaction.partner_id.name"/>
+                            </div>
+                        </div>
+
+                        <hr/>
+
+                        <div class="row">
+                            <div class="col-6 h5 mb-0">Total Pembayaran</div>
+                            <div class="col-6 text-end h5 mb-0 text-primary">
+                                <t t-out="transaction.currency_id.symbol"/>
+                                <span t-out="'{:,.0f}'.format(transaction.amount)"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call To Action Buttons -->
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <!-- Primary CTA: Open DOKU Page -->
+                            <a t-att-href="transaction.doku_payment_url"
+                               target="_blank"
+                               class="btn btn-primary btn-lg"
+                               t-if="transaction.doku_payment_url">
+                                <i class="fa fa-external-link me-2"/>
+                                Lihat Instruksi Pembayaran
+                            </a>
+
+                            <p class="text-center text-muted small mb-0 mt-2">
+                                <i class="fa fa-info-circle me-1"/>
+                                Anda akan diarahkan ke halaman DOKU untuk melihat
+                                Nomor Virtual Account, QRIS, atau cara pembayaran lainnya.
+                            </p>
+
+                            <!-- Cancel Link -->
+                            <hr class="my-3"/>
+
+                            <form t-att-action="cancel_url" method="post" class="text-center">
+                                <input type="hidden" name="csrf_token"
+                                       t-att-value="request.csrf_token()"/>
+                                <button type="submit"
+                                        class="btn btn-link text-danger"
+                                        onclick="return confirm('Anda yakin ingin membatalkan pembayaran ini?');">
+                                    <i class="fa fa-times me-1"/>
+                                    Batalkan Pembayaran
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Footer -->
+                <div class="alert alert-info" role="alert">
+                    <i class="fa fa-lightbulb-o me-2"/>
+                    <strong>Tips:</strong>
+                    Setelah Anda menyelesaikan pembayaran, status pesanan akan diperbarui
+                    secara otomatis. Anda dapat menutup halaman ini setelah pembayaran selesai.
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="/my/orders" class="text-muted">
+                        <i class="fa fa-arrow-left me-1"/>Kembali ke Daftar Pesanan
+                    </a>
+                </div>
+            </div>
+
+            <!-- Countdown Timer + Auto-Polling Script -->
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function() {
+
+                    // ------------------------------------------------
+                    // COUNTDOWN TIMER
+                    // ------------------------------------------------
+                    var countdownEl = document.getElementById('doku_countdown');
+                    if (countdownEl) {
+                        var expiryStr = countdownEl.getAttribute('data-expiry');
+                        if (expiryStr) {
+                            var expiryISO = expiryStr.replace(' ', 'T') + 'Z';
+                            var expiryDate = new Date(expiryISO).getTime();
+
+                            var hoursEl   = document.getElementById('doku_countdown_hours');
+                            var minutesEl = document.getElementById('doku_countdown_minutes');
+                            var secondsEl = document.getElementById('doku_countdown_seconds');
+                            var expiredMsgEl = document.getElementById('doku_expired_message');
+
+                            function updateCountdown() {
+                                var distance = expiryDate - new Date().getTime();
+                                if (distance &lt; 0) {
+                                    hoursEl.textContent   = '00';
+                                    minutesEl.textContent = '00';
+                                    secondsEl.textContent = '00';
+                                    if (expiredMsgEl) expiredMsgEl.style.display = 'block';
+                                    clearInterval(countdownTimer);
+                                    return;
+                                }
+                                var totalHours = Math.floor(distance / (1000 * 60 * 60));
+                                var minutes    = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                var seconds    = Math.floor((distance % (1000 * 60)) / 1000);
+                                hoursEl.textContent   = String(totalHours).padStart(2, '0');
+                                minutesEl.textContent = String(minutes).padStart(2, '0');
+                                secondsEl.textContent = String(seconds).padStart(2, '0');
+                            }
+                            updateCountdown();
+                            var countdownTimer = setInterval(updateCountdown, 1000);
+                        }
+                    }
+
+                    // ------------------------------------------------
+                    // AUTO-POLLING: cek status pembayaran setiap 5 detik
+                    //
+                    // Temuan penting (2026-05-02):
+                    // Alur yang benar: draft → sent (saat _set_pending) →
+                    // sale (saat _set_done via webhook DOKU).
+                    // "Quotation Sent" di backend adalah state SEMENTARA yang
+                    // normal — bukan bug. SO dikonfirmasi otomatis oleh Odoo
+                    // core via _check_amount_and_confirm_order() setelah
+                    // _set_done() dipanggil. Semua record (invoice, delivery,
+                    // MO) tetap terbuat dengan benar.
+                    // Polling ini mencegah customer bingung melihat halaman
+                    // "Menunggu" terlalu lama setelah pembayaran selesai.
+                    // ------------------------------------------------
+                    var txId = <t t-out="transaction.id"/>;
+                    var pollInterval = null;
+                    var pollFailCount = 0;
+
+                    function pollPaymentStatus() {
+                        fetch('/payment/doku/check-status/' + txId)
+                            .then(function(response) {
+                                if (!response.ok) { throw new Error('HTTP ' + response.status); }
+                                return response.json();
+                            })
+                            .then(function(data) {
+                                pollFailCount = 0;
+                                var state = data.state;
+                                if (state === 'done') {
+                                    clearInterval(pollInterval);
+                                    window.location.href = '/payment/status';
+                                } else if (state === 'cancel' || state === 'error') {
+                                    clearInterval(pollInterval);
+                                    window.location.href = '/payment/status';
+                                }
+                                // state === 'pending' / 'draft': keep polling
+                            })
+                            .catch(function() {
+                                pollFailCount++;
+                                // Stop polling after 5 consecutive failures
+                                if (pollFailCount >= 5) {
+                                    clearInterval(pollInterval);
+                                }
+                            });
+                    }
+
+                    // Start polling after 3s delay, then every 5s
+                    setTimeout(function() {
+                        pollPaymentStatus();
+                        pollInterval = setInterval(pollPaymentStatus, 5000);
+                    }, 3000);
+                });
+            </script>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Delivery method: Pengiriman Berdasarkan Jarak -->
+        <record id="delivery_carrier_distance" model="delivery.carrier">
+            <field name="name">Pengiriman GoPoKaja (Berdasarkan Jarak)</field>
+            <field name="delivery_type">distance</field>
+            <field name="website_published">1</field>
+            <field name="product_id" ref="delivery.product_product_delivery"/>
+            <field name="sequence">5</field>
+            <field name="distance_base_fee">8000</field>
+            <field name="distance_threshold_km">3.0</field>
+            <field name="distance_per_km_fee">2500</field>
+            <field name="distance_max_km">5.0</field>
+        </record>
+
+    </data>
+</odoo>

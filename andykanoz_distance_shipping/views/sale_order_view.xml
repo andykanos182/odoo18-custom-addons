@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tampilkan Delivery Distance di Sales Order form -->
+    <record id="view_order_form_distance" model="ir.ui.view">
+        <field name="name">sale.order.form.distance</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                <field name="delivery_distance_km"
+                       string="Delivery Distance (km)"
+                       invisible="delivery_distance_km == 0"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

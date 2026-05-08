@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================== -->
+    <!-- Payment Transaction Form View Extension       -->
+    <!-- ============================================== -->
+    <record id="payment_transaction_form_doku" model="ir.ui.view">
+        <field name="name">payment.transaction.form.doku</field>
+        <field name="model">payment.transaction</field>
+        <field name="inherit_id" ref="payment.payment_transaction_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Add DOKU details section -->
+            <xpath expr="//sheet" position="inside">
+                <notebook invisible="provider_code != 'doku'">
+                    <page string="DOKU Details" name="doku_details">
+
+                        <group string="DOKU Transaction Info">
+                            <group>
+                                <field name="doku_invoice_number" readonly="1"/>
+                                <field name="doku_payment_method" readonly="1"/>
+                                <field name="doku_payment_channel" readonly="1"/>
+                                <field name="doku_acquirer" readonly="1"/>
+                                <field name="doku_va_number" readonly="1"
+                                       invisible="doku_payment_method != 'virtual_account'"/>
+                            </group>
+                            <group>
+                                <field name="doku_expired_at" readonly="1"/>
+                                <field name="doku_paid_at" readonly="1"/>
+                                <field name="doku_token_id" readonly="1"/>
+                                <field name="doku_session_id" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <group string="Webhook Tracking">
+                            <group>
+                                <field name="doku_webhook_count" readonly="1"/>
+                                <field name="doku_last_webhook_at" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="doku_last_webhook_status" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <group string="Payment URL"
+                               invisible="not doku_payment_url">
+                            <field name="doku_payment_url" widget="url" readonly="1"/>
+                            <button name="action_view_doku_payment"
+                                    string="Open Payment Page"
+                                    type="object"
+                                    class="btn-primary"
+                                    icon="fa-external-link"/>
+                        </group>
+
+                        <group string="QRIS Data"
+                               invisible="doku_payment_method != 'qris' or not doku_qris_data">
+                            <field name="doku_qris_data" readonly="1" nolabel="1"/>
+                        </group>
+
+                        <!-- Action Buttons -->
+                        <div class="oe_button_box">
+                            <button name="action_check_doku_status"
+                                    string="Check Status"
+                                    type="object"
+                                    class="btn-secondary"
+                                    icon="fa-refresh"
+                                    invisible="not doku_invoice_number"/>
+                        </div>
+
+                        <!-- Debug Info (Admin only) -->
+                        <group string="Debug Information"
+                               groups="base.group_system">
+                            <field name="doku_request_data" readonly="1"
+                                   widget="text"/>
+                            <field name="doku_response_data" readonly="1"
+                                   widget="text"/>
+                            <field name="doku_last_webhook_data" readonly="1"
+                                   widget="text"/>
+                        </group>
+
+                    </page>
+                </notebook>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ============================================== -->
+    <!-- Payment Transaction List View Extension       -->
+    <!-- ============================================== -->
+    <record id="payment_transaction_list_doku" model="ir.ui.view">
+        <field name="name">payment.transaction.list.doku</field>
+        <field name="model">payment.transaction</field>
+        <field name="inherit_id" ref="payment.payment_transaction_list"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='reference']" position="after">
+                <field name="doku_invoice_number"
+                       optional="hide"
+                       string="DOKU Invoice"/>
+                <field name="doku_payment_method"
+                       optional="show"
+                       string="DOKU Method"/>
+                <field name="doku_payment_channel"
+                       optional="hide"
+                       string="DOKU Channel"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

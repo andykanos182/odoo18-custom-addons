@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_purchase_mobile.LineCard">
+        <div class="pm-line-card">
+
+            <div class="pm-line-head">
+                <img class="pm-line-thumb"
+                     t-att-src="props.line.product.image_url"
+                     alt=""
+                     onerror="this.style.visibility='hidden'"/>
+
+                <div class="pm-line-head-body">
+                    <div class="pm-line-name-row">
+                        <div class="pm-line-name" t-esc="props.line.product.name"/>
+                        <button class="pm-line-remove"
+                                t-on-click="onRemoveClick"
+                                title="Hapus line">×</button>
+                    </div>
+                    <div t-if="props.line.product.default_code"
+                         class="pm-line-sku"
+                         t-esc="'SKU: ' + props.line.product.default_code"/>
+                    <div class="pm-line-expiry">
+                        <span t-att-class="'pm-badge ' + expiryBadge.cls"
+                              t-esc="expiryBadge.label"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pm-line-grid">
+
+                <!-- Qty (with stepper) -->
+                <div class="pm-line-cell">
+                    <div class="pm-line-cell-label">Qty</div>
+                    <QtyStepper value="props.line.productQty"
+                                onChange.bind="onQtyChange"
+                                step="1"
+                                min="0"
+                                precision="2"/>
+                </div>
+
+                <!-- UoM select.
+                     We rely solely on `selected` attribute on options;
+                     setting t-att-value on the <select> caused inconsistent
+                     behavior across browsers (some accepted, some ignored
+                     because the option DOM nodes weren't ready yet). -->
+                <div class="pm-line-cell">
+                    <div class="pm-line-cell-label">UoM</div>
+                    <select class="pm-line-select"
+                            t-on-change="onUomChange">
+                        <option t-foreach="uomOptions"
+                                t-as="uom"
+                                t-key="uom.id"
+                                t-att-value="uom.id"
+                                t-att-selected="uom.id === currentUomId ? 'selected' : null"
+                                t-esc="uom.name"/>
+                    </select>
+                </div>
+
+                <!-- Packaging select (only if product has packagings) -->
+                <div class="pm-line-cell">
+                    <div class="pm-line-cell-label">Packaging</div>
+                    <select t-if="packagingOptions.length"
+                            class="pm-line-select"
+                            t-on-change="onPackagingChange">
+                        <option value=""
+                                t-att-selected="!currentPackagingId ? 'selected' : null">— tidak ada —</option>
+                        <option t-foreach="packagingOptions"
+                                t-as="pkg"
+                                t-key="pkg.id"
+                                t-att-value="pkg.id"
+                                t-att-selected="pkg.id === currentPackagingId ? 'selected' : null"
+                                t-esc="pkg.name"/>
+                    </select>
+                    <div t-else="" class="pm-line-cell-value pm-line-cell-disabled">—</div>
+                </div>
+
+                <!-- Unit Price input -->
+                <div class="pm-line-cell">
+                    <div class="pm-line-cell-label">Unit Price</div>
+                    <div class="pm-line-price-input">
+                        <span class="pm-line-price-prefix"
+                              t-esc="props.currency.symbol || 'Rp'"/>
+                        <input type="text"
+                               inputmode="numeric"
+                               class="pm-line-price-val"
+                               t-att-value="formatPrice(props.line.priceUnit)"
+                               t-on-change="onPriceChange"/>
+                    </div>
+                </div>
+
+                <!-- Expiry date input (only if product requires expiry) -->
+                <div t-if="props.line.requiresExpiry" class="pm-line-cell pm-line-cell-wide">
+                    <div class="pm-line-cell-label">Tanggal Expired</div>
+                    <input type="date"
+                           class="pm-line-date-input"
+                           t-att-value="props.line.expectedExpiryDate or ''"
+                           t-on-change="onExpiryChange"/>
+                </div>
+
+                <!-- Subtotal (full width, emphasized) -->
+                <div class="pm-line-cell pm-line-cell-wide pm-line-subtotal-row">
+                    <div class="pm-line-cell-label">Subtotal</div>
+                    <div class="pm-line-subtotal"
+                         t-esc="formatMoney(props.line.priceSubtotal)"/>
+                </div>
+            </div>
+
+        </div>
+    </t>
+
+</templates>

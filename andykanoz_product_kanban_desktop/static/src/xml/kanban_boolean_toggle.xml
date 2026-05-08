@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="andykanoz_product_kanban_desktop.KanbanBooleanToggle">
+        <span t-att-class="'badge cursor-pointer user-select-none ' + (isActive ? 'text-bg-success' : 'text-bg-secondary')"
+              t-att-title="fieldLabel"
+              t-on-click.stop.prevent="onToggle"
+              style="font-size: 0.75em;">
+            <t t-esc="fieldLabel"/>
+        </span>
+    </t>
+</templates>

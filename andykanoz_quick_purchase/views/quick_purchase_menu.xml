@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add a menu item under Purchase -> Orders -> Quick Entry -->
+    <menuitem
+        id="menu_quick_purchase_root"
+        name="Quick Entry"
+        parent="purchase.menu_procurement_management"
+        action="action_quick_purchase"
+        sequence="5"
+        groups="purchase.group_purchase_user"/>
+</odoo>

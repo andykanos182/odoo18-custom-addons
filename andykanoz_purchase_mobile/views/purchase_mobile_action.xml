@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        ir.actions.act_url — clicking the menu navigates the browser to
+        /andykanoz_purchase_mobile/app as a full-page redirect (target=self),
+        leaving the Odoo webclient. This is the standalone-page pattern used
+        by POS and matches decision Q1 in HANDOFF_V1.md.
+    -->
+    <record id="action_purchase_mobile" model="ir.actions.act_url">
+        <field name="name">Purchase Mobile</field>
+        <field name="url">/andykanoz_purchase_mobile/app</field>
+        <field name="target">self</field>
+    </record>
+
+</odoo>

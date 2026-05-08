@@ -1,0 +1,51 @@
+.o_andykanoz_gemini_integration_auto_edit_systray {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0 8px;
+    color: white;
+
+    .o_andykanoz_gemini_integration_auto_edit_icon {
+        font-size: 18px;
+        margin-right: 4px;
+    }
+
+    .o_andykanoz_gemini_integration_auto_edit_badge {
+        background-color: #017e84;
+        color: white;
+        font-size: 11px;
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    &.o_state_done .o_andykanoz_gemini_integration_auto_edit_badge {
+        background-color: #28a745;
+    }
+    &.o_state_failed .o_andykanoz_gemini_integration_auto_edit_badge {
+        background-color: #dc3545;
+    }
+    &.o_state_cancelled .o_andykanoz_gemini_integration_auto_edit_badge {
+        background-color: #6c757d;
+    }
+}
+
+.o_andykanoz_gemini_integration_auto_edit_progress_dialog {
+    .progress {
+        height: 18px;
+    }
+    .o_progress_status {
+        margin-top: 6px;
+        font-size: 13px;
+    }
+    .o_current_product {
+        margin-top: 8px;
+        font-style: italic;
+        color: #6c757d;
+        word-break: break-word;
+    }
+    .o_summary_block {
+        margin-top: 8px;
+        font-weight: 600;
+    }
+}

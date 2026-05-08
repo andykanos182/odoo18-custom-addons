@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_purchase_mobile.VendorPicker">
+        <div class="pm-vendor-picker">
+
+            <!-- Chip mode: a vendor is already selected -->
+            <div t-if="state.selected" class="pm-vendor-chip">
+                <div class="pm-vendor-chip-body">
+                    <div class="pm-vendor-chip-name" t-esc="state.selected.name"/>
+                    <div t-if="state.selected.city"
+                         class="pm-vendor-chip-meta"
+                         t-esc="state.selected.city"/>
+                </div>
+                <button class="pm-vendor-chip-clear"
+                        t-on-click="onClearSelection"
+                        title="Clear selection">×</button>
+            </div>
+
+            <!-- Search mode: show input + dropdown -->
+            <div t-else="" class="pm-vendor-search">
+                <input type="text"
+                       class="pm-vendor-input"
+                       t-att-placeholder="props.placeholder"
+                       t-att-value="state.query"
+                       t-on-input="onInputChange"
+                       t-on-focus="onInputFocus"
+                       t-on-blur="onInputBlur"/>
+                <div t-if="state.showDropdown" class="pm-vendor-dropdown">
+                    <div t-if="state.isSearching"
+                         class="pm-vendor-dropdown-hint">Searching...</div>
+                    <div t-elif="!state.results.length"
+                         class="pm-vendor-dropdown-hint">No vendors found</div>
+                    <div t-else=""
+                         class="pm-vendor-dropdown-list">
+                        <div t-foreach="state.results"
+                             t-as="vendor"
+                             t-key="vendor.id"
+                             class="pm-vendor-option"
+                             t-on-mousedown="() => this.onVendorMousedown(vendor)">
+                            <div class="pm-vendor-option-name" t-esc="vendor.name"/>
+                            <div t-if="vendor.city || vendor.email"
+                                 class="pm-vendor-option-meta">
+                                <span t-if="vendor.city" t-esc="vendor.city"/>
+                                <span t-if="vendor.city and vendor.email"> · </span>
+                                <span t-if="vendor.email" t-esc="vendor.email"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,799 @@
+// Purchase Mobile — main stylesheet.
+// All selectors are prefixed with `pm-` to avoid collisions with
+// Odoo's frontend CSS (which is loaded in the same bundle via the
+// ('include', 'web.assets_frontend') extension).
+
+.pm-app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f5f5f7;
+    color: #1a2332;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+
+    * { box-sizing: border-box; }
+
+    code {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 12px;
+        background: #f1efe8;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+}
+
+.pm-topbar {
+    background: #1a2332;
+    color: #fff;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+
+    .pm-title { flex: 1; font-size: 15px; }
+    .pm-phase {
+        font-size: 11px;
+        opacity: 0.65;
+        font-weight: 400;
+    }
+}
+
+.pm-content {
+    flex: 1;
+    padding: 24px 16px;
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.pm-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+    h2 {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0 0 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    p {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #555;
+        margin: 0;
+    }
+    .pm-desc {
+        margin-bottom: 14px;
+        font-size: 13px;
+    }
+}
+
+.pm-meta-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    &:last-child { border-bottom: none; }
+}
+.pm-meta-label { color: #888; }
+.pm-meta-value { font-weight: 500; }
+
+.pm-badge {
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+
+    &.pm-badge-ok     { background: #E1F5EE; color: #0F6E56; }
+    &.pm-badge-err    { background: #FCEBEB; color: #A32D2D; }
+    &.pm-badge-idle   { background: #F1EFE8; color: #5F5E5A; }
+    &.pm-badge-run    { background: #FAEEDA; color: #854F0B; }
+    &.pm-badge-mobile { background: #EEEDFE; color: #3C3489; }
+}
+
+.pm-btn {
+    background: #1a2332;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+
+    &:hover  { background: #2a3548; }
+    &:active { transform: scale(0.97); }
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &.pm-btn-ghost {
+        background: transparent;
+        color: #1a2332;
+        border: 1px solid #ddd;
+        &:hover { background: #f5f5f7; }
+    }
+}
+
+.pm-result {
+    background: #1a2332;
+    color: #a6e3a1;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    max-height: 240px;
+    overflow-y: auto;
+    margin: 0;
+
+    &.error { color: #f38ba8; }
+}
+
+.pm-demo-output {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed #ddd;
+}
+.pm-demo-output-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.pm-footer {
+    text-align: center;
+    padding: 20px 16px;
+    color: #999;
+    font-size: 12px;
+
+    strong {
+        color: #555;
+        font-weight: 500;
+    }
+}
+
+// ======================================================================
+// VendorPicker
+// ======================================================================
+
+.pm-vendor-picker {
+    position: relative;
+}
+
+.pm-vendor-search {
+    position: relative;
+}
+
+.pm-vendor-input {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    transition: border-color 0.15s;
+
+    &:focus {
+        outline: none;
+        border-color: #1a2332;
+    }
+}
+
+.pm-vendor-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 50;
+}
+
+.pm-vendor-dropdown-hint {
+    padding: 14px;
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+}
+
+.pm-vendor-option {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f3f3;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: #f5f5f7; }
+}
+
+.pm-vendor-option-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a2332;
+}
+
+.pm-vendor-option-meta {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+}
+
+.pm-vendor-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #EEEDFE;
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+.pm-vendor-chip-body { flex: 1; min-width: 0; }
+.pm-vendor-chip-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #3C3489;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.pm-vendor-chip-meta {
+    font-size: 12px;
+    color: #534AB7;
+    margin-top: 2px;
+}
+.pm-vendor-chip-clear {
+    border: none;
+    background: transparent;
+    color: #3C3489;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+
+    &:hover { background: rgba(60, 52, 137, 0.1); }
+}
+
+// ======================================================================
+// POList
+// ======================================================================
+
+.pm-po-list-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.pm-po-list-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a2332;
+}
+
+.pm-po-list-state {
+    text-align: center;
+    padding: 24px 16px;
+    font-size: 13px;
+    color: #888;
+    background: #f5f5f7;
+    border-radius: 8px;
+}
+.pm-po-list-error { color: #A32D2D; background: #FCEBEB; }
+.pm-po-list-state-title { font-weight: 500; margin-bottom: 4px; }
+.pm-po-list-state-msg { font-size: 12px; opacity: 0.8; }
+
+.pm-po-list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pm-po-item {
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.08s;
+
+    &:hover  { border-color: #ccc; }
+    &:active { transform: scale(0.99); }
+}
+
+.pm-po-item-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+.pm-po-item-subrow { margin-top: 6px; }
+
+.pm-po-item-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a2332;
+}
+.pm-po-item-total {
+    font-size: 14px;
+    font-weight: 500;
+    color: #0F6E56;
+    white-space: nowrap;
+}
+.pm-po-item-vendor {
+    flex: 1;
+    font-size: 13px;
+    color: #555;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.pm-po-item-meta {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #888;
+}
+
+// ======================================================================
+// PurchaseMobileApp — list view "New PO" button
+// ======================================================================
+
+.pm-new-po-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: #1a2332;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    margin-bottom: 16px;
+    transition: background 0.15s;
+
+    &:hover  { background: #2a3548; }
+    &:active { transform: scale(0.99); }
+}
+
+// ======================================================================
+// POEditor
+// ======================================================================
+
+.pm-editor {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #f5f5f7;
+}
+
+.pm-editor-header {
+    background: #1a2332;
+    color: #fff;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.pm-editor-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+
+    &:hover  { background: rgba(255, 255, 255, 0.2); }
+    &:active { transform: scale(0.97); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    &.pm-editor-btn-back {
+        font-size: 22px;
+        line-height: 1;
+        padding: 6px 12px;
+        background: transparent;
+    }
+    &.pm-editor-btn-save {
+        background: #0F6E56;
+        &:hover { background: #15896D; }
+    }
+}
+
+.pm-editor-title {
+    flex: 1;
+    min-width: 0;
+}
+.pm-editor-ref {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+.pm-editor-state {
+    font-size: 11px;
+    opacity: 0.65;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.pm-editor-body {
+    flex: 1;
+    padding: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.pm-editor-section {
+    margin-bottom: 18px;
+}
+
+.pm-editor-section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+.pm-editor-section-count {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+}
+
+.pm-editor-empty {
+    background: #fff;
+    border: 1px dashed #ddd;
+    border-radius: 10px;
+    padding: 28px 16px;
+    text-align: center;
+}
+.pm-editor-empty-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 4px;
+}
+.pm-editor-empty-msg {
+    font-size: 12px;
+    color: #999;
+}
+
+.pm-editor-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.pm-editor-add-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: #fff;
+    border: 1px dashed #c8c8c8;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #555;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+
+    &:hover  { border-color: #888; color: #1a2332; }
+    &:active { transform: scale(0.99); }
+}
+
+.pm-editor-state-box {
+    margin: 24px 16px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+
+    &.pm-editor-state-error {
+        background: #FCEBEB;
+        color: #A32D2D;
+    }
+}
+.pm-editor-state-title { font-weight: 500; margin-bottom: 4px; }
+.pm-editor-state-msg   { font-size: 12px; opacity: 0.8; }
+
+.pm-editor-footer {
+    background: #1a2332;
+    color: #fff;
+    padding: 12px 16px;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+}
+.pm-editor-footer-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    opacity: 0.75;
+    &.pm-editor-footer-total {
+        font-size: 15px;
+        font-weight: 500;
+        opacity: 1;
+        margin-top: 4px;
+    }
+}
+
+// Readonly vendor chip variant
+.pm-vendor-chip-readonly {
+    background: #F1EFE8;
+    .pm-vendor-chip-name { color: #444; }
+    .pm-vendor-chip-meta { color: #888; font-size: 11px; }
+}
+
+// ======================================================================
+// LineCard
+// ======================================================================
+
+.pm-line-card {
+    background: #fff;
+    border: 0.5px solid #eaeaea;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.pm-line-head {
+    display: flex;
+    gap: 10px;
+}
+
+.pm-line-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    background: #f1efe8;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.pm-line-head-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.pm-line-name-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.pm-line-name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: #1a2332;
+    overflow-wrap: break-word;
+}
+
+.pm-line-remove {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    color: #bbb;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+
+    &:hover  { background: #FCEBEB; color: #A32D2D; }
+    &:active { transform: scale(0.95); }
+}
+
+.pm-line-sku {
+    font-size: 11px;
+    color: #999;
+    margin-top: 2px;
+}
+
+.pm-line-expiry {
+    margin-top: 6px;
+}
+
+.pm-line-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 0.5px dashed #e0e0e0;
+}
+
+.pm-line-cell {
+    min-width: 0;
+}
+.pm-line-cell-label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+    font-weight: 500;
+}
+.pm-line-cell-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1a2332;
+    overflow-wrap: break-word;
+}
+.pm-line-subtotal {
+    color: #0F6E56;
+}
+
+// ======================================================================
+// Modal (ProductPicker + future modals)
+// ======================================================================
+
+.pm-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 35, 50, 0.55);
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    @media (min-width: 600px) {
+        align-items: center;
+    }
+}
+
+.pm-modal {
+    background: #fff;
+    width: 100%;
+    max-width: 480px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+
+    @media (min-width: 600px) {
+        border-radius: 16px;
+        margin: 16px;
+    }
+}
+
+.pm-modal-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 0.5px solid #eee;
+}
+.pm-modal-title {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a2332;
+}
+.pm-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    color: #888;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 6px;
+
+    &:hover { background: #f5f5f7; color: #1a2332; }
+}
+
+.pm-modal-search {
+    padding: 10px 14px;
+    border-bottom: 0.5px solid #eee;
+}
+.pm-modal-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+
+    &:focus { outline: none; border-color: #1a2332; }
+}
+
+.pm-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 200px;
+}
+.pm-modal-state {
+    padding: 32px 16px;
+    text-align: center;
+    color: #888;
+    font-size: 13px;
+    &.pm-modal-state-err { color: #A32D2D; }
+}
+
+.pm-product-list {
+    display: flex;
+    flex-direction: column;
+}
+.pm-product-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 0.5px solid #f3f3f3;
+    cursor: pointer;
+
+    &:hover  { background: #f7f7f9; }
+    &:active { background: #eeeef1; }
+    &:last-child { border-bottom: none; }
+}
+.pm-product-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    background: #f1efe8;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.pm-product-info {
+    flex: 1;
+    min-width: 0;
+}
+.pm-product-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1a2332;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.pm-product-sku {
+    font-size: 11px;
+    color: #999;
+    margin-top: 2px;
+}
+.pm-product-price {
+    font-size: 13px;
+    font-weight: 500;
+    color: #0F6E56;
+    white-space: nowrap;
+}

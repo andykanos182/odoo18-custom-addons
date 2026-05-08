@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- HALAMAN CHECKOUT: /shop/address                               -->
+    <!-- ============================================================ -->
+    <template id="extend_website_sale_address_form" 
+              name="Extend Website Sale Address Form with GMaps"
+              inherit_id="website_sale.address">
+        
+        <xpath expr="//div[@id='div_phone']" position="after">
+            <div id="div_gmaps_link" class="col-lg-12 mb-2">
+                <label for="gmaps_link" class="col-form-label">Link Google Maps</label>
+                <input type="text"
+                        id="gmaps_link"
+                        name="gmaps_link"
+                        class="form-control"
+                        t-att-value="partner_sudo.gmaps_link or ''"
+                        placeholder="Tempelkan link Google Maps anda di sini"/>
+            </div>
+
+            <t t-if="google_maps_api_key">
+                <div id="div_andyka_map" class="col-lg-12 mb-2">
+                    <label class="col-form-label fw-bold">
+                        <i class="fa fa-map-marker text-danger me-1"/>
+                        Pilih Lokasi di Peta
+                    </label>
+
+                    <div id="andyka_gmap"
+                         style="width:100%; height:350px; border:1px solid #ced4da; border-radius:0.375rem; background:#e9ecef;"
+                         t-att-data-lat="partner_sudo.partner_latitude or 0"
+                         t-att-data-lng="partner_sudo.partner_longitude or 0"
+                         t-att-data-gmaps-link="partner_sudo.gmaps_link or ''">
+                    </div>
+
+                    <div id="andyka_map_info" class="mt-2" style="display:none;">
+                        <small class="text-muted">
+                            <i class="fa fa-check-circle text-success me-1"/>
+                            Koordinat: <span id="andyka_map_coords" class="font-monospace fw-bold"/>
+                        </small>
+                        <br/>
+                        <small class="text-muted">
+                            Alamat: <span id="andyka_map_address" class="fw-bold"/>
+                        </small>
+                    </div>
+
+                    <small class="form-text text-muted">
+                        Klik pada peta untuk memilih lokasi. Field alamat akan terisi otomatis.
+                    </small>
+
+                    <div class="mt-2">
+                        <button type="button" id="andyka_btn_my_location" class="btn btn-sm btn-outline-primary">
+                            <i class="fa fa-crosshairs me-1"/>Lokasi Saya
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="partner_latitude" id="andyka_input_lat"
+                           t-att-value="partner_sudo.partner_latitude or ''"/>
+                    <input type="hidden" name="partner_longitude" id="andyka_input_lng"
+                           t-att-value="partner_sudo.partner_longitude or ''"/>
+
+                    <script t-attf-src="https://maps.googleapis.com/maps/api/js?key=#{google_maps_api_key}&amp;libraries=places&amp;callback=andykaInitMap"
+                            async="" defer=""/>
+
+                    <script>
+                        function andykaInitMap() {
+                            var mapEl = document.getElementById('andyka_gmap');
+                            if (!mapEl) return;
+
+                            var DEFAULT_LAT = -8.6705, DEFAULT_LNG = 115.2126;
+                            var initLat = parseFloat(mapEl.dataset.lat) || 0;
+                            var initLng = parseFloat(mapEl.dataset.lng) || 0;
+                            var gmapsLink = mapEl.dataset.gmapsLink || '';
+
+                            if ((initLat === 0 || initLng === 0) &amp;&amp; gmapsLink) {
+                                var m = gmapsLink.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+                                if (!m) m = gmapsLink.match(/[?&amp;]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+                                if (m) { initLat = parseFloat(m[1]); initLng = parseFloat(m[2]); }
+                            }
+                            if (initLat === 0 &amp;&amp; initLng === 0) { initLat = DEFAULT_LAT; initLng = DEFAULT_LNG; }
+
+                            var center = { lat: initLat, lng: initLng };
+                            var map = new google.maps.Map(mapEl, {
+                                center: center, zoom: 15,
+                                mapTypeControl: false, streetViewControl: false
+                            });
+                            var marker = new google.maps.Marker({
+                                position: center, map: map, draggable: true,
+                                title: 'Seret untuk memilih lokasi'
+                            });
+                            var geocoder = new google.maps.Geocoder();
+
+                            if (initLat !== DEFAULT_LAT || initLng !== DEFAULT_LNG) {
+                                updateCoords(initLat, initLng);
+                            }
+
+                            map.addListener('click', function (e) {
+                                marker.setPosition(e.latLng);
+                                handlePosition(e.latLng.lat(), e.latLng.lng());
+                            });
+                            marker.addListener('dragend', function (e) {
+                                handlePosition(e.latLng.lat(), e.latLng.lng());
+                            });
+
+                            var btn = document.getElementById('andyka_btn_my_location');
+                            if (btn) {
+                                btn.addEventListener('click', function () {
+                                    if (!navigator.geolocation) { alert('Browser tidak mendukung geolokasi.'); return; }
+                                    btn.disabled = true;
+                                    btn.innerHTML = '&lt;i class="fa fa-spinner fa-spin me-1"&gt;&lt;/i&gt;Mendeteksi...';
+                                    navigator.geolocation.getCurrentPosition(
+                                        function (pos) {
+                                            var lat = pos.coords.latitude, lng = pos.coords.longitude;
+                                            var ll = new google.maps.LatLng(lat, lng);
+                                            map.setCenter(ll); map.setZoom(17); marker.setPosition(ll);
+                                            handlePosition(lat, lng);
+                                            btn.disabled = false;
+                                            btn.innerHTML = '&lt;i class="fa fa-crosshairs me-1"&gt;&lt;/i&gt;Lokasi Saya';
+                                        },
+                                        function (err) {
+                                            var msg = 'Tidak dapat mendeteksi lokasi.';
+                                            if (err.code === 1) msg = 'Akses lokasi ditolak oleh browser.';
+                                            alert(msg); btn.disabled = false;
+                                            btn.innerHTML = '&lt;i class="fa fa-crosshairs me-1"&gt;&lt;/i&gt;Lokasi Saya';
+                                        },
+                                        { enableHighAccuracy: true, timeout: 10000 }
+                                    );
+                                });
+                            }
+
+                            var gmapsInput = document.getElementById('gmaps_link');
+                            if (gmapsInput) {
+                                gmapsInput.addEventListener('change', function () {
+                                    var m2 = gmapsInput.value.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+                                    if (!m2) m2 = gmapsInput.value.match(/[?&amp;]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+                                    if (m2) {
+                                        var lt = parseFloat(m2[1]), ln = parseFloat(m2[2]);
+                                        var ll = new google.maps.LatLng(lt, ln);
+                                        map.setCenter(ll); map.setZoom(15); marker.setPosition(ll);
+                                        handlePosition(lt, ln);
+                                    }
+                                });
+                            }
+
+                            function handlePosition(lat, lng) {
+                                updateCoords(lat, lng);
+                                updateInputs(lat, lng);
+                                reverseGeocode(lat, lng);
+                            }
+
+                            function reverseGeocode(lat, lng) {
+                                geocoder.geocode({ location: { lat: lat, lng: lng } }, function (results, status) {
+                                    if (status === 'OK' &amp;&amp; results[0]) {
+                                        var r = results[0];
+                                        var addrEl = document.getElementById('andyka_map_address');
+                                        if (addrEl) addrEl.textContent = r.formatted_address;
+                                        fillAddressFields(r.address_components);
+                                    }
+                                });
+                            }
+
+                            function fillAddressFields(components) {
+                                var get = function(type) {
+                                    for (var i = 0; i &lt; components.length; i++) {
+                                        if (components[i].types.indexOf(type) !== -1) return components[i].long_name;
+                                    }
+                                    return '';
+                                };
+                                var streetNum = get('street_number');
+                                var route = get('route');
+                                var street = [route, streetNum].filter(Boolean).join(' ');
+                                var sublocality = get('sublocality_level_1') || get('sublocality') || '';
+                                var city = get('locality') || get('administrative_area_level_2') || '';
+                                var zip = get('postal_code') || '';
+                                var stateName = get('administrative_area_level_1') || '';
+                                var countryName = get('country') || '';
+
+                                setField('street', street || sublocality);
+                                setField('street2', sublocality &amp;&amp; street ? sublocality : '');
+                                setField('city', city);
+                                setField('zip', zip);
+                                setField('zipcode', zip);
+                                setSelectByText('state_id', stateName);
+                                setSelectByText('country_id', countryName);
+                            }
+
+                            function setField(name, value) {
+                                var el = document.querySelector('input[name="' + name + '"], textarea[name="' + name + '"]');
+                                if (el &amp;&amp; value) { el.value = value; el.dispatchEvent(new Event('change', {bubbles: true})); }
+                            }
+
+                            function setSelectByText(name, text) {
+                                if (!text) return;
+                                var sel = document.querySelector('select[name="' + name + '"]');
+                                if (!sel) return;
+                                for (var i = 0; i &lt; sel.options.length; i++) {
+                                    if (sel.options[i].text.toLowerCase().indexOf(text.toLowerCase()) !== -1) {
+                                        sel.value = sel.options[i].value;
+                                        sel.dispatchEvent(new Event('change', {bubbles: true}));
+                                        break;
+                                    }
+                                }
+                            }
+
+                            function updateCoords(lat, lng) {
+                                var el = document.getElementById('andyka_map_info');
+                                var co = document.getElementById('andyka_map_coords');
+                                if (el) el.style.display = 'block';
+                                if (co) co.textContent = lat.toFixed(6) + ', ' + lng.toFixed(6);
+                            }
+
+                            function updateInputs(lat, lng) {
+                                var a = document.getElementById('andyka_input_lat');
+                                var b = document.getElementById('andyka_input_lng');
+                                if (a) a.value = lat; if (b) b.value = lng;
+                            }
+                        }
+                    </script>
+                </div>
+            </t>
+        </xpath>
+        
+    </template>
+
+    <!-- ============================================================ -->
+    <!-- HALAMAN "My Account" — Peta Google Maps                      -->
+    <!-- ============================================================ -->
+    <template id="extend_my_account_page" 
+              name="Extend Portal My Account with Map"
+              inherit_id="portal.portal_my_details_fields">
+        <xpath expr="//input[@name='phone']/ancestor::div[1]" position="after">
+
+            <t t-if="google_maps_api_key">
+                <div class="mb-3 col-xl-12">
+                    <label class="col-form-label fw-bold">
+                        <i class="fa fa-map-marker text-danger me-1"/>
+                        Pilih Lokasi di Peta
+                    </label>
+
+                    <div id="andyka_gmap"
+                         style="width:100%; height:350px; border:1px solid #ced4da; border-radius:0.375rem; background:#e9ecef;"
+                         t-att-data-lat="partner.partner_latitude or 0"
+                         t-att-data-lng="partner.partner_longitude or 0">
+                    </div>
+
+                    <div id="andyka_map_info" class="mt-2" style="display:none;">
+                        <small class="text-muted">
+                            <i class="fa fa-check-circle text-success me-1"/>
+                            Koordinat: <span id="andyka_map_coords" class="font-monospace fw-bold"/>
+                        </small>
+                        <br/>
+                        <small class="text-muted">
+                            Alamat: <span id="andyka_map_address" class="fw-bold"/>
+                        </small>
+                    </div>
+
+                    <small class="form-text text-muted">
+                        Klik pada peta untuk memilih lokasi. Field alamat akan terisi otomatis.
+                    </small>
+
+                    <div class="mt-2">
+                        <button type="button" id="andyka_btn_my_location" class="btn btn-sm btn-outline-primary">
+                            <i class="fa fa-crosshairs me-1"/>Lokasi Saya
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="partner_latitude" id="andyka_input_lat"
+                           t-att-value="partner.partner_latitude or ''"/>
+                    <input type="hidden" name="partner_longitude" id="andyka_input_lng"
+                           t-att-value="partner.partner_longitude or ''"/>
+
+                    <script t-attf-src="https://maps.googleapis.com/maps/api/js?key=#{google_maps_api_key}&amp;libraries=places&amp;callback=andykaInitMap"
+                            async="" defer=""/>
+
+                    <script>
+                        function andykaInitMap() {
+                            var mapEl = document.getElementById('andyka_gmap');
+                            if (!mapEl) return;
+
+                            var DEFAULT_LAT = -8.6705, DEFAULT_LNG = 115.2126;
+                            var initLat = parseFloat(mapEl.dataset.lat) || 0;
+                            var initLng = parseFloat(mapEl.dataset.lng) || 0;
+
+                            if (initLat === 0 &amp;&amp; initLng === 0) { initLat = DEFAULT_LAT; initLng = DEFAULT_LNG; }
+
+                            var center = { lat: initLat, lng: initLng };
+                            var map = new google.maps.Map(mapEl, {
+                                center: center, zoom: 15,
+                                mapTypeControl: false, streetViewControl: false
+                            });
+                            var marker = new google.maps.Marker({
+                                position: center, map: map, draggable: true,
+                                title: 'Seret untuk memilih lokasi'
+                            });
+                            var geocoder = new google.maps.Geocoder();
+
+                            if (initLat !== DEFAULT_LAT || initLng !== DEFAULT_LNG) {
+                                updateCoords(initLat, initLng);
+                            }
+
+                            map.addListener('click', function (e) {
+                                marker.setPosition(e.latLng);
+                                handlePosition(e.latLng.lat(), e.latLng.lng());
+                            });
+                            marker.addListener('dragend', function (e) {
+                                handlePosition(e.latLng.lat(), e.latLng.lng());
+                            });
+
+                            var btn = document.getElementById('andyka_btn_my_location');
+                            if (btn) {
+                                btn.addEventListener('click', function () {
+                                    if (!navigator.geolocation) { alert('Browser tidak mendukung geolokasi.'); return; }
+                                    btn.disabled = true;
+                                    btn.innerHTML = '&lt;i class="fa fa-spinner fa-spin me-1"&gt;&lt;/i&gt;Mendeteksi...';
+                                    navigator.geolocation.getCurrentPosition(
+                                        function (pos) {
+                                            var lat = pos.coords.latitude, lng = pos.coords.longitude;
+                                            var ll = new google.maps.LatLng(lat, lng);
+                                            map.setCenter(ll); map.setZoom(17); marker.setPosition(ll);
+                                            handlePosition(lat, lng);
+                                            btn.disabled = false;
+                                            btn.innerHTML = '&lt;i class="fa fa-crosshairs me-1"&gt;&lt;/i&gt;Lokasi Saya';
+                                        },
+                                        function (err) {
+                                            var msg = 'Tidak dapat mendeteksi lokasi.';
+                                            if (err.code === 1) msg = 'Akses lokasi ditolak oleh browser.';
+                                            alert(msg); btn.disabled = false;
+                                            btn.innerHTML = '&lt;i class="fa fa-crosshairs me-1"&gt;&lt;/i&gt;Lokasi Saya';
+                                        },
+                                        { enableHighAccuracy: true, timeout: 10000 }
+                                    );
+                                });
+                            }
+
+                            function handlePosition(lat, lng) {
+                                updateCoords(lat, lng);
+                                updateInputs(lat, lng);
+                                reverseGeocode(lat, lng);
+                            }
+
+                            function reverseGeocode(lat, lng) {
+                                geocoder.geocode({ location: { lat: lat, lng: lng } }, function (results, status) {
+                                    if (status === 'OK' &amp;&amp; results[0]) {
+                                        var r = results[0];
+                                        var addrEl = document.getElementById('andyka_map_address');
+                                        if (addrEl) addrEl.textContent = r.formatted_address;
+                                        fillAddressFields(r.address_components);
+                                    }
+                                });
+                            }
+
+                            function fillAddressFields(components) {
+                                var get = function(type) {
+                                    for (var i = 0; i &lt; components.length; i++) {
+                                        if (components[i].types.indexOf(type) !== -1) return components[i].long_name;
+                                    }
+                                    return '';
+                                };
+                                var streetNum = get('street_number');
+                                var route = get('route');
+                                var street = [route, streetNum].filter(Boolean).join(' ');
+                                var sublocality = get('sublocality_level_1') || get('sublocality') || '';
+                                var city = get('locality') || get('administrative_area_level_2') || '';
+                                var zip = get('postal_code') || '';
+                                var stateName = get('administrative_area_level_1') || '';
+                                var countryName = get('country') || '';
+
+                                setField('street', street || sublocality);
+                                setField('street2', sublocality &amp;&amp; street ? sublocality : '');
+                                setField('city', city);
+                                setField('zip', zip);
+                                setField('zipcode', zip);
+                                setSelectByText('state_id', stateName);
+                                setSelectByText('country_id', countryName);
+                            }
+
+                            function setField(name, value) {
+                                var el = document.querySelector('input[name="' + name + '"], textarea[name="' + name + '"]');
+                                if (el &amp;&amp; value) { el.value = value; el.dispatchEvent(new Event('change', {bubbles: true})); }
+                            }
+
+                            function setSelectByText(name, text) {
+                                if (!text) return;
+                                var sel = document.querySelector('select[name="' + name + '"]');
+                                if (!sel) return;
+                                for (var i = 0; i &lt; sel.options.length; i++) {
+                                    if (sel.options[i].text.toLowerCase().indexOf(text.toLowerCase()) !== -1) {
+                                        sel.value = sel.options[i].value;
+                                        sel.dispatchEvent(new Event('change', {bubbles: true}));
+                                        break;
+                                    }
+                                }
+                            }
+
+                            function updateCoords(lat, lng) {
+                                var el = document.getElementById('andyka_map_info');
+                                var co = document.getElementById('andyka_map_coords');
+                                if (el) el.style.display = 'block';
+                                if (co) co.textContent = lat.toFixed(6) + ', ' + lng.toFixed(6);
+                            }
+
+                            function updateInputs(lat, lng) {
+                                var a = document.getElementById('andyka_input_lat');
+                                var b = document.getElementById('andyka_input_lng');
+                                if (a) a.value = lat; if (b) b.value = lng;
+                            }
+                        }
+                    </script>
+                </div>
+            </t>
+
+        </xpath>
+    </template>
+    
+</odoo>

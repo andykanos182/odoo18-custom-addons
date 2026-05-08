@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_product_desktop_kanban" model="ir.actions.act_window">
+        <field name="name">Product Desktop Kanban</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="limit">54</field>
+        <field name="view_id" ref="andykanoz_product_kanban_desktop.product_template_kanban_view_desktop"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new product
+            </p>
+        </field>
+    </record>
+
+    <record id="action_product_product_desktop_kanban" model="ir.actions.act_window">
+        <field name="name">Product Variant Desktop Kanban</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="limit">54</field>
+        <field name="view_id" ref="andykanoz_product_kanban_desktop.product_product_kanban_view_desktop"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new product variant
+            </p>
+        </field>
+    </record>
+</odoo>

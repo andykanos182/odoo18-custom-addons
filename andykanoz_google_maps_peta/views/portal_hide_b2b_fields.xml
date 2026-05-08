@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Kustomisasi portal /my/account untuk B2C -->
+    <template id="hide_b2b_fields_portal"
+              name="Hide B2B Fields in Portal My Details"
+              inherit_id="portal.portal_my_details_fields">
+
+        <!-- Sembunyikan Company Name -->
+        <xpath expr="//input[@name='company_name']/ancestor::div[1]" position="attributes">
+            <attribute name="style">display:none;</attribute>
+        </xpath>
+
+        <!-- Sembunyikan VAT Number -->
+        <xpath expr="//input[@name='vat']/ancestor::div[1]" position="attributes">
+            <attribute name="style">display:none;</attribute>
+        </xpath>
+
+        <!-- Ganti label Phone menjadi Phone / WhatsApp -->
+        <xpath expr="//label[@for='phone']" position="replace">
+            <label class="col-form-label" for="phone">Phone / WhatsApp</label>
+        </xpath>
+
+    </template>
+</odoo>

@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_batch_edit_job_user,batch.edit.job.user,model_andykanoz_batch_edit_job,base.group_user,1,1,1,0
+access_batch_edit_job_manager,batch.edit.job.manager,model_andykanoz_batch_edit_job,base.group_system,1,1,1,1
+access_batch_edit_job_line_user,batch.edit.job.line.user,model_andykanoz_batch_edit_job_line,base.group_user,1,1,1,0
+access_batch_edit_job_line_manager,batch.edit.job.line.manager,model_andykanoz_batch_edit_job_line,base.group_system,1,1,1,1
+access_batch_edit_wizard,batch.edit.wizard,model_andykanoz_batch_edit_wizard,base.group_user,1,1,1,1

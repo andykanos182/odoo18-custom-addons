@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!--
+        Custom sequence for Purchase Orders created via the Purchase Mobile app.
+        Generates names like MP00001, MP00002, ... so they are visually
+        distinguishable from standard POs (which use prefix `P`).
+
+        Usage (from controller, later phases):
+            name = request.env['ir.sequence'].next_by_code(
+                'andykanoz.purchase.mobile'
+            ) or '/'
+            po = request.env['purchase.order'].create({'name': name, ...})
+    -->
+    <record id="seq_andykanoz_purchase_mobile" model="ir.sequence">
+        <field name="name">Purchase Mobile Order</field>
+        <field name="code">andykanoz.purchase.mobile</field>
+        <field name="prefix">MP</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+</odoo>

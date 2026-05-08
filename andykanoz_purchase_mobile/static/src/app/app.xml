@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_purchase_mobile.App">
+        <div class="o_apm_app">
+
+            <nav class="o_apm_tabs">
+                <button t-on-click="() => this.showView('list')"
+                        t-att-class="{ 'o_apm_tab_active': state.view === 'list' }">
+                    Purchase Orders
+                </button>
+                <button t-on-click="() => this.showView('vendor_demo')"
+                        t-att-class="{ 'o_apm_tab_active': state.view === 'vendor_demo' }">
+                    Vendor Picker
+                </button>
+            </nav>
+
+            <main class="o_apm_content">
+                <POList t-if="state.view === 'list'"/>
+
+                <div t-if="state.view === 'vendor_demo'" class="o_apm_demo_wrap">
+                    <p class="o_apm_demo_hint">
+                        Demo autocomplete vendor (Phase 3). Komponen ini akan
+                        dipakai di POEditor pada Phase 4. Pola mousedown
+                        dipakai supaya select item tidak terhalang blur input.
+                    </p>
+                    <VendorPicker onSelect="(v) => this.onDemoVendorSelected(v)"/>
+
+                    <div t-if="state.demoSelectedVendor" class="o_apm_demo_output">
+                        <h4>Selected vendor (raw)</h4>
+                        <pre t-esc="demoSelectedVendorJson"/>
+                    </div>
+                </div>
+            </main>
+
+        </div>
+    </t>
+
+</templates>

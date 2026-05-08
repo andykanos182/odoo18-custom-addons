@@ -1,0 +1,641 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_quick_purchase.QuickPurchase">
+        <div class="o_quick_purchase">
+
+            <!-- ============ SESSION BAR ============ -->
+            <div class="o_qp_session_bar">
+                <div class="o_qp_session_tabs">
+                    <t t-foreach="state.sessions" t-as="sess" t-key="sess.id">
+                        <div class="o_qp_session_tab" t-att-class="{ 'o_qp_session_active': sess.id === state.activeSessionId }" t-on-click="() => this.switchSession(sess.id)">
+                            <div class="o_qp_session_tab_content">
+                                <t t-if="state.editingSessionName === sess.id">
+                                    <input type="text" class="o_qp_session_name_input" t-att-value="state.editingSessionNameValue" t-on-input="onSessionNameInput" t-on-keydown="onSessionNameKeydown" t-on-blur="saveSessionName" t-on-click.stop="" autofocus="autofocus"/>
+                                </t>
+                                <t t-else="">
+                                    <span class="o_qp_session_tab_name" t-on-dblclick.stop="() => this.startEditSessionName(sess.id)">
+                                        <t t-esc="sess.name"/>
+                                    </span>
+                                </t>
+                                <span class="o_qp_session_tab_badge" t-if="(sess.lines || []).length > 0">
+                                    <t t-esc="(sess.lines || []).length"/>
+                                </span>
+                            </div>
+                            <button class="o_qp_session_tab_close" t-on-click.stop="() => this.deleteSession(sess.id)" title="Delete draft">
+                                <i class="fa fa-times"/>
+                            </button>
+                        </div>
+                    </t>
+                    <button class="o_qp_session_add_btn" t-on-click="createNewSession" title="New draft session">
+                        <i class="fa fa-plus"/>
+                    </button>
+                </div>
+                <div class="o_qp_session_info" t-if="state.activeSessionId">
+                    <span class="o_qp_session_summary">
+                        <t t-set="activeSession" t-value="state.sessions.find(s => s.id === state.activeSessionId)"/>
+                        <t t-if="activeSession">
+                            <t t-esc="getSessionSummary(activeSession)"/>
+                        </t>
+                    </span>
+                </div>
+            </div>
+
+            <t t-if="state.sessions.length > 0">
+                <!-- ============ HEADER: vendor selection ============ -->
+                <div class="o_qp_header">
+                    <div class="o_qp_vendor_row">
+                        <label class="o_qp_vendor_label">Vendor:</label>
+                        <div class="o_qp_vendor_field">
+                            <div t-if="state.lines.length > 0" class="o_qp_vendor_locked">
+                                <i class="fa fa-lock me-1"/>
+                                <strong>
+                                    <t t-esc="state.partnerName"/>
+                                </strong>
+                            </div>
+                            <div t-else="" class="o_qp_vendor_autocomplete">
+                                <input type="text" class="o_qp_vendor_input" placeholder="Name, TIN, Email, or Reference" t-att-value="state.vendorQuery" t-on-input="onVendorInput" t-on-focus="onVendorFocus" t-on-blur="onVendorBlur" t-on-keydown="onVendorKeydown" autocomplete="off"/>
+                                <div t-if="state.showVendorDropdown and state.vendorSuggestions.length > 0" class="o_qp_vendor_dropdown">
+                                    <div t-foreach="state.vendorSuggestions" t-as="v" t-key="v.id" class="o_qp_vendor_item" t-att-class="{ 'o_qp_active': v_index === state.vendorActiveSuggestion }" t-on-mousedown="() => this.selectVendor(v)">
+                                        <div class="o_qp_vendor_item_name">
+                                            <t t-esc="v.name"/>
+                                        </div>
+                                        <div t-if="v.ref" class="o_qp_vendor_item_ref">
+                                            Ref: <t t-esc="v.ref"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div t-elif="state.showVendorDropdown and state.vendorQuery.length > 0" class="o_qp_vendor_dropdown">
+                                    <div class="o_qp_vendor_no_result">No vendor found</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary o_qp_reset_btn" t-on-click="onReset">
+                            Reset
+                        </button>
+                    </div>
+                    <div t-if="state.lines.length > 0" class="o_qp_scan_hint mt-1">
+                        Vendor is locked while lines exist. Click Reset to change vendor.
+                    </div>
+                </div>
+
+                <!-- ============ SCAN BAR ============ -->
+                <div class="o_qp_scan_bar" t-if="state.partnerId">
+                    <div class="o_qp_scan_input_wrap">
+                        <input type="text" class="o_qp_scan_input" placeholder="Scan / type barcode, SKU, or name…" t-ref="scanInput" t-model="state.scanQuery" t-on-keydown="onScanKeydown" t-on-input="onScanInput"/>
+                        <button class="o_qp_camera_btn o_qp_camera_once_btn" t-on-click="openCameraOnce" title="Scan Once (Single Scan)">
+                            <i class="fa fa-camera"/>
+                            <span class="o_qp_btn_text ms-1">Once</span>
+                        </button>
+                        <button class="o_qp_camera_btn o_qp_camera_continuous_btn" t-on-click="openCameraContinuous" title="Scan Continuous (Multiple Scans)">
+                            <i class="fa fa-video-camera"/>
+                            <span class="o_qp_btn_text ms-1">Multi</span>
+                        </button>
+                    </div>
+                    <div class="o_qp_scan_hint">
+                        Scan again to add +1 quantity. Press Enter to search.
+                    </div>
+
+                    <div t-if="state.suggestions.length > 0 || state.showNoResult" class="o_qp_suggestions">
+                        <t t-if="state.suggestions.length > 0">
+                            <div t-foreach="state.suggestions" t-as="p" t-key="p.id" class="o_qp_suggestion_item" t-att-class="{ 'o_qp_active': p_index === state.activeSuggestion }" t-on-click="() => this.addProduct(p)">
+                                <div class="o_qp_sug_name">
+                                    <t t-esc="p.name"/>
+                                </div>
+                                <div class="o_qp_sug_meta">
+                                    <t t-if="p.default_code">[                                        <t t-esc="p.default_code"/>
+] </t>
+                                    <t t-if="p.barcode">•                                        <t t-esc="p.barcode"/>
+                                    </t>
+                                    • Last price: <t t-esc="formatMoney(p.price)"/>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-if="state.showNoResult">
+                            <div class="o_qp_no_result">
+                                No product found for "<t t-esc="state.lastSearched"/>
+"
+                            <br/>
+                            <button class="btn btn-primary btn-sm" t-on-click="openCreateModal">
+                                    + Quick Create Product
+                            </button>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- ============ EMPTY STATE ============ -->
+            <div t-if="!state.partnerId" class="o_qp_empty_state">
+                    Select a vendor above to start a Quick Purchase session.
+            </div>
+            <div t-elif="state.lines.length === 0" class="o_qp_empty_state">
+                    Scan or search a product above to add the first line.
+            </div>
+
+            <!-- ============ LINES HEADER: sort toggle ============ -->
+            <div t-if="state.lines.length > 0" class="o_qp_lines_header">
+                <button class="btn btn-sm o_qp_sort_btn" t-on-click="toggleSortOrder">
+                    <i t-att-class="state.sortOrder === 'newest_first' ? 'fa fa-sort-amount-desc' : 'fa fa-sort-amount-asc'"/>
+                    <span class="ms-1">
+                        <t t-if="state.sortOrder === 'newest_first'">Newest First</t>
+                        <t t-else="">Oldest First</t>
+                    </span>
+                </button>
+            </div>
+
+            <!-- ============ LINES TABLE (desktop) ============ -->
+            <table t-if="state.lines.length > 0" class="o_qp_lines_table o_qp_desktop_only">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Product</th>
+                        <th class="text-end" style="width: 8%;">Qty</th>
+                        <th style="width: 14%;">UoM</th>
+                        <th class="text-end" style="width: 8%;">Pkg Qty</th>
+                        <th style="width: 12%;">Packaging</th>
+                        <th class="text-end" style="width: 11%;">Unit Price</th>
+                        <th class="text-end" style="width: 10%;">Disc/Unit</th>
+                        <th class="text-end" style="width: 10%;">Subtotal</th>
+                        <th style="width: 2%;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="sortedLines()" t-as="line" t-key="line.product_id">
+                        <td>
+                            <div>
+                                <strong>
+                                    <t t-esc="line.name"/>
+                                </strong>
+                            </div>
+                            <div class="o_qp_sug_meta">
+                                <t t-if="line.default_code">[                                    <t t-esc="line.default_code"/>
+] </t>
+                                <t t-if="line.barcode">•                                    <t t-esc="line.barcode"/>
+                                </t>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="number" class="o_qp_num" step="1" min="0" t-att-value="line.qty" t-on-input="(ev) => this.updateLine(line.product_id, 'qty', ev.target.value)" t-on-focus="(ev) => ev.target.select()"/>
+                        </td>
+                        <td>
+                            <div class="o_qp_uom_cell">
+                                <select class="o_qp_uom_select" t-on-change="(ev) => this.updateLine(line.product_id, 'uom_id', ev.target.value)">
+                                    <t t-if="line.uom_options and line.uom_options.length > 0">
+                                        <t t-foreach="line.uom_options" t-as="u" t-key="u.id">
+                                            <option t-att-value="u.id" t-att-selected="line.uom_id === u.id ? 'selected' : null">
+                                                <t t-esc="u.name"/>
+                                            </option>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <option value="">— No UoM —</option>
+                                    </t>
+                                </select>
+                                <button class="o_qp_uom_add_btn" t-on-click="() => this.openUomPage(line.product_id)" title="Add new UoM (opens UoM page)">+</button>
+                                <button class="o_qp_uom_refresh_btn" t-on-click="() => this.refreshUomsForLine(line.product_id)" title="Refresh UoMs">
+                                    <i class="fa fa-refresh"/>
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="number" class="o_qp_num" step="1" min="0" t-att-value="line.packaging_qty" t-on-input="(ev) => this.updateLine(line.product_id, 'packaging_qty', ev.target.value)" t-on-focus="(ev) => ev.target.select()"/>
+                        </td>
+                        <td>
+                            <div class="o_qp_uom_cell">
+                                <select class="o_qp_uom_select" t-on-change="(ev) => this.updateLine(line.product_id, 'packaging_id', ev.target.value)">
+                                    <option value="">— No Packaging —</option>
+                                    <t t-if="line.packaging_options and line.packaging_options.length > 0">
+                                        <t t-foreach="line.packaging_options" t-as="p" t-key="p.id">
+                                            <option t-att-value="p.id" t-att-selected="line.packaging_id === p.id ? 'selected' : null">
+                                                <t t-esc="p.name"/>
+                                            </option>
+                                        </t>
+                                    </t>
+                                </select>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" class="o_qp_num o_qp_money" inputmode="decimal" t-att-value="formatMoney(line.price_unit)" t-on-focus="(ev) => this.onPriceFocus(ev, line, 'price_unit')" t-on-blur="(ev) => this.onPriceBlur(ev, line, 'price_unit')" t-on-keydown="onPriceKeydown"/>
+                        </td>
+                        <td>
+                            <input type="text" class="o_qp_num o_qp_money" inputmode="decimal" t-att-value="formatMoney(line.discount_amount)" t-on-focus="(ev) => this.onPriceFocus(ev, line, 'discount_amount')" t-on-blur="(ev) => this.onPriceBlur(ev, line, 'discount_amount')" t-on-keydown="onPriceKeydown"/>
+                        </td>
+                        <td class="o_qp_subtotal">
+                            <t t-esc="formatMoney(this.lineSubtotal(line), true)"/>
+                        </td>
+                        <td>
+                            <button class="o_qp_remove_btn" t-on-click="() => this.removeLine(line.product_id)" title="Remove">×</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ============ LINES CARDS (mobile) ============ -->
+            <div t-if="state.lines.length > 0" class="o_qp_lines_cards o_qp_mobile_only">
+                <div t-foreach="sortedLines()" t-as="line" t-key="line.product_id" class="o_qp_line_card">
+                    <div class="o_qp_card_header">
+                        <div class="o_qp_card_title">
+                            <strong>
+                                <t t-esc="line.name"/>
+                            </strong>
+                            <div class="o_qp_sug_meta">
+                                <t t-if="line.default_code">[                                    <t t-esc="line.default_code"/>
+] </t>
+                                <t t-if="line.barcode">•                                    <t t-esc="line.barcode"/>
+                                </t>
+                            </div>
+                        </div>
+                        <button class="o_qp_remove_btn" t-on-click="() => this.removeLine(line.product_id)">×</button>
+                    </div>
+                    <div class="o_qp_card_grid">
+                        <div class="o_qp_card_field o_qp_qty_field">
+                            <label>Qty</label>
+                            <div class="o_qp_qty_stepper">
+                                <button class="o_qp_qty_btn o_qp_qty_minus" t-on-click="() => this.stepQty(line.product_id, -1)">−</button>
+                                <input type="number" class="o_qp_num o_qp_qty_display" step="1" min="0" t-att-value="line.qty" t-on-input="(ev) => this.updateLine(line.product_id, 'qty', ev.target.value)" t-on-focus="(ev) => ev.target.select()"/>
+                                <button class="o_qp_qty_btn o_qp_qty_plus" t-on-click="() => this.stepQty(line.product_id, 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="o_qp_card_field o_qp_card_uom">
+                            <label>UoM</label>
+                            <div class="o_qp_uom_cell">
+                                <select class="o_qp_uom_select" t-on-change="(ev) => this.updateLine(line.product_id, 'uom_id', ev.target.value)">
+                                    <t t-if="line.uom_options and line.uom_options.length > 0">
+                                        <t t-foreach="line.uom_options" t-as="u" t-key="u.id">
+                                            <option t-att-value="u.id" t-att-selected="line.uom_id === u.id ? 'selected' : null">
+                                                <t t-esc="u.name"/>
+                                            </option>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <option value="">— No UoM —</option>
+                                    </t>
+                                </select>
+                                <button class="o_qp_uom_add_btn" t-on-click="() => this.openUomPage(line.product_id)" title="Add new UoM (opens UoM page)">+</button>
+                                <button class="o_qp_uom_refresh_btn" t-on-click="() => this.refreshUomsForLine(line.product_id)" title="Refresh UoMs">
+                                    <i class="fa fa-refresh"/>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="o_qp_card_field o_qp_qty_field">
+                            <label>Pkg Qty</label>
+                            <input type="number" class="o_qp_num" step="1" min="0" t-att-value="line.packaging_qty" t-on-input="(ev) => this.updateLine(line.product_id, 'packaging_qty', ev.target.value)" t-on-focus="(ev) => ev.target.select()"/>
+                        </div>
+                        <div class="o_qp_card_field o_qp_card_uom">
+                            <label>Packaging</label>
+                            <div class="o_qp_uom_cell">
+                                <select class="o_qp_uom_select" t-on-change="(ev) => this.updateLine(line.product_id, 'packaging_id', ev.target.value)">
+                                    <option value="">— No Packaging —</option>
+                                    <t t-if="line.packaging_options and line.packaging_options.length > 0">
+                                        <t t-foreach="line.packaging_options" t-as="p" t-key="p.id">
+                                            <option t-att-value="p.id" t-att-selected="line.packaging_id === p.id ? 'selected' : null">
+                                                <t t-esc="p.name"/>
+                                            </option>
+                                        </t>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="o_qp_card_field">
+                            <label>Price</label>
+                            <input type="text" class="o_qp_num o_qp_money" inputmode="decimal" t-att-value="formatMoney(line.price_unit)" t-on-focus="(ev) => this.onPriceFocus(ev, line, 'price_unit')" t-on-blur="(ev) => this.onPriceBlur(ev, line, 'price_unit')" t-on-keydown="onPriceKeydown"/>
+                        </div>
+                        <div class="o_qp_card_field">
+                            <label>Disc/Unit</label>
+                            <input type="text" class="o_qp_num o_qp_money" inputmode="decimal" t-att-value="formatMoney(line.discount_amount)" t-on-focus="(ev) => this.onPriceFocus(ev, line, 'discount_amount')" t-on-blur="(ev) => this.onPriceBlur(ev, line, 'discount_amount')" t-on-keydown="onPriceKeydown"/>
+                        </div>
+                    </div>
+                    <div class="o_qp_card_subtotal">
+                            Subtotal: <strong>
+                        <t t-esc="formatMoney(this.lineSubtotal(line), true)"/>
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ FOOTER: totals + create PO ============ -->
+        <div t-if="state.lines.length > 0" class="o_qp_footer">
+            <div class="o_qp_totals">
+                <div>
+                    <span class="o_qp_total_label">Lines:</span>
+                    <span class="o_qp_total_value">
+                        <t t-esc="state.lines.length"/>
+                    </span>
+                </div>
+                <div>
+                    <span class="o_qp_total_label">Total Qty:</span>
+                    <span class="o_qp_total_value">
+                        <t t-esc="totalQty()"/>
+                    </span>
+                </div>
+                <div>
+                    <span class="o_qp_total_label">Discount:</span>
+                    <span class="o_qp_total_value">
+                        <t t-esc="formatMoney(totalDiscount(), true)"/>
+                    </span>
+                </div>
+                <div class="o_qp_grand_total">
+                    <span class="o_qp_total_label">Grand Total:</span>
+                    <span class="o_qp_total_value">
+                        <t t-esc="formatMoney(grandTotal(), true)"/>
+                    </span>
+                </div>
+            </div>
+            <button class="o_qp_create_po" t-on-click="() => this.onCreatePO(true)" t-att-disabled="state.creating ? 'disabled' : null">
+                <t t-if="state.creating">Creating…</t>
+                <t t-else="">Create Purchase Order →</t>
+            </button>
+        </div>
+
+        <!-- ============ QUICK CREATE PRODUCT MODAL ============ -->
+        <div t-if="state.showCreateModal" class="o_qp_modal_backdrop" t-on-click="onModalBackdropClick">
+            <div class="o_qp_modal" t-on-click.stop="">
+                <h3>Quick Create Product</h3>
+                <div class="o_qp_form_row">
+                    <label>Name *</label>
+                    <input type="text" t-model="state.newProduct.name" t-ref="newProductName"/>
+                </div>
+                <div class="o_qp_form_row">
+                    <label>Barcode</label>
+                    <input type="text" t-model="state.newProduct.barcode"/>
+                </div>
+                <div class="o_qp_form_row">
+                    <label>Internal Reference (SKU)</label>
+                    <input type="text" t-model="state.newProduct.default_code"/>
+                </div>
+                <div class="o_qp_form_row">
+                    <label>Cost</label>
+                    <input type="number" step="any" min="0" t-model="state.newProduct.cost"/>
+                </div>
+                <!-- Category (single-select autocomplete) -->
+                <div class="o_qp_form_row">
+                    <label>Category</label>
+                    <div class="o_qp_modal_autocomplete o_qp_modal_autocomplete_with_button">
+                        <input type="text" class="o_qp_modal_ac_input" placeholder="Type to search category…" t-att-value="state.categQuery" t-on-input="onCategInput" t-on-focus="onCategFocus" t-on-blur="onCategBlur" t-on-keydown="onCategKeydown" autocomplete="off"/>
+                        <button type="button" class="btn btn-sm btn-outline-secondary o_qp_modal_create_button" t-on-click="openCreateCategoryPopup">
+                                    +
+                        </button>
+                        <div t-if="state.showCategDropdown and state.categSuggestions.length > 0" class="o_qp_modal_ac_dropdown">
+                            <div t-foreach="state.categSuggestions" t-as="c" t-key="c.id" class="o_qp_modal_ac_item" t-att-class="{ 'o_qp_active': c_index === state.categActiveSuggestion }" t-on-mousedown="() => this.selectCateg(c)">
+                                <t t-esc="c.name"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div t-if="!state.newProduct.categ_id" class="o_qp_modal_validation text-danger">
+                        <t t-esc="this._t('Category is required.')"/>
+                    </div>
+                    <div t-if="state.categQuery.trim() &amp;&amp; state.categQuery !== state.newProduct.categ_name" class="o_qp_modal_validation text-danger">
+                        <t t-esc="this._t('Please select a valid category from the list or clear the field.')"/>
+                    </div>
+                </div>
+
+                <!-- eCommerce Categories (multi-select autocomplete with tags) -->
+                <div t-if="state.metadata.public_categories.length > 0" class="o_qp_form_row">
+                    <label>eCommerce Categories</label>
+                    <div class="o_qp_modal_autocomplete o_qp_multi_ac">
+                        <!-- Tags for selected items -->
+                        <div t-if="state.newProduct.public_categ_ids.length > 0" class="o_qp_tags_wrap">
+                            <t t-foreach="state.newProduct.public_categ_ids" t-as="pcId" t-key="pcId">
+                                <span class="o_qp_tag">
+                                    <t t-esc="this.getPublicCategName(pcId)"/>
+                                    <button class="o_qp_tag_remove" t-on-click="() => this.removePublicCateg(pcId)">×</button>
+                                </span>
+                            </t>
+                        </div>
+                        <div class="o_qp_modal_autocomplete o_qp_modal_autocomplete_with_button">
+                            <input type="text" class="o_qp_modal_ac_input" placeholder="Type to search…" t-att-value="state.publicCategQuery" t-on-input="onPublicCategInput" t-on-focus="onPublicCategFocus" t-on-blur="onPublicCategBlur" t-on-keydown="onPublicCategKeydown" autocomplete="off"/>
+                            <button type="button" class="btn btn-sm btn-outline-secondary o_qp_modal_create_button" t-on-click="openCreatePublicCategoryPopup">
+                                        +
+                            </button>
+                        </div>
+                        <div t-if="state.showPublicCategDropdown and state.publicCategSuggestions.length > 0" class="o_qp_modal_ac_dropdown">
+                            <div t-foreach="state.publicCategSuggestions" t-as="pc" t-key="pc.id" class="o_qp_modal_ac_item" t-att-class="{ 'o_qp_active': pc_index === state.publicCategActiveSuggestion }" t-on-mousedown="() => this.selectPublicCateg(pc)">
+                                <t t-esc="pc.name"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div t-if="state.publicCategQuery.trim()" class="o_qp_modal_validation text-danger">
+                        <t t-esc="this._t('Please select a public category from the list or clear the field.')"/>
+                    </div>
+                </div>
+
+                <!-- Track Inventory -->
+                <div class="o_qp_form_row o_qp_form_row_inline">
+                    <label class="o_qp_toggle_label">
+                        <input type="checkbox" t-att-checked="state.newProduct.is_storable ? 'checked' : null" t-on-change="onTrackInventoryToggle"/>
+                        <span>Track Inventory</span>
+                    </label>
+                </div>
+                <div class="o_qp_form_row o_qp_form_row_inline">
+                    <label class="o_qp_toggle_label">
+                        <input type="checkbox" t-att-checked="state.newProduct.available_in_pos ? 'checked' : null" t-on-change="(ev) => { this.state.newProduct.available_in_pos = ev.target.checked; }"/>
+                        <span>Point of Sale</span>
+                    </label>
+                </div>
+
+                <!-- Is Published -->
+                <div class="o_qp_form_row o_qp_form_row_inline">
+                    <label class="o_qp_toggle_label">
+                        <input type="checkbox" t-att-checked="state.newProduct.is_published ? 'checked' : null" t-on-change="(ev) => { this.state.newProduct.is_published = ev.target.checked; }"/>
+                        <span>Is Published</span>
+                    </label>
+                </div>
+
+                <div class="o_qp_modal_actions">
+                    <button class="btn-secondary" t-on-click="closeCreateModal">Cancel</button>
+                    <button class="btn-primary" t-on-click="onSubmitNewProduct" t-att-disabled="this.isCreateNewProductDisabled() || state.creatingProduct ? 'disabled' : null">
+                        <t t-if="state.creatingProduct">Creating…</t>
+                        <t t-else="">Create &amp; Add</t>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ CAMERA SCANNER MODAL ============ -->
+        <div t-if="state.showCameraModal" class="o_qp_camera_backdrop">
+            <div class="o_qp_camera_modal">
+                <!-- Header with mode indicator -->
+                <div class="o_qp_camera_header">
+                    <span>
+                        <t t-if="state.cameraMode === 'once'">Scan Barcode (Single)</t>
+                        <t t-else="">Scan Barcode (Continuous)</t>
+                    </span>
+                    <button class="o_qp_camera_close" t-on-click="closeCameraScanner">×</button>
+                </div>
+
+                <!-- Video area with overlay and flash feedback -->
+                <div class="o_qp_camera_video_wrap">
+                    <video t-ref="cameraVideo" autoplay="autoplay" playsinline="playsinline" muted="muted"/>
+                    <div class="o_qp_camera_overlay">
+                        <div class="o_qp_camera_target"/>
+                    </div>
+                    <!-- Flash feedback overlay (visible 1.5s after scan) -->
+                    <div t-if="state.lastScanStatus" t-att-class="'o_qp_camera_flash o_qp_flash_' + state.lastScanStatus">
+                        <div t-if="state.lastScanMessage" class="o_qp_camera_toast">
+                            <t t-esc="state.lastScanMessage"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status line -->
+                <div class="o_qp_camera_status">
+                    <t t-if="state.cameraError">
+                        <span class="text-danger">
+                            <t t-esc="state.cameraError"/>
+                        </span>
+                    </t>
+                    <t t-elif="state.cameraMode === 'continuous'">
+                                Scanned: <strong>
+                        <t t-esc="state.scannedCount"/>
+                    </strong> products
+                    <t t-if="state.lastDetected"> • Last: <t t-esc="state.lastDetected"/>
+                    </t>
+                </t>
+                <t t-elif="state.lastDetected">
+                                Detected: <strong>
+                    <t t-esc="state.lastDetected"/>
+                </strong>
+            </t>
+            <t t-else="">Point camera at a barcode…</t>
+        </div>
+
+        <!-- Bottom controls -->
+        <div class="o_qp_camera_controls">
+            <button class="btn btn-secondary" t-on-click="toggleTorch" t-att-disabled="!state.torchSupported ? 'disabled' : null" t-att-title="state.torchSupported ? 'Toggle flash' : 'Flash not supported on this device'">
+                <i class="fa fa-bolt"/>
+                <span class="ms-1">
+                    <t t-if="state.torchOn">Flash On</t>
+                    <t t-else="">Flash Off</t>
+                </span>
+            </button>
+            <button class="btn btn-secondary" t-on-click="switchCamera" title="Switch Camera">
+                <i class="fa fa-refresh"/>
+                <span class="ms-1">Switch</span>
+            </button>
+            <button class="btn btn-secondary" t-on-click="closeCameraScanner">
+                <t t-if="state.cameraMode === 'continuous'">Done</t>
+                <t t-else="">Cancel</t>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ SCAN RESULT POPUP (mobile + camera flow) ============ -->
+<div t-if="state.showScanPopup" class="o_qp_scan_popup_backdrop" t-on-click="closeScanPopup">
+    <div class="o_qp_scan_popup" t-on-click.stop="">
+        <t t-if="state.scanPopupNotFound">
+            <h3>Product not found</h3>
+            <p>Not found: <strong>
+                <t t-esc="state.scanPopupBarcode"/>
+            </strong>
+        </p>
+        <div class="o_qp_modal_actions">
+            <button class="btn-secondary" t-on-click="closeScanPopup">Cancel</button>
+            <button class="btn-secondary" t-on-click="openCreateModalFromScanPopup">+ Quick Create</button>
+            <button class="btn-primary" t-on-click="skipAndContinueScan">Skip &amp; Continue</button>
+        </div>
+    </t>
+    <t t-else="">
+        <div class="o_qp_scan_popup_header">
+            <h3>
+                <t t-esc="state.scanPopupProduct &amp;&amp; state.scanPopupProduct.name"/>
+            </h3>
+            <div class="o_qp_sug_meta">
+                <t t-if="state.scanPopupProduct &amp;&amp; state.scanPopupProduct.default_code">[                    <t t-esc="state.scanPopupProduct.default_code"/>
+] </t>
+                <t t-if="state.scanPopupProduct &amp;&amp; state.scanPopupProduct.barcode">•                    <t t-esc="state.scanPopupProduct.barcode"/>
+                </t>
+            </div>
+        </div>
+        <div class="o_qp_form_row">
+            <label>Qty</label>
+            <div class="o_qp_qty_stepper">
+                <input type="number" class="o_qp_num o_qp_qty_display" step="1" min="0" t-att-value="state.scanPopupQty" t-on-input="onScanPopupQtyInput"/>
+                <button class="o_qp_qty_btn o_qp_qty_minus" t-on-click="() => this.scanPopupStep(-1)">&#8722;</button>
+                <button class="o_qp_qty_btn o_qp_qty_plus" t-on-click="() => this.scanPopupStep(1)">+</button>
+            </div>
+        </div>
+        <div class="o_qp_form_row">
+            <label>UoM</label>
+            <select t-on-change="onScanPopupUomChange">
+                <t t-if="state.scanPopupProduct &amp;&amp; state.scanPopupProduct.uom_options &amp;&amp; state.scanPopupProduct.uom_options.length > 0">
+                    <t t-foreach="state.scanPopupProduct.uom_options" t-as="u" t-key="u.id">
+                        <option t-att-value="u.id" t-att-selected="state.scanPopupUomId === u.id ? 'selected' : null">
+                            <t t-esc="u.name"/>
+                        </option>
+                    </t>
+                </t>
+                <t t-else="">
+                    <option value="">&#8212; No UoM &#8212;</option>
+                </t>
+            </select>
+        </div>
+        <div class="o_qp_form_row">
+            <label>Unit Price</label>
+            <input type="number" step="any" min="0" t-att-value="state.scanPopupPrice" t-on-input="onScanPopupPriceInput"/>
+        </div>
+        <div class="o_qp_form_row">
+            <label>Disc/Unit</label>
+            <input type="number" step="any" min="0" t-att-value="state.scanPopupDiscount" t-on-input="onScanPopupDiscountInput"/>
+        </div>
+        <div class="o_qp_modal_actions">
+            <button class="btn-secondary" t-on-click="closeScanPopup">Cancel</button>
+            <button class="btn-primary" t-on-click="confirmScanPopup">Add to List</button>
+        </div>
+    </t>
+</div>
+</div>
+
+<!-- ============ DUPLICATE SCAN CONFIRMATION MODAL (Once mode) ============ -->
+<div t-if="state.showDuplicateModal" class="o_qp_modal_backdrop" t-on-click="cancelDuplicateAdd">
+<div class="o_qp_modal o_qp_duplicate_modal" t-on-click.stop="">
+    <h3>⚠ Produk Sudah Ada</h3>
+    <div t-if="state.duplicateExistingLine" class="o_qp_dup_info">
+        <div class="o_qp_dup_name">
+            <strong>
+                <t t-esc="state.duplicateExistingLine.name"/>
+            </strong>
+        </div>
+        <div class="o_qp_sug_meta">
+            <t t-if="state.duplicateExistingLine.default_code">[                <t t-esc="state.duplicateExistingLine.default_code"/>
+] </t>
+            <t t-if="state.duplicateExistingLine.barcode">•                <t t-esc="state.duplicateExistingLine.barcode"/>
+            </t>
+        </div>
+        <div class="o_qp_dup_current_qty">
+                                Qty saat ini: <strong>
+            <t t-esc="state.duplicateExistingLine.qty"/>
+        </strong>
+    </div>
+</div>
+<div class="o_qp_form_row">
+    <label>Tambahkan qty:</label>
+    <div class="o_qp_qty_stepper o_qp_dup_stepper">
+        <button class="o_qp_qty_btn o_qp_qty_minus" t-on-click="decrementDuplicateQty" t-att-disabled="state.duplicateAddQty &lt;= 1 ? 'disabled' : null">−</button>
+        <input type="number" class="o_qp_num o_qp_qty_display" step="1" min="1" max="9999" t-att-value="state.duplicateAddQty" t-on-input="onDuplicateQtyInput" t-on-focus="(ev) => ev.target.select()"/>
+        <button class="o_qp_qty_btn o_qp_qty_plus" t-on-click="incrementDuplicateQty">+</button>
+    </div>
+</div>
+<div class="o_qp_modal_actions">
+    <button class="btn-secondary" t-on-click="cancelDuplicateAdd">Batal</button>
+    <button class="btn-primary" t-on-click="confirmDuplicateAdd">
+                                Tambah +<t t-esc="state.duplicateAddQty"/>
+    </button>
+</div>
+</div>
+</div>
+
+</t>
+
+</div>
+</t>
+
+</templates>
+
+
+
+
+
+
+
+
+

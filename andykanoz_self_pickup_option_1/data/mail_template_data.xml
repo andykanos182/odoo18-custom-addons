@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Email Template: Pesanan Siap Diambil (Self Pickup) -->
+        <record id="mail_template_self_pickup_ready" model="mail.template">
+            <field name="name">Self Pickup: Pesanan Siap Diambil</field>
+            <field name="model_id" ref="stock.model_stock_picking"/>
+            <field name="subject">{{ object.company_id.name }} - Pesanan {{ object.sale_id.name or object.name }} Siap Diambil</field>
+            <field name="partner_to">{{ object.partner_id.email and object.partner_id.id or object.partner_id.parent_id.id }}</field>
+            <field name="description">Dikirim ke customer saat pesanan Self Pickup siap diambil di toko</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Halo <t t-out="object.partner_id.name or ''">Customer</t>,<br/><br/>
+
+        Pesanan Anda <strong><t t-out="object.sale_id.name or object.name or ''">S00001</t></strong> sudah siap untuk diambil!
+        <br/><br/>
+
+        <strong>Kode Pengambilan:</strong><br/>
+        <span style="font-size: 24px; font-weight: bold; color: #0c5460; letter-spacing: 2px; background: #f0f7fa; padding: 8px 16px; border: 2px dashed #17a2b8; border-radius: 8px; display: inline-block; margin: 8px 0;">
+            <t t-out="object.sale_id.name or object.name or ''">S00001</t>
+        </span>
+        <br/><br/>
+
+        <strong>Cara Pengambilan:</strong><br/>
+        1. Datang ke toko kami pada jam operasional<br/>
+        2. Tunjukkan kode pengambilan di atas kepada staff kasir<br/>
+        3. Staff akan menyerahkan pesanan Anda<br/>
+        <br/>
+
+        <strong>Alamat Toko:</strong><br/>
+        <t t-out="object.company_id.name or ''">PT GOPOKAJA</t><br/>
+        <t t-if="object.company_id.street"><t t-out="object.company_id.street or ''"/><br/></t>
+        <t t-if="object.company_id.street2"><t t-out="object.company_id.street2 or ''"/><br/></t>
+        <t t-if="object.company_id.city"><t t-out="object.company_id.city or ''"/></t>
+        <t t-if="object.company_id.zip"> <t t-out="object.company_id.zip or ''"/></t>
+        <t t-if="object.company_id.country_id"><br/><t t-out="object.company_id.country_id.name or ''"/></t>
+        <br/>
+        <t t-if="object.company_id.phone">
+            <br/>Telepon: <t t-out="object.company_id.phone or ''"/>
+        </t>
+        <t t-if="object.company_id.partner_id.gmaps_link">
+            <br/>Google Maps: <a t-attf-href="{{ object.company_id.partner_id.gmaps_link }}" target="_blank"><t t-out="object.company_id.partner_id.gmaps_link or ''"/></a>
+        </t>
+        <br/><br/>
+
+        Terima kasih telah berbelanja di <t t-out="object.company_id.name or ''">PT GOPOKAJA</t>!
+        <t t-if="user.signature">
+            <br/><br/>
+            <t t-out="user.signature or ''">--<br/>Admin</t>
+        </t>
+    </p>
+</div>
+            </field>
+            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

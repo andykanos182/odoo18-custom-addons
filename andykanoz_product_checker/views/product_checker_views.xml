@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Client Action: Product Checker Page -->
+    <record id="action_product_checker" model="ir.actions.client">
+        <field name="name">Product Checker</field>
+        <field name="tag">andykanoz_product_checker.ProductCheckerAction</field>
+        <field name="target">current</field>
+    </record>
+</odoo>

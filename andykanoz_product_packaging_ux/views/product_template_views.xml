@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_view_packaging_tab" model="ir.ui.view">
+        <field name="name">product.template.form.packaging.tab</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Add a new tab for Packagings -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Packagings" name="packagings_tab" icon="fa-cubes">
+                    <!-- Inline editable tree view for packagings -->
+                    <field name="packaging_ids">
+                        <list editable="bottom">
+                            <field name="name" string="Packaging"/>
+                            <field name="product_id" groups="product.group_product_variant" optional="show"/>
+                            <field name="qty" string="Contained Quantity"/>     
+                            <field name="barcode" widget="barcode_camera"/>     
+                            <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                        </list>
+                        <kanban class="o_kanban_mobile">
+                            <templates>
+                                <t t-name="kanban-box">
+                                    <div t-attf-class="oe_kanban_global_click">
+                                        <div class="row mb-1">
+                                            <div class="col-8">
+                                                <strong><field name="name"/></strong>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <span class="badge rounded-pill text-bg-info">
+                                                    <field name="qty"/>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <i class="fa fa-barcode me-1" title="Barcode"/> 
+                                                <field name="barcode"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                        <form>
+                            <group>
+                                <group>
+                                    <field name="name"/>
+                                    <field name="qty"/>
+                                </group>
+                                <group>
+                                    <field name="barcode" widget="barcode_camera"/>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                </group>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Distance Shipping Configuration — setting terpisah
+        Posisi: di antara Geolocation dan reCAPTCHA di section Integrations
+    -->
+    <record id="res_config_settings_view_form_distance_shipping" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.distance.shipping</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='recaptcha']" position="before">
+                <setting string="Distance Shipping"
+                         help="Konfigurasi biaya pengiriman berdasarkan jarak GPS."
+                         id="distance_shipping_setting">
+                    <div class="content-group">
+                        <div class="row mb-1">
+                            <label class="col-lg-5 o_light_label"
+                                   for="distance_shipping_base_fee"
+                                   string="Base Fee (Rp)"/>
+                            <field name="distance_shipping_base_fee" class="col-lg-7"/>
+                        </div>
+                        <div class="row mb-1">
+                            <label class="col-lg-5 o_light_label"
+                                   for="distance_shipping_threshold_km"
+                                   string="Threshold (km)"/>
+                            <field name="distance_shipping_threshold_km" class="col-lg-7"/>
+                        </div>
+                        <div class="row mb-1">
+                            <label class="col-lg-5 o_light_label"
+                                   for="distance_shipping_per_km_fee"
+                                   string="Fee per KM (Rp)"/>
+                            <field name="distance_shipping_per_km_fee" class="col-lg-7"/>
+                        </div>
+                        <div class="row mb-1">
+                            <label class="col-lg-5 o_light_label"
+                                   for="distance_shipping_max_km"
+                                   string="Max Distance (km)"/>
+                            <field name="distance_shipping_max_km" class="col-lg-7"/>
+                        </div>
+                        <div class="row mb-1">
+                            <label class="col-lg-5 o_light_label"
+                                   for="distance_shipping_travel_mode"
+                                   string="Default Route"/>
+                            <field name="distance_shipping_travel_mode" class="col-lg-7"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

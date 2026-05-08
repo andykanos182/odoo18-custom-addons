@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="andykanoz_product_kanban_desktop.KanbanCategorySelectField">
+        <div class="akd_category_readonly small">
+            <span class="text-muted fw-bold">
+                <t t-esc="fieldLabel"/>:
+            </span>
+            <span class="ms-1" t-att-title="displayValue">
+                <t t-esc="displayValue"/>
+            </span>
+        </div>
+    </t>
+</templates>

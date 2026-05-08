@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu: Product Checker (top-level app menu) -->
+    <menuitem
+        id="menu_product_checker_root"
+        name="Product Checker"
+        web_icon="andykanoz_product_checker,static/description/icon.png"
+        sequence="20"
+        action="action_product_checker"/>
+</odoo>

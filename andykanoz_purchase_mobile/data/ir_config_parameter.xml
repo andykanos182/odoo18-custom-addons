@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!--
+        Threshold in days below which the mobile app shows the "near expiry"
+        red badge on a line card. Default 60 days. Adjustable per-deployment
+        via Settings -> Technical -> System Parameters.
+    -->
+    <record id="param_expiry_warning_days" model="ir.config_parameter">
+        <field name="key">andykanoz_purchase_mobile.expiry_warning_days</field>
+        <field name="value">60</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Phase 3+ app shell.
+
+        Single-call asset loading. Having `t-call-assets` twice (once
+        in <head> with t-js=false, once in <body> with t-css=false) was
+        causing the frontend bundle to initialize twice per page,
+        which in turn made createPublicRoot run startServices twice,
+        which crashed with DuplicatedKeyError on NotificationContainer.
+
+        Now we call `t-call-assets` exactly once at the end of <body>,
+        loading both CSS and JS in a single pass. The tradeoff is a
+        tiny FOUC (unstyled flash) while OWL boots — mitigated by the
+        inline placeholder styles in <head>.
+    -->
+    <template id="app_shell" name="Purchase Mobile App Shell">
+        <html>
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport"
+                      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+                <meta name="theme-color" content="#1a2332"/>
+                <title>Purchase Mobile · Gopokaja</title>
+
+                <!--
+                    PWA manifest. Phase 7. The browser fetches this on
+                    every page load (within Cache-Control limits) and
+                    decides whether to show the "Add to Home Screen"
+                    install banner based on its contents — needs at least
+                    name, short_name, icons (192 + 512), display, and
+                    start_url within scope.
+                -->
+                <link rel="manifest"
+                      href="/andykanoz_purchase_mobile/manifest.json"/>
+
+                <!-- iOS-specific meta to enable PWA-like behavior
+                     when added to home screen on Safari. iOS doesn't
+                     read manifest.json the same way Chrome does. -->
+                <meta name="apple-mobile-web-app-capable" content="yes"/>
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+                <meta name="apple-mobile-web-app-title" content="Purchase"/>
+                <link rel="apple-touch-icon"
+                      href="/andykanoz_purchase_mobile/icon.svg?size=192"/>
+                <style>
+                    html, body {
+                        margin: 0;
+                        padding: 0;
+                        height: 100%;
+                        background: #f5f5f7;
+                        font-family: -apple-system, BlinkMacSystemFont,
+                                     'Segoe UI', Roboto, sans-serif;
+                    }
+                    #app-loading {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100vh;
+                        color: #888;
+                        font-size: 14px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div id="app"
+                     t-att-data-user-name="user_name"
+                     t-att-data-user-login="user_login"
+                     t-att-data-phase="phase"
+                     t-att-data-module-version="module_version">
+                    <div id="app-loading">Loading Purchase Mobile...</div>
+                </div>
+                <t t-call-assets="web.assets_frontend"/>
+
+                <!--
+                    Service worker registration. Phase 7. Runs after
+                    OWL has had a chance to bootstrap (asset bundle
+                    loads first), so SW registration doesn't compete
+                    for resources during the critical render path.
+
+                    The `?v=...` query lets us cache-bust by manifest
+                    upgrade alone, without needing the user to clear
+                    cache. Also helps with Cloudflare Tunnel's
+                    aggressive caching of /service-worker.js.
+
+                    Scope is explicit: even though Service-Worker-Allowed
+                    header on the response would suffice, declaring scope
+                    here matches it and avoids any browser confusion.
+                -->
+                <script>
+                    if ('serviceWorker' in navigator) {
+                        window.addEventListener('load', function () {
+                            navigator.serviceWorker.register(
+                                '/andykanoz_purchase_mobile/service-worker.js',
+                                { scope: '/andykanoz_purchase_mobile/' }
+                            ).then(function (reg) {
+                                console.log('[purchase_mobile] SW registered:', reg.scope);
+                            }).catch(function (err) {
+                                console.warn('[purchase_mobile] SW registration failed:', err);
+                            });
+                        });
+                    }
+                </script>
+            </body>
+        </html>
+    </template>
+
+</odoo>

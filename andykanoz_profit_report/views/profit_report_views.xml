@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================ -->
+    <!-- List view                                                         -->
+    <!-- ================================================================ -->
+    <record id="view_andykanoz_profit_report_tree" model="ir.ui.view">
+        <field name="name">andykanoz.profit.report.tree</field>
+        <field name="model">andykanoz.profit.report</field>
+        <field name="arch" type="xml">
+            <list string="Profit Report" create="false" edit="false" delete="false">
+                <field name="date"/>
+                <field name="order_id"/>
+                <field name="config_id"/>
+                <field name="pricelist_id"/>
+                <field name="categ_id"/>
+                <field name="product_id"/>
+                <field name="qty" sum="Total Qty"/>
+                <field name="revenue" sum="Total Revenue"/>
+                <field name="cost" sum="Total Cost"/>
+                <field name="profit" sum="Total Profit"/>
+                <field name="margin" avg="Avg Margin %" widget="float" digits="[16,2]"/>
+                <field name="company_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!-- Pivot view (default for this report)                              -->
+    <!-- ================================================================ -->
+    <record id="view_andykanoz_profit_report_pivot" model="ir.ui.view">
+        <field name="name">andykanoz.profit.report.pivot</field>
+        <field name="model">andykanoz.profit.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Profit Report" sample="1">
+                <field name="categ_id" type="row"/>
+                <field name="date" interval="month" type="col"/>
+                <field name="revenue" type="measure"/>
+                <field name="cost" type="measure"/>
+                <field name="profit" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!-- Graph view                                                        -->
+    <!-- ================================================================ -->
+    <record id="view_andykanoz_profit_report_graph" model="ir.ui.view">
+        <field name="name">andykanoz.profit.report.graph</field>
+        <field name="model">andykanoz.profit.report</field>
+        <field name="arch" type="xml">
+            <graph string="Profit Report" type="bar" sample="1">
+                <field name="categ_id"/>
+                <field name="profit" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!-- Search view with filters and group-bys                            -->
+    <!-- ================================================================ -->
+    <record id="view_andykanoz_profit_report_search" model="ir.ui.view">
+        <field name="name">andykanoz.profit.report.search</field>
+        <field name="model">andykanoz.profit.report</field>
+        <field name="arch" type="xml">
+            <search string="Profit Report">
+                <field name="product_id"/>
+                <field name="categ_id"/>
+                <field name="order_id"/>
+                <field name="config_id"/>
+                <field name="pricelist_id"/>
+
+                <filter string="This Month" name="filter_this_month"
+                        domain="[('date','&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Last Month" name="filter_last_month"
+                        domain="[
+                            ('date','&gt;=', ((context_today().replace(day=1)) - relativedelta(months=1)).strftime('%Y-%m-%d')),
+                            ('date','&lt;', (context_today().replace(day=1)).strftime('%Y-%m-%d'))
+                        ]"/>
+                <filter string="This Year" name="filter_this_year"
+                        domain="[('date','&gt;=', (context_today().replace(month=1, day=1)).strftime('%Y-%m-%d'))]"/>
+
+                <separator/>
+                <filter string="Order Date" name="filter_date" date="date"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Product Category" name="group_categ"
+                            context="{'group_by':'categ_id'}"/>
+                    <filter string="Product" name="group_product"
+                            context="{'group_by':'product_id'}"/>
+                    <filter string="Pricelist" name="group_pricelist"
+                            context="{'group_by':'pricelist_id'}"/>
+                    <filter string="POS Config" name="group_config"
+                            context="{'group_by':'config_id'}"/>
+                    <filter string="Order" name="group_order"
+                            context="{'group_by':'order_id'}"/>
+                    <filter string="Day" name="group_day"
+                            context="{'group_by':'date:day'}"/>
+                    <filter string="Week" name="group_week"
+                            context="{'group_by':'date:week'}"/>
+                    <filter string="Month" name="group_month"
+                            context="{'group_by':'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!-- Action                                                            -->
+    <!-- ================================================================ -->
+    <record id="action_andykanoz_profit_report" model="ir.actions.act_window">
+        <field name="name">Profit by Category</field>
+        <field name="res_model">andykanoz.profit.report</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_andykanoz_profit_report_search"/>
+        <field name="context">{
+            'search_default_filter_this_month': 1,
+            'search_default_group_categ': 1,
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No profit data yet
+            </p>
+            <p>
+                This report aggregates revenue and cost per product category
+                from paid POS orders. Close a POS session with some sales to
+                see data here.
+            </p>
+        </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!-- Menu — under Point of Sale > Reporting                            -->
+    <!-- ================================================================ -->
+    <menuitem id="menu_andykanoz_profit_report"
+              name="Profit by Category"
+              parent="point_of_sale.menu_point_rep"
+              action="action_andykanoz_profit_report"
+              sequence="50"/>
+
+</odoo>

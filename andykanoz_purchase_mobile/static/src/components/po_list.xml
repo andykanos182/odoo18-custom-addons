@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_purchase_mobile.POList">
+        <div class="o_apm_po_list">
+
+            <!-- Filter pills -->
+            <div class="o_apm_filter_bar">
+                <button t-on-click="() => this.changeFilter('draft')"
+                        t-att-class="{ 'o_apm_filter_active': state.filter === 'draft' }">
+                    Draft
+                </button>
+                <button t-on-click="() => this.changeFilter('purchase')"
+                        t-att-class="{ 'o_apm_filter_active': state.filter === 'purchase' }">
+                    Confirmed
+                </button>
+                <button t-on-click="() => this.changeFilter('')"
+                        t-att-class="{ 'o_apm_filter_active': state.filter === '' }">
+                    All
+                </button>
+                <span class="o_apm_count">
+                    <t t-esc="state.count"/> PO
+                </span>
+            </div>
+
+            <!-- Loading -->
+            <div t-if="state.loading" class="o_apm_state">
+                Loading…
+            </div>
+
+            <!-- Error -->
+            <div t-if="state.error" class="o_apm_state o_apm_state_error">
+                <strong>Error:</strong>
+                <div><t t-esc="state.error"/></div>
+                <button t-on-click="() => this.loadOrders()"
+                        class="o_apm_retry_btn">
+                    Retry
+                </button>
+            </div>
+
+            <!-- Empty -->
+            <div t-if="not state.loading and not state.error and state.orders.length === 0"
+                 class="o_apm_state o_apm_state_empty">
+                <div>Tidak ada PO untuk filter ini</div>
+                <small>Phase 4 akan tambah tombol buat PO baru</small>
+            </div>
+
+            <!-- List -->
+            <div t-if="not state.loading and not state.error and state.orders.length > 0"
+                 class="o_apm_po_cards">
+                <div t-foreach="state.orders" t-as="order" t-key="order.id"
+                     class="o_apm_po_card"
+                     t-on-click="() => this.onTapOrder(order)">
+
+                    <div class="o_apm_po_card_head">
+                        <div class="o_apm_po_ref">
+                            <span class="o_apm_po_name"
+                                  t-esc="order.name"/>
+                            <span t-if="order.created_via_mobile"
+                                  class="o_apm_po_mobile_flag">
+                                mobile
+                            </span>
+                        </div>
+                        <span t-att-class="'o_apm_badge ' + stateBadgeClass(order.state)"
+                              t-esc="order.state_label"/>
+                    </div>
+
+                    <div class="o_apm_po_vendor">
+                        <t t-if="order.partner" t-esc="order.partner.name"/>
+                        <t t-else="">No vendor</t>
+                    </div>
+
+                    <div class="o_apm_po_footer">
+                        <span class="o_apm_po_meta">
+                            <t t-esc="order.line_count"/> item ·
+                            <t t-esc="formatDate(order.date_order)"/>
+                        </span>
+                        <span class="o_apm_po_total"
+                              t-esc="formatMoney(order.amount_total, order.currency)"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAB placeholder (disabled until Phase 4) -->
+            <button class="o_apm_fab" disabled="disabled" title="Phase 4">
+                +
+            </button>
+
+        </div>
+    </t>
+
+</templates>

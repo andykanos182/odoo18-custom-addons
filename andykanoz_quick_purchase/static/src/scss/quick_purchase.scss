@@ -1,0 +1,1493 @@
+/* andykanoz_quick_purchase — full styling with mobile support */
+
+.o_quick_purchase {
+    padding: 16px;
+    max-width: none;
+    margin: 0;
+    font-size: 14px;
+
+    /* Enable scrolling — Odoo 18 action manager does not scroll for us */
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+
+    /* ========== SESSION BAR ========== */
+    .o_qp_session_bar {
+        margin-bottom: 12px;
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 8px;
+
+        .o_qp_session_tabs {
+            display: flex;
+            gap: 4px;
+            align-items: stretch;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 4px;
+
+            /* Hide scrollbar but allow scrolling */
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        .o_qp_session_tab {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: #f1f3f5;
+            border: 1px solid #dee2e6;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 13px;
+            min-width: 0;
+            transition: background 0.15s ease;
+
+            &:hover {
+                background: #e9ecef;
+            }
+
+            &.o_qp_session_active {
+                background: #fff;
+                border-bottom-color: #fff;
+                font-weight: 600;
+                color: #714B67;
+                border-color: #714B67;
+                border-bottom-color: #fff;
+                margin-bottom: -2px;
+                padding-bottom: 8px;
+            }
+
+            .o_qp_session_tab_content {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                min-width: 0;
+            }
+
+            .o_qp_session_tab_name {
+                max-width: 140px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .o_qp_session_name_input {
+                border: 1px solid #714B67;
+                border-radius: 3px;
+                padding: 2px 6px;
+                font-size: 13px;
+                width: 120px;
+                outline: none;
+            }
+
+            .o_qp_session_tab_badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: #714B67;
+                color: #fff;
+                border-radius: 10px;
+                font-size: 11px;
+                font-weight: 600;
+                min-width: 20px;
+                height: 18px;
+                padding: 0 5px;
+            }
+
+            .o_qp_session_tab_close {
+                background: transparent;
+                border: none;
+                color: #999;
+                font-size: 12px;
+                cursor: pointer;
+                padding: 2px 4px;
+                line-height: 1;
+                opacity: 0.6;
+
+                &:hover {
+                    opacity: 1;
+                    color: #dc3545;
+                }
+            }
+        }
+
+        .o_qp_session_add_btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px dashed #adb5bd;
+            border-radius: 6px 6px 0 0;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.15s ease;
+
+            &:hover {
+                background: #f8f9fa;
+                border-color: #714B67;
+                color: #714B67;
+            }
+        }
+
+        .o_qp_session_info {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #6c757d;
+
+            .o_qp_session_summary {
+                font-style: italic;
+            }
+        }
+    }
+
+    /* ========== HEADER ========== */
+    .o_qp_header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--o-view-background-color, #ffffff);
+        padding: 12px 0;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 16px;
+
+        .o_qp_vendor_row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+
+            .o_qp_vendor_label {
+                font-weight: 600;
+                margin-bottom: 0;
+                white-space: nowrap;
+            }
+
+            .o_qp_vendor_field {
+                flex: 1;
+                min-width: 220px;
+
+                /* Make Many2XAutocomplete look bigger / friendlier */
+                .o-autocomplete {
+                    width: 100%;
+                }
+
+                .o-autocomplete--input {
+                    width: 100%;
+                    padding: 8px 12px;
+                    font-size: 15px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                }
+            }
+
+            .o_qp_reset_btn {
+                padding: 8px 16px;
+            }
+        }
+    }
+
+    /* ========== SCAN BAR ========== */
+    .o_qp_scan_bar {
+        margin-bottom: 16px;
+        position: relative;
+
+        .o_qp_scan_input_wrap {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        input.o_qp_scan_input {
+            flex: 1;
+            padding: 14px 16px;
+            font-size: 18px;
+            border: 2px solid #714B67;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+
+        input.o_qp_scan_input:focus {
+            border-color: #5a3a52;
+            box-shadow: 0 0 0 3px rgba(113, 75, 103, 0.15);
+        }
+
+        .o_qp_camera_btn {
+            padding: 0 14px;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 52px;
+            gap: 4px;
+        }
+
+        .o_qp_camera_btn:active {
+            transform: scale(0.97);
+        }
+
+        .o_qp_camera_once_btn {
+            background: #17a2b8;
+
+            &:hover {
+                background: #138496;
+            }
+        }
+
+        .o_qp_camera_continuous_btn {
+            background: #ffc107;
+            color: #212529;
+
+            &:hover {
+                background: #e0a800;
+            }
+        }
+
+        .o_qp_scan_hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .o_qp_suggestions {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            max-height: 320px;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 20;
+
+            .o_qp_suggestion_item {
+                padding: 10px 14px;
+                cursor: pointer;
+                border-bottom: 1px solid #f1f3f5;
+
+                &:hover,
+                &.o_qp_active {
+                    background: #f8f4f7;
+                }
+
+                .o_qp_sug_name {
+                    font-weight: 500;
+                }
+
+                .o_qp_sug_meta {
+                    font-size: 12px;
+                    color: #6c757d;
+                    margin-top: 2px;
+                }
+            }
+
+            .o_qp_no_result {
+                padding: 16px;
+                text-align: center;
+                color: #6c757d;
+
+                button {
+                    margin-top: 8px;
+                }
+            }
+        }
+    }
+
+    /* ========== LINES TABLE (desktop) ========== */
+    .o_qp_lines_table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        overflow: hidden;
+
+        thead {
+            background: #f8f9fa;
+
+            th {
+                padding: 10px 12px;
+                text-align: left;
+                font-weight: 600;
+                font-size: 13px;
+                color: #495057;
+                border-bottom: 2px solid #dee2e6;
+                white-space: nowrap;
+            }
+
+            th.text-end {
+                text-align: right;
+            }
+        }
+
+        tbody td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f3f5;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+
+        input.o_qp_num {
+            width: 100%;
+            text-align: right;
+            padding: 6px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input.o_qp_num:focus {
+            border-color: #714B67;
+            outline: none;
+        }
+
+        .o_qp_subtotal {
+            text-align: right;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .o_qp_remove_btn {
+            background: transparent;
+            border: none;
+            color: #dc3545;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .o_qp_remove_btn:hover {
+            color: #a71d2a;
+        }
+    }
+
+    /* ========== LINES CARDS (mobile) ========== */
+    .o_qp_lines_cards {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        .o_qp_line_card {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+            .o_qp_card_header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 10px;
+
+                .o_qp_card_title {
+                    flex: 1;
+
+                    .o_qp_sug_meta {
+                        font-size: 11px;
+                        color: #6c757d;
+                        margin-top: 2px;
+                    }
+                }
+
+                .o_qp_remove_btn {
+                    background: transparent;
+                    border: none;
+                    color: #dc3545;
+                    font-size: 22px;
+                    cursor: pointer;
+                    padding: 0 6px;
+                    line-height: 1;
+                }
+            }
+
+            .o_qp_card_grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 8px;
+
+                .o_qp_card_field {
+                    label {
+                        display: block;
+                        font-size: 11px;
+                        color: #6c757d;
+                        margin-bottom: 2px;
+                        text-transform: uppercase;
+                        font-weight: 600;
+                    }
+
+                    input.o_qp_num {
+                        width: 100%;
+                        text-align: right;
+                        padding: 8px 10px;
+                        border: 1px solid #ced4da;
+                        border-radius: 4px;
+                        font-size: 16px;
+                        /* 16px prevents iOS zoom on focus */
+                    }
+
+                    input.o_qp_num:focus {
+                        border-color: #714B67;
+                        outline: none;
+                    }
+
+                    .o_qp_qty_stepper {
+                        display: flex;
+                        align-items: stretch;
+                        gap: 0;
+                        border: 1px solid #ced4da;
+                        border-radius: 6px;
+                        overflow: hidden;
+                    }
+
+                    .o_qp_qty_btn {
+                        width: 44px;
+                        background: #f1f3f5;
+                        border: none;
+                        font-size: 20px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        color: #495057;
+
+                        &:active {
+                            background: #dee2e6;
+                        }
+                    }
+
+                    .o_qp_qty_minus {
+                        border-right: 1px solid #ced4da;
+                    }
+
+                    .o_qp_qty_plus {
+                        border-left: 1px solid #ced4da;
+                    }
+
+                    .o_qp_qty_display {
+                        flex: 1;
+                        text-align: center;
+                        border: none !important;
+                        border-radius: 0;
+                        font-size: 18px;
+                        font-weight: 600;
+                        min-width: 50px;
+                    }
+                }
+            }
+
+            .o_qp_card_subtotal {
+                margin-top: 10px;
+                padding-top: 8px;
+                border-top: 1px dashed #e9ecef;
+                text-align: right;
+                font-size: 14px;
+                color: #495057;
+
+                strong {
+                    color: #714B67;
+                    font-size: 16px;
+                }
+            }
+        }
+    }
+
+    .o_qp_lines_header {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 8px;
+
+        .o_qp_sort_btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1px solid #ced4da;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+    }
+
+    /* ========== EMPTY STATE ========== */
+    .o_qp_empty_state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+        font-size: 16px;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 6px;
+    }
+
+    /* ========== FOOTER ========== */
+    .o_qp_footer {
+        margin-top: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        flex-wrap: wrap;
+
+        .o_qp_totals {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 14px;
+
+            .o_qp_total_label {
+                color: #6c757d;
+            }
+
+            .o_qp_total_value {
+                font-weight: 600;
+                margin-left: 6px;
+                font-size: 16px;
+            }
+
+            .o_qp_grand_total .o_qp_total_value {
+                font-size: 20px;
+                color: #714B67;
+            }
+        }
+
+        button.o_qp_create_po {
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            background: #714B67;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button.o_qp_create_po:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        button.o_qp_create_po:hover:not(:disabled) {
+            background: #5a3a52;
+        }
+    }
+
+    /* ========== QUICK CREATE MODAL ========== */
+    .o_qp_modal_backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .o_qp_modal {
+        background: #fff;
+        border-radius: 8px;
+        padding: 24px;
+        width: 100%;
+        max-width: 520px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+        h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .o_qp_form_row {
+            margin-bottom: 12px;
+
+            label {
+                display: block;
+                font-weight: 500;
+                margin-bottom: 4px;
+                font-size: 13px;
+            }
+
+            input,
+            select {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid #ced4da;
+                border-radius: 4px;
+                font-size: 16px;
+                /* prevent iOS zoom */
+            }
+        }
+
+        .o_qp_modal_actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+
+            button {
+                padding: 10px 18px;
+            }
+
+            button.btn-primary {
+                background: #714B67;
+                color: white;
+                border: none;
+                border-radius: 4px;
+            }
+
+            button.btn-secondary {
+                background: #e9ecef;
+                border: none;
+                border-radius: 4px;
+            }
+        }
+
+        /* Modal autocomplete (Category & Public Categories) */
+        .o_qp_modal_autocomplete {
+            position: relative;
+            width: 100%;
+
+            .o_qp_modal_ac_input {
+                width: 100%;
+                padding: 10px 12px;
+                font-size: 16px;
+                border: 1px solid #ced4da;
+                border-radius: 4px;
+                background: #fff;
+                outline: none;
+            }
+
+            .o_qp_modal_ac_input:focus {
+                border-color: #714B67;
+                box-shadow: 0 0 0 3px rgba(113, 75, 103, 0.15);
+            }
+
+            .o_qp_modal_ac_dropdown {
+                position: absolute;
+                top: calc(100% + 4px);
+                left: 0;
+                right: 0;
+                background: #fff;
+                border: 1px solid #ced4da;
+                border-radius: 6px;
+                max-height: 200px;
+                overflow-y: auto;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 1050;
+
+                .o_qp_modal_ac_item {
+                    padding: 9px 14px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    border-bottom: 1px solid #f1f3f5;
+
+                    &:last-child {
+                        border-bottom: none;
+                    }
+
+                    &:hover,
+                    &.o_qp_active {
+                        background: #f8f4f7;
+                    }
+                }
+            }
+
+            /* Multi-select: adjust input when tags are present */
+            &.o_qp_multi_ac {
+                .o_qp_modal_ac_input {
+                    font-size: 14px;
+                    padding: 8px 12px;
+                }
+            }
+        }
+
+        /* Tags for multi-select */
+        .o_qp_tags_wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 6px;
+
+            .o_qp_tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 4px 8px;
+                background: #714B67;
+                color: #fff;
+                border-radius: 4px;
+                font-size: 13px;
+                font-weight: 500;
+                line-height: 1.3;
+
+                .o_qp_tag_remove {
+                    background: transparent;
+                    border: none;
+                    color: #fff;
+                    font-size: 16px;
+                    cursor: pointer;
+                    padding: 0 2px;
+                    line-height: 1;
+                    opacity: 0.7;
+
+                    &:hover {
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+
+        /* Inline toggle rows (Track Inventory, Is Published) */
+        .o_qp_form_row_inline {
+            .o_qp_toggle_label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+                font-weight: 500;
+                font-size: 14px;
+                margin-bottom: 0;
+                padding: 6px 0;
+
+                input[type="checkbox"] {
+                    width: 20px;
+                    height: 20px;
+                    accent-color: #714B67;
+                    flex-shrink: 0;
+                }
+            }
+        }
+    }
+
+    /* ========== SCAN RESULT POPUP ========== */
+    .o_qp_scan_popup_backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+    }
+
+    .o_qp_scan_popup {
+        background: #fff;
+        border-radius: 8px;
+        padding: 16px;
+        width: 100%;
+        max-width: 460px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+        h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .o_qp_form_row {
+            margin-bottom: 10px;
+        }
+
+        .o_qp_form_row label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .o_qp_form_row input,
+        .o_qp_form_row select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .o_qp_scan_popup_header h3 {
+            margin: 0 0 6px;
+        }
+
+        /* Qty stepper: horizontal [ - ] [ qty ] [ + ] */
+        .o_qp_qty_stepper {
+            display: flex;
+            align-items: stretch;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .o_qp_qty_btn {
+            width: 48px;
+            min-height: 44px;
+            background: #f1f3f5;
+            border: none;
+            font-size: 22px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:active {
+                background: #dee2e6;
+            }
+        }
+
+        .o_qp_qty_display {
+            flex: 1;
+            text-align: center;
+            border: none !important;
+            border-radius: 0;
+            font-size: 20px;
+            font-weight: 600;
+            min-width: 60px;
+            padding: 8px 4px;
+            width: auto !important;
+            /* override .o_qp_form_row input width:100% */
+            border-right: 1px solid #ced4da !important;
+        }
+
+        .o_qp_qty_minus {
+            border-right: 1px solid #ced4da;
+        }
+
+        .o_qp_qty_plus {
+            /* last item, no right border */
+        }
+
+        .o_qp_modal_actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+
+            button {
+                padding: 10px 18px;
+            }
+
+            button.btn-primary {
+                background: #714B67;
+                color: white;
+                border: none;
+                border-radius: 4px;
+            }
+
+            button.btn-secondary {
+                background: #e9ecef;
+                border: none;
+                border-radius: 4px;
+            }
+        }
+    }
+
+    /* ========== CAMERA SCANNER MODAL ========== */
+    .o_qp_camera_backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 1100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .o_qp_camera_modal {
+        background: #1a1a1a;
+        color: #fff;
+        border-radius: 10px;
+        width: 95%;
+        max-width: 480px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+
+        .o_qp_camera_header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #000;
+            font-weight: 600;
+            font-size: 15px;
+
+            .o_qp_camera_close {
+                background: transparent;
+                color: #fff;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                line-height: 1;
+                padding: 0 4px;
+                opacity: 0.8;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+        }
+
+        .o_qp_camera_video_wrap {
+            position: relative;
+            background: #000;
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+
+            video {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+
+            .o_qp_camera_overlay {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                .o_qp_camera_target {
+                    width: 70%;
+                    height: 30%;
+                    border: 3px solid rgba(255, 255, 255, 0.85);
+                    border-radius: 8px;
+                    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+                }
+            }
+
+            /* Flash feedback animation */
+            @keyframes fadeOutFlash {
+                0% {
+                    opacity: 1;
+                }
+
+                100% {
+                    opacity: 0;
+                }
+            }
+
+            .o_qp_camera_flash {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                animation: fadeOutFlash 2s forwards;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                padding-bottom: 20%;
+
+                &.o_qp_flash_success {
+                    background: rgba(40, 167, 69, 0.4);
+                    /* Green */
+                }
+
+                &.o_qp_flash_duplicate {
+                    background: rgba(255, 193, 7, 0.4);
+                    /* Yellow */
+                }
+
+                &.o_qp_flash_notfound {
+                    background: rgba(220, 53, 69, 0.4);
+                    /* Red */
+                }
+            }
+
+            .o_qp_camera_toast {
+                background: rgba(0, 0, 0, 0.85);
+                color: #fff;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                pointer-events: none;
+                text-align: center;
+                max-width: 90%;
+                word-break: break-word;
+            }
+        }
+
+        .o_qp_camera_status {
+            padding: 10px 16px;
+            text-align: center;
+            font-size: 13px;
+            background: #222;
+            color: #fff;
+            min-height: 40px;
+
+            strong {
+                color: #4db8ff;
+            }
+        }
+
+        .o_qp_camera_controls {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #111;
+
+            button {
+                flex: 1;
+                padding: 12px;
+                font-size: 14px;
+                border-radius: 6px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            }
+
+            button.btn-secondary {
+                background: #333;
+                color: #fff;
+                border: 1px solid #555;
+
+                &:hover:not(:disabled) {
+                    background: #444;
+                }
+            }
+
+            button.btn-secondary:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    /* ========== RESPONSIVE TOGGLE ========== */
+    .o_qp_mobile_only {
+        display: none;
+    }
+
+    .o_qp_desktop_only {
+        display: table;
+    }
+}
+
+/* end .o_quick_purchase */
+
+/* ========== MOBILE BREAKPOINTS ========== */
+@media (max-width: 768px) {
+    .o_quick_purchase {
+        padding: 8px;
+        font-size: 13px;
+
+        .o_qp_session_bar {
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+
+            .o_qp_session_tab {
+                padding: 5px 10px;
+                font-size: 12px;
+
+                .o_qp_session_tab_name {
+                    max-width: 100px;
+                }
+            }
+
+            .o_qp_session_add_btn {
+                padding: 5px 10px;
+            }
+        }
+
+        .o_qp_mobile_only {
+            display: flex;
+        }
+
+        .o_qp_desktop_only {
+            display: none !important;
+        }
+
+        .o_qp_header {
+            padding: 8px 0;
+
+            .o_qp_vendor_row {
+                gap: 8px;
+
+                .o_qp_vendor_label {
+                    font-size: 13px;
+                }
+
+                .o_qp_vendor_field {
+                    flex: 1 1 100%;
+                    min-width: 0;
+
+                    .o-autocomplete--input {
+                        font-size: 16px;
+                        /* prevent iOS zoom */
+                    }
+                }
+
+                .o_qp_reset_btn {
+                    padding: 6px 12px;
+                    font-size: 13px;
+                }
+            }
+        }
+
+        .o_qp_scan_bar {
+            input.o_qp_scan_input {
+                font-size: 16px;
+                /* prevent iOS zoom */
+                padding: 12px 14px;
+            }
+
+            .o_qp_camera_btn {
+                min-width: 44px;
+                padding: 0 10px;
+                font-size: 16px;
+
+                .o_qp_btn_text {
+                    display: none;
+                }
+            }
+        }
+
+        /* Camera modal fullscreen on mobile */
+        .o_qp_camera_modal {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            border-radius: 0;
+
+            .o_qp_camera_video_wrap {
+                aspect-ratio: auto;
+                flex: 1;
+            }
+
+            .o_qp_camera_overlay .o_qp_camera_target {
+                width: 80%;
+                height: 25%;
+            }
+        }
+
+        .o_qp_footer {
+            flex-direction: column;
+            align-items: stretch;
+
+            .o_qp_totals {
+                justify-content: space-between;
+                gap: 12px;
+            }
+
+            button.o_qp_create_po {
+                width: 100%;
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .o_quick_purchase {
+        .o_qp_lines_cards .o_qp_line_card .o_qp_card_grid {
+            grid-template-columns: 1fr 1fr;
+
+            .o_qp_card_field:nth-child(3) {
+                grid-column: 1 / span 2;
+            }
+        }
+    }
+}
+
+
+/* ========== VENDOR LOCKED STATE ========== */
+.o_quick_purchase .o_qp_vendor_field .o_qp_vendor_locked {
+    padding: 8px 12px;
+    background: #f8f4f7;
+    border: 1px solid #d4c7d0;
+    border-radius: 4px;
+    font-size: 15px;
+    color: #495057;
+
+    .fa-lock {
+        color: #714B67;
+    }
+}
+
+/* ========== UoM CELL (desktop table + mobile card) ========== */
+.o_quick_purchase {
+    .o_qp_uom_cell {
+        display: flex;
+        gap: 4px;
+        align-items: stretch;
+
+        .o_qp_uom_select {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #fff;
+            min-width: 0;
+        }
+
+        .o_qp_uom_select:focus {
+            border-color: #714B67;
+            outline: none;
+        }
+
+        .o_qp_uom_add_btn,
+        .o_qp_uom_refresh_btn {
+            flex: 0 0 auto;
+            width: 32px;
+            background: #714B67;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .o_qp_uom_add_btn:hover,
+        .o_qp_uom_refresh_btn:hover {
+            background: #5a3a52;
+        }
+    }
+}
+
+/* Mobile: make UoM select bigger to prevent iOS zoom */
+@media (max-width: 768px) {
+    .o_quick_purchase .o_qp_uom_cell .o_qp_uom_select {
+        font-size: 16px;
+        padding: 8px 10px;
+    }
+
+    .o_quick_purchase .o_qp_uom_cell .o_qp_uom_add_btn,
+    .o_quick_purchase .o_qp_uom_cell .o_qp_uom_refresh_btn {
+        width: 40px;
+    }
+}
+
+/* ========== CUSTOM VENDOR AUTOCOMPLETE ========== */
+.o_quick_purchase {
+    .o_qp_vendor_autocomplete {
+        position: relative;
+        width: 100%;
+
+        .o_qp_vendor_input {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 16px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: #fff;
+            outline: none;
+        }
+
+        .o_qp_vendor_input:focus {
+            border-color: #714B67;
+            box-shadow: 0 0 0 3px rgba(113, 75, 103, 0.15);
+        }
+
+        .o_qp_vendor_dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            max-height: 280px;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 50;
+
+            .o_qp_vendor_item {
+                padding: 10px 14px;
+                cursor: pointer;
+                border-bottom: 1px solid #f1f3f5;
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                &:hover,
+                &.o_qp_active {
+                    background: #f8f4f7;
+                }
+
+                .o_qp_vendor_item_name {
+                    font-weight: 500;
+                    color: #212529;
+                }
+
+                .o_qp_vendor_item_ref {
+                    font-size: 12px;
+                    color: #6c757d;
+                    margin-top: 2px;
+                }
+            }
+
+            .o_qp_vendor_no_result {
+                padding: 14px;
+                text-align: center;
+                color: #6c757d;
+                font-size: 13px;
+            }
+        }
+    }
+
+    /* ========== DUPLICATE SCAN CONFIRMATION MODAL (Once mode) ========== */
+    .o_qp_duplicate_modal {
+        max-width: 420px;
+
+        h3 {
+            color: #d9822b;
+            text-align: center;
+        }
+
+        .o_qp_dup_info {
+            background: #fff8e6;
+            border: 1px solid #ffe69c;
+            border-radius: 6px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            text-align: center;
+
+            .o_qp_dup_name {
+                font-size: 15px;
+                color: #212529;
+                margin-bottom: 4px;
+            }
+
+            .o_qp_sug_meta {
+                font-size: 12px;
+                color: #6c757d;
+                margin-bottom: 8px;
+            }
+
+            .o_qp_dup_current_qty {
+                font-size: 14px;
+                color: #495057;
+                margin-top: 8px;
+
+                strong {
+                    color: #714B67;
+                    font-size: 18px;
+                }
+            }
+        }
+
+        .o_qp_form_row {
+            label {
+                text-align: center;
+                font-weight: 600;
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+        }
+
+        /* Force the qty stepper to lay out horizontally as [input] [-] [+] */
+        .o_qp_dup_stepper {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            justify-content: center;
+            gap: 0;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            overflow: hidden;
+            width: fit-content;
+            margin: 0 auto;
+
+            /* Override the modal's blanket "input { width: 100% }" rule */
+            input.o_qp_qty_display {
+                width: 90px !important;
+                flex: 0 0 90px;
+                text-align: center;
+                border: none !important;
+                border-radius: 0;
+                font-size: 20px;
+                font-weight: 700;
+                padding: 10px 8px;
+                color: #212529;
+                background: #fff;
+                outline: none;
+                /* Hide number input spinners for cleaner look */
+                -moz-appearance: textfield;
+
+                &::-webkit-outer-spin-button,
+                &::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+            }
+
+            .o_qp_qty_btn {
+                width: 50px;
+                background: #f1f3f5;
+                border: none;
+                font-size: 22px;
+                font-weight: 700;
+                cursor: pointer;
+                color: #495057;
+                padding: 0;
+                transition: background 0.12s ease;
+
+                &:hover:not(:disabled) {
+                    background: #e9ecef;
+                }
+
+                &:active:not(:disabled) {
+                    background: #dee2e6;
+                }
+
+                &:disabled {
+                    color: #adb5bd;
+                    cursor: not-allowed;
+                    opacity: 0.5;
+                }
+            }
+
+            .o_qp_qty_minus {
+                border-left: 1px solid #ced4da;
+                border-right: none;
+            }
+
+            .o_qp_qty_plus {
+                border-left: 1px solid #ced4da;
+                border-right: none;
+            }
+        }
+    }
+
+    /* ========== MONEY INPUT FIELDS (Unit Price & Disc/Unit) ========== */
+    /* Right-align the formatted text and tighten font for readability */
+    input.o_qp_num.o_qp_money {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.2px;
+    }
+}

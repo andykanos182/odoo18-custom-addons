@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Menu entry under the Purchase root menu. Clicking this triggers
+        action_purchase_mobile which redirects to the standalone app page.
+    -->
+    <menuitem
+        id="menu_purchase_mobile_root"
+        name="Purchase Mobile"
+        parent="purchase.menu_purchase_root"
+        action="action_purchase_mobile"
+        sequence="5"/>
+
+</odoo>

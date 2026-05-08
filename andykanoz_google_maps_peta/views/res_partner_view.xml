@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Field Link Maps di form Contact -->
+    <record id="view_partner_form_gmaps_link_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.gmaps.link.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[hasclass('o_address_format')]" position="after">
+                <field name="gmaps_link" 
+                       widget="url" 
+                       string="Link Maps"
+                       placeholder="https://maps.app.goo.gl/..."
+                       invisible="type != 'contact'"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Tambah Geolocation Map di tab Partner Assignment -->
+    <record id="view_partner_form_gmap_widget" model="ir.ui.view">
+        <field name="name">res.partner.form.gmap.widget</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base_geolocalize.view_crm_partner_geo_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Target: div geo_localize_button yang punya name attribute -->
+            <xpath expr="//div[@name='geo_localize_button']" position="after">
+                <separator string="Geolocation Map"/>
+                <field name="partner_latitude"
+                       widget="gmap_marker_widget"
+                       nolabel="1"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

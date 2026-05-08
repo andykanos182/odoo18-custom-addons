@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!-- sidebar_type field removed from form view to fix Odoo 18 compatibility -->
+    <!-- The field is still defined in the model and accessible programmatically -->
+
+</odoo>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--
+            Generate VAPID keypair on module install.
+            noupdate="1" so re-running -u doesn't regenerate keys and
+            invalidate existing browser subscriptions.
+        -->
+        <function model="kitchen.vapid" name="ensure_vapid_keys"/>
+    </data>
+</odoo>

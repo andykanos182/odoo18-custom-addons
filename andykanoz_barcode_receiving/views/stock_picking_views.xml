@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add "Barcode Receiving" button to stock.picking form view -->
+    <record id="view_picking_form_barcode_receiving" model="ir.ui.view">
+        <field name="name">stock.picking.form.barcode.receiving</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='button_validate']" position="before">
+                <button name="action_open_barcode_receiving"
+                        string="Barcode Receiving"
+                        type="object"
+                        class="btn-primary"
+                        icon="fa-barcode"
+                        invisible="state not in ('assigned', 'confirmed') or picking_type_code != 'incoming'"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

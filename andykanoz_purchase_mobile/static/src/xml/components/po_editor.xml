@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_purchase_mobile.POEditor">
+        <div class="pm-editor">
+
+            <!-- Header -->
+            <div class="pm-editor-header">
+                <button class="pm-editor-btn pm-editor-btn-back"
+                        t-on-click="onBackClick"
+                        title="Kembali">‹</button>
+                <div class="pm-editor-title">
+                    <div class="pm-editor-ref" t-esc="state.order.name"/>
+                    <div class="pm-editor-state">
+                        <span t-esc="state.order.stateLabel"/>
+                        <span t-if="state.dirty" class="pm-dirty-dot" title="Ada perubahan">•</span>
+                    </div>
+                </div>
+                <button t-if="canDelete"
+                        class="pm-editor-btn pm-editor-btn-delete"
+                        t-on-click="onDelete"
+                        t-att-disabled="state.deleting"
+                        title="Hapus draft">🗑</button>
+                <button class="pm-editor-btn pm-editor-btn-save"
+                        t-on-click="onSave"
+                        t-att-disabled="!canSave">
+                    <span t-if="state.saving">Saving...</span>
+                    <span t-else="">Save</span>
+                </button>
+            </div>
+
+            <!-- Error banner (save/confirm/delete) -->
+            <div t-if="state.saveError" class="pm-editor-error-banner">
+                <span t-esc="state.saveError"/>
+                <button class="pm-editor-error-close"
+                        t-on-click="() => (state.saveError = null)">×</button>
+            </div>
+
+            <!-- Loading / Error state -->
+            <div t-if="state.loading" class="pm-editor-state-box">
+                Loading purchase order...
+            </div>
+            <div t-elif="state.error" class="pm-editor-state-box pm-editor-state-error">
+                <div class="pm-editor-state-title">Error loading PO</div>
+                <div class="pm-editor-state-msg" t-esc="state.error"/>
+            </div>
+
+            <!-- Body -->
+            <div t-else="" class="pm-editor-body">
+
+                <!-- Vendor section -->
+                <div class="pm-editor-section">
+                    <div class="pm-editor-section-label">Vendor</div>
+                    <div t-if="vendorLocked and state.order.partner" class="pm-vendor-chip pm-vendor-chip-readonly">
+                        <div class="pm-vendor-chip-body">
+                            <div class="pm-vendor-chip-name" t-esc="state.order.partner.name"/>
+                            <div class="pm-vendor-chip-meta">Terkunci — hapus semua line untuk ganti</div>
+                        </div>
+                    </div>
+                    <VendorPicker t-else=""
+                                  onSelect.bind="onVendorSelected"
+                                  initialVendor="state.order.partner"/>
+                </div>
+
+                <!-- Lines section -->
+                <div class="pm-editor-section">
+                    <div class="pm-editor-section-label">
+                        <span>Items</span>
+                        <span class="pm-editor-section-count"
+                              t-esc="state.lines.length + ' line' + (state.lines.length === 1 ? '' : 's')"/>
+                    </div>
+
+                    <div t-if="!state.lines.length" class="pm-editor-empty">
+                        <div class="pm-editor-empty-title">Belum ada item</div>
+                        <div class="pm-editor-empty-msg">
+                            Tap "Tambah Produk" di bawah untuk mulai.
+                        </div>
+                    </div>
+
+                    <div t-else="" class="pm-editor-lines">
+                        <LineCard t-foreach="state.lines"
+                                  t-as="line"
+                                  t-key="line.clientId"
+                                  line="line"
+                                  currency="state.order.currency"
+                                  expiryWarningDays="state.expiryWarningDays"
+                                  onChange.bind="onLineChange"
+                                  onRemove.bind="onLineRemove"/>
+                    </div>
+
+                    <button class="pm-editor-add-btn"
+                            t-on-click="openProductPicker">
+                        + Tambah Produk
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Footer totals -->
+            <div t-if="!state.loading and !state.error" class="pm-editor-footer">
+                <div class="pm-editor-footer-row">
+                    <span>Untaxed</span>
+                    <span t-esc="formatMoney(untaxedAmount)"/>
+                </div>
+                <div class="pm-editor-footer-row pm-editor-footer-total">
+                    <span>Total</span>
+                    <span t-esc="formatMoney(totalAmount)"/>
+                </div>
+                <button t-if="canConfirm"
+                        class="pm-editor-confirm-btn"
+                        t-on-click="onConfirm"
+                        t-att-disabled="state.confirming">
+                    <span t-if="state.confirming">Confirming...</span>
+                    <span t-else="">Confirm PO</span>
+                </button>
+                <div t-elif="state.order.state !== 'draft'"
+                     class="pm-editor-confirmed-note">
+                    PO sudah di-confirm. Edit lanjutan lewat Odoo desktop.
+                </div>
+            </div>
+
+            <!-- Product picker modal -->
+            <ProductPicker t-if="state.showProductPicker"
+                           vendorId="state.order.partner and state.order.partner.id"
+                           onPick.bind="onProductPicked"
+                           onClose.bind="closeProductPicker"
+                           onConfigUpdate.bind="onConfigUpdate"/>
+
+        </div>
+    </t>
+
+</templates>

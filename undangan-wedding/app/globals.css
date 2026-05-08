@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────
+   CSS custom properties (theme tokens)
+   These are referenced by Tailwind config + component code.
+   ───────────────────────────────────────────────────────── */
+:root {
+  --color-forest: 44 62 45;
+  --color-sage: 168 184 156;
+  --color-terracotta: 201 123 91;
+  --color-sand: 242 213 165;
+  --color-cream: 245 239 227;
+  --color-cream-light: 250 246 238;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Base layer
+   ───────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-cream text-forest font-body antialiased;
+    font-feature-settings: "ss01", "ss02", "cv11";
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Improve display font rendering */
+  .font-display {
+    font-feature-settings: "liga", "dlig", "swsh";
+    letter-spacing: -0.01em;
+  }
+
+  /* Prevent body scroll when cover screen is open */
+  body.no-scroll {
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* Custom selection color */
+  ::selection {
+    @apply bg-terracotta text-cream;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Custom utility classes
+   ───────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Container constrained to mobile-first reading width */
+  .container-invitation {
+    @apply mx-auto w-full max-w-[480px] px-6;
+  }
+
+  /* Tropical paper background — subtle texture using gradients */
+  .bg-paper {
+    background-color: #F5EFE3;
+    background-image:
+      radial-gradient(at 20% 10%, rgba(168, 184, 156, 0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 90%, rgba(201, 123, 91, 0.06) 0px, transparent 50%);
+  }
+
+  /* Section divider ornament */
+  .divider-ornament {
+    @apply mx-auto my-8 flex items-center justify-center gap-3;
+  }
+
+  .divider-ornament::before,
+  .divider-ornament::after {
+    content: "";
+    @apply h-px w-12 bg-forest/30;
+  }
+
+  /* Glass panel for date cards / event cards */
+  .glass-panel {
+    @apply rounded-2xl border border-forest/15 bg-cream-light/80 backdrop-blur-sm;
+  }
+
+  /* Subtle shadow for raised elements */
+  .shadow-soft {
+    box-shadow: 0 4px 24px -8px rgba(44, 62, 45, 0.15);
+  }
+
+  /* Hide scrollbar visually but keep scrollable */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Custom scrollbar (subtle, matches palette)
+   ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgb(var(--color-cream));
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--color-sage));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--color-forest));
+}

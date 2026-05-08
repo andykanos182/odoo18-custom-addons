@@ -1,0 +1,1101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_product_checker.ProductCheckerPage">
+        <div class="o_product_checker_page">
+            <!-- Hidden file inputs for image update.
+                 accept includes HEIC/HEIF for iOS native photo format.
+                 Gallery input: no capture attr → opens file picker / photo library.
+                 Camera input: capture="environment" → opens native camera app directly. -->
+            <input type="file" accept="image/*,.heic,.heif" class="d-none" t-ref="galleryInput" t-on-change="onImageFileSelected"/>
+            <input type="file" accept="image/*,.heic,.heif" capture="environment" class="d-none" t-ref="cameraInput" t-on-change="onImageFileSelected"/>
+
+            <!-- Top Bar -->
+            <div class="o_pc_topbar">
+                <h1 class="o_pc_title">
+                    <i class="fa fa-barcode me-2"/>
+Product Checker
+                </h1>
+                <div class="o_pc_search_box">
+                    <input type="text" t-ref="barcodeInput" class="o_pc_barcode_input" placeholder="Scan or type barcode..." t-att-value="state.barcode" t-on-input="onBarcodeInput" t-on-keydown="onBarcodeKeydown" autofocus="autofocus"/>
+                    <button class="btn btn-primary o_pc_search_btn" t-on-click="() => this.searchProduct()" t-att-disabled="state.loading" title="Search">
+                        <i class="fa fa-search"/>
+                        <span class="o_pc_btn_text ms-1">Search</span>
+                    </button>
+                    <button class="btn btn-success o_pc_newscan_btn" t-on-click="newScan" title="New Scan (clear input only)">
+                        <i class="fa fa-barcode"/>
+                        <span class="o_pc_btn_text ms-1">New Scan</span>
+                    </button>
+                    <button class="btn btn-info o_pc_camera_once_btn ms-1" t-on-click="openCameraOnce" title="Scan Once (Single Scan)">
+                        <i class="fa fa-camera"/>
+                        <span class="o_pc_btn_text ms-1">Scan Once</span>
+                    </button>
+                    <button class="btn btn-warning o_pc_camera_continuous_btn ms-1" t-on-click="openCameraContinuous" title="Scan Continuous (Multiple Scans)">
+                        <i class="fa fa-video-camera"/>
+                        <span class="o_pc_btn_text ms-1">Scan Continuous</span>
+                    </button>
+                    <button class="btn btn-secondary o_pc_reset_btn" t-on-click="resetSearch" title="Reset (clear everything)">
+                        <i class="fa fa-refresh"/>
+                        <span class="o_pc_btn_text ms-1">Reset</span>
+                    </button>
+                </div>
+                <div class="o_pc_pricelist_selector">
+                    <label>Pricelist:</label>
+                    <select class="form-select" t-on-change="onPricelistChange">
+                        <t t-foreach="state.pricelists" t-as="pl" t-key="pl.id">
+                            <option t-att-value="pl.id" t-att-selected="pl.id === state.selectedPricelistId">
+                                <t t-esc="pl.name"/>
+                            </option>
+                        </t>
+                    </select>
+                </div>
+                <!-- Product List drawer toggle (desktop-only; hidden on mobile via SCSS) -->
+                <button class="btn btn-outline-primary o_pc_productlist_toggle" t-on-click="toggleProductList" t-att-class="{ 'active': state.productListOpen }" title="Toggle Product List panel">
+                    <i class="fa fa-list"/>
+                    <span class="o_pc_btn_text ms-1">Product List</span>
+                </button>
+                <!-- Auto-add checkbox -->
+                <div class="o_pc_auto_add form-check form-switch" title="Auto-add every scanned product to print list">
+                    <input type="checkbox" class="form-check-input" id="auto_add_print" t-att-checked="state.autoAddToPrintList" t-on-change="onAutoAddToggle"/>
+                    <label class="form-check-label" for="auto_add_print">
+                        <i class="fa fa-magic"/>
+ Auto-add
+                    </label>
+                </div>
+                <!-- Print List toggle -->
+                <button class="btn btn-warning o_pc_printlist_toggle" t-on-click="togglePrintListPanel" title="View Print List">
+                    <i class="fa fa-print"/>
+                    <span class="o_pc_btn_text ms-1">Print List</span>
+                    <span t-if="state.printList.length" class="o_pc_printlist_badge">
+                        <t t-esc="state.printList.length"/>
+                    </span>
+                </button>
+                <!-- Mobile only: toggle history drawer -->
+                <button class="btn btn-outline-secondary o_pc_history_toggle" t-on-click="toggleSidebar" title="Scan History">
+                    <i class="fa fa-history"/>
+                    <span t-if="state.history.length" class="o_pc_history_badge">
+                        <t t-esc="state.history.length"/>
+                    </span>
+                </button>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="o_pc_body">
+                <!-- ============ LEFT: PRODUCT LIST DRAWER (desktop-only) ============ -->
+                <div class="o_pc_product_list_sidebar" t-att-class="{ 'o_pc_product_list_open': state.productListOpen }">
+                    <div class="o_pc_product_list_header">
+                        <h3>
+                            <i class="fa fa-list"/>
+Product List</h3>
+                        <button class="o_pc_product_list_close" t-on-click="closeProductList" title="Hide panel (filter tetap tersimpan)">
+                            <i class="fa fa-times"/>
+                        </button>
+                    </div>
+                    <div class="o_pc_product_list_search">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Cari nama, code, atau barcode..." t-att-value="state.productListQuery" t-on-input="onProductListQueryInput"/>
+                            <div class="o_pc_favorites_wrap">
+                                <button class="btn btn-outline-secondary o_pc_productlist_favorites_btn" t-att-class="{ 'o_pc_fav_active': state.activeSavedFilterId }" t-on-click.stop="toggleFavoritesDropdown" title="Favorites / Saved Searches">
+                                    <i t-att-class="state.activeSavedFilterId ? 'fa fa-star' : 'fa fa-star-o'"/>
+                                </button>
+                                <div t-if="state.favoritesDropdownOpen" class="o_pc_favorites_dropdown" t-on-click.stop="">
+                                    <div class="o_pc_fav_header">
+                                        <i class="fa fa-star"/>
+ Favorites
+                                    </div>
+                                    <t t-if="!state.savedFilters.length">
+                                        <div class="o_pc_fav_empty">
+                                            No saved filters yet.<br/>
+Build a filter and save it below.
+                                        </div>
+                                    </t>
+                                    <t t-foreach="state.savedFilters" t-as="f" t-key="f.id">
+                                        <div class="o_pc_fav_item" t-att-class="{ 'o_pc_fav_selected': f.id === state.activeSavedFilterId }" t-on-click="() => this.applySavedFilter(f)">
+                                            <span class="o_pc_fav_check">
+                                                <i t-if="f.id === state.activeSavedFilterId" class="fa fa-check"/>
+                                            </span>
+                                            <span class="o_pc_fav_name" t-att-title="f.name">
+                                                <t t-esc="f.name"/>
+                                            </span>
+                                            <span t-if="f.is_default" class="o_pc_fav_default_badge" title="Auto-applied on open">
+                                                Default
+                                            </span>
+                                            <button class="o_pc_fav_delete" t-on-click.stop="() => this.deleteSavedFilter(f)" title="Delete">
+                                                <i class="fa fa-trash-o"/>
+                                            </button>
+                                        </div>
+                                    </t>
+                                    <div class="o_pc_fav_divider"/>
+                                    <button class="o_pc_fav_save_toggle" t-on-click="toggleSaveFilterForm">
+                                        <span>Save current search</span>
+                                        <i t-att-class="state.saveFilterFormOpen ? 'fa fa-caret-up' : 'fa fa-caret-down'"/>
+                                    </button>
+                                    <div t-if="state.saveFilterFormOpen" class="o_pc_fav_save_form">
+                                        <div class="o_pc_fav_save_title">Name</div>
+                                        <input type="text" class="form-control" placeholder="e.g. Product Layak Jual" t-att-value="state.saveFilterName" t-on-input="(ev) => state.saveFilterName = ev.target.value" t-on-keydown="onSaveFilterNameKeydown"/>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="save_fav_default" t-att-checked="state.saveFilterIsDefault" t-on-change="(ev) => state.saveFilterIsDefault = ev.target.checked"/>
+                                            <label class="form-check-label" for="save_fav_default">
+                                                Default filter (auto-apply on open)
+                                            </label>
+                                        </div>
+                                        <button class="btn btn-primary" t-on-click="saveCurrentFilter" t-att-disabled="!state.saveFilterName.trim()">
+                                            <i class="fa fa-save me-1"/>
+ Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-secondary o_pc_productlist_filter_btn" t-att-class="{ 'o_pc_has_filters': state.productListFilterCount > 0 }" t-on-click="openFilterDialog" title="Custom Filter (advanced rules)">
+                                <i class="fa fa-filter"/>
+                                <span t-if="state.productListFilterCount > 0" class="o_pc_productlist_filter_badge">
+                                    <t t-esc="state.productListFilterCount"/>
+                                </span>
+                            </button>
+                            <button t-if="state.productListFilterCount > 0 or state.productListQuery" class="btn btn-outline-danger" t-on-click="clearAllFiltersAndQuery" title="Clear Search and Filters">
+                                <i class="fa fa-times"/>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="o_pc_product_list_body">
+                        <!-- Loading (initial) -->
+                        <t t-if="state.productListLoading and !state.productListItems.length">
+                            <div class="o_pc_product_list_loading">
+                                <i class="fa fa-spinner fa-spin fa-2x"/>
+                                <p class="mt-2 mb-0">Loading products...</p>
+                            </div>
+                        </t>
+
+                        <!-- Empty state (after a load completed) -->
+                        <t t-if="!state.productListLoading and !state.productListItems.length and state.productListInitialized">
+                            <div class="o_pc_product_list_empty">
+                                <i class="fa fa-inbox fa-2x mb-2"/>
+                                <p class="mb-1">
+                                    <strong>No products found</strong>
+                                </p>
+                                <small t-if="state.productListFilterCount > 0 or state.productListQuery">
+                                    Your current filter matches 0 products.
+                                    <br/>
+Try adjusting or clearing the filter.
+                                </small>
+                                <small t-else="">
+                                    There are no products in the database.
+                                </small>
+                                <div t-if="state.productListFilterCount > 0 or state.productListQuery" class="mt-3">
+                                    <button class="btn btn-sm btn-outline-danger" t-on-click="clearAllFiltersAndQuery">
+                                        <i class="fa fa-times me-1"/>
+ Clear all filters
+                                    </button>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Items -->
+                        <t t-foreach="state.productListItems" t-as="p" t-key="p.id">
+                            <div class="o_pc_product_list_item" t-on-click="() => this.onProductListItemClick(p)">
+                                <img t-att-src="p.image_url" class="o_pc_product_list_image" alt=""/>
+                                <div class="o_pc_product_list_info">
+                                    <div class="o_pc_product_list_name">
+                                        <t t-esc="p.name"/>
+                                    </div>
+                                    <div class="o_pc_product_list_code" t-if="p.barcode or p.default_code">
+                                        <t t-if="p.barcode">
+                                            <i class="fa fa-barcode"/>
+                                            <t t-esc="p.barcode"/>
+                                        </t>
+                                        <t t-if="p.default_code">
+                                            <span t-if="p.barcode" class="mx-1">|</span>
+                                            <i class="fa fa-hashtag"/>
+                                            <t t-esc="p.default_code"/>
+                                        </t>
+                                    </div>
+                                    <div class="o_pc_product_list_meta">
+                                        <span class="o_pc_product_list_price" title="Sales Price">
+                                            <i class="fa fa-tag"/>
+                                            <t t-esc="formatPrice(p.price, p)"/>
+                                        </span>
+                                        <span class="o_pc_product_list_cost" title="Cost">
+                                            <i class="fa fa-money"/>
+                                            <t t-esc="formatPrice(p.standard_price, p)"/>
+                                        </span>
+                                    </div>
+                                    <div class="o_pc_product_list_stock" t-att-class="{ 'text-danger': p.qty_on_hand &lt;= 0 }">
+                                        <i class="fa fa-cubes"/>
+Stock: <t t-esc="p.qty_on_hand"/>
+                                    <small t-if="p.uom_name">
+                                        <t t-esc="p.uom_name"/>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Load More -->
+                    <t t-if="state.productListItems.length and state.productListItems.length &lt; state.productListTotal">
+                        <button class="btn btn-outline-secondary o_pc_product_list_loadmore" t-on-click="loadMoreProducts" t-att-disabled="state.productListLoading">
+                            <t t-if="state.productListLoading">
+                                <i class="fa fa-spinner fa-spin me-1"/>
+ Loading...
+                            </t>
+                            <t t-else="">
+                                <i class="fa fa-plus-circle me-1"/>
+                                    Load More (<t t-esc="state.productListTotal - state.productListItems.length"/>
+ remaining)
+                            </t>
+                        </button>
+                    </t>
+                </div>
+
+                <!-- Footer info: showing X of Y -->
+                <div class="o_pc_product_list_footer_info" t-if="state.productListItems.length">
+                        Showing <strong>
+                    <t t-esc="state.productListItems.length"/>
+                </strong> of <strong>
+                <t t-esc="state.productListTotal"/>
+            </strong>
+        </div>
+
+        <!-- Custom Filter chip summary (shown when any rule is active) -->
+        <div class="o_pc_productlist_chip_summary" t-if="state.productListFilterCount > 0">
+            <i class="fa fa-filter"/>
+            <span>
+                <strong>
+                    <t t-esc="state.productListFilterCount"/>
+                </strong>
+                            filter rule<t t-if="state.productListFilterCount > 1">s</t> active
+            </span>
+            <button class="o_pc_chip_clear" t-on-click="clearFilterDomain" title="Clear all filter rules">
+                <i class="fa fa-times"/>
+ Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- Left: Main Product Display -->
+    <div class="o_pc_main">
+        <!-- Loading -->
+        <t t-if="state.loading">
+            <div class="o_pc_loading">
+                <i class="fa fa-spinner fa-spin fa-3x"/>
+                <p>Searching...</p>
+            </div>
+        </t>
+
+        <!-- Product Found -->
+        <t t-if="state.product and !state.loading and !state.showCreateForm">
+            <div class="o_pc_product_card">
+                <div class="o_pc_product_image">
+                    <img t-att-src="state.product.image_url" alt="Product" t-on-click="viewProductImage" class="o_pc_clickable_image"/>
+                    <div class="o_pc_image_actions">
+                        <button class="btn btn-sm btn-outline-secondary o_pc_update_image_btn" t-on-click="openImageUpdateDialog" t-att-disabled="state.loading" title="Update Product Image">
+                            <i class="fa fa-camera"/>
+ Update Image
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary o_pc_auto_bg_btn ms-1" t-on-click="autoWhiteBackground" t-att-disabled="state.loading" title="Auto White BG (Gemini AI)">
+                            <i class="fa fa-magic"/>
+ Auto White BG
+                        </button>
+                        <button class="btn btn-sm btn-outline-success o_pc_auto_pro_btn ms-1" t-on-click="autoProfessionalEdit" t-att-disabled="state.loading" title="Auto Pro Edit (Gemini AI)">
+                            <i class="fa fa-star"/>
+ Auto Pro Edit
+                        </button>
+                    </div>
+                </div>
+                <div class="o_pc_product_info">
+                    <div class="o_pc_product_name_row d-flex align-items-center">
+                        <button type="button" class="btn btn-sm btn-outline-secondary o_pc_titlecase_btn me-2" title="Convert to Title Case (e.g. 'andyka noz' → 'Andyka Noz')" aria-label="Convert to Title Case" t-on-click="() => this.convertProductNameToTitleCase()" t-att-disabled="state.loading || !state.product">
+                            <i class="fa fa-font"/>
+                        </button>
+                        <h2 class="o_pc_product_name mb-0">
+                            <t t-esc="state.product.name"/>
+                        </h2>
+                        <button t-if="state.nameChangeUndoVisible" type="button" class="btn btn-link btn-sm o_pc_undo_name_btn ms-2" title="Undo name change" t-on-click="() => this.undoProductNameChange()">
+                            Undo
+                        </button>
+                    </div>
+                    <div class="o_pc_product_meta">
+                        <div class="o_pc_meta_item" t-if="state.product.default_code">
+                            <span class="o_pc_label">Internal Ref:</span>
+                            <span class="o_pc_value">
+                                <t t-esc="state.product.default_code"/>
+                            </span>
+                        </div>
+                        <div class="o_pc_meta_item" t-if="state.product.barcode">
+                            <span class="o_pc_label">Barcode:</span>
+                            <span class="o_pc_value">
+                                <t t-esc="state.product.barcode"/>
+                            </span>
+                        </div>
+                        <div class="o_pc_meta_item">
+                            <span class="o_pc_label">Category:</span>
+                            <span class="o_pc_value">
+                                <div class="o_pc_meta_autocomplete position-relative w-100">
+                                    <div class="o_input_dropdown">
+                                        <div class="o-autocomplete dropdown">
+                                            <input type="text" class="o-autocomplete--input o_input o_pc_meta_ac_input" style="padding-right: 52px;" t-att-value="state.metaCategQuery" t-on-input="onMetaCategoryInput" t-on-focus="onMetaCategoryFocus" t-on-blur="onMetaCategoryBlur" t-on-keydown="onMetaCategoryKeydown" autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" t-att-id="'categ_id_' + (state.product &amp;&amp; state.product.id ? state.product.id : 0)" t-att-aria-expanded="state.showMetaCategDropdown ? 'true' : 'false'" />
+                                        </div>
+                                        <span class="o_dropdown_button" t-on-mousedown="toggleMetaCategoryDropdown"></span>
+                                        <button type="button" class="btn btn-link text-action o_pc_external_button o_pc_categ_ext_btn" t-on-click="openCategoryForm" t-att-disabled="!state.product || !state.product.categ_id" title="Open Category">
+                                            <i class="fa fa-external-link"/>
+                                        </button>
+                                    </div>
+
+                                    <div t-if="state.showMetaCategDropdown and state.metaCategSuggestions.length" class="o_pc_meta_ac_dropdown">
+                                        <div t-foreach="state.metaCategSuggestions" t-as="c" t-key="c.id" class="o_pc_meta_ac_item" t-att-class="{ 'o_pc_active': c_index === state.metaCategActiveSuggestion }" t-on-mousedown="() => this.selectMetaCateg(c)">
+                                            <t t-if="c.isCreate">
+                                                <i class="fa fa-plus-circle me-2 text-primary"/>
+                                                <em>Create "<strong class="text-primary">
+                                                    <t t-esc="c._create_name"/>
+                                                </strong>"
+                                            </em>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-foreach="c.parts" t-as="p" t-key="p_index">
+                                                <strong t-if="p.match" class="text-primary">
+                                                    <t t-esc="p.text"/>
+                                                </strong>
+                                                <t t-else="">
+                                                    <t t-esc="p.text"/>
+                                                </t>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="o_pc_price_stock_grid">
+                    <div class="o_pc_kpi o_pc_kpi_price">
+                        <div class="o_pc_kpi_label">
+                            <i class="fa fa-tag"/>
+ Sales Price
+                            <small>(                                <t t-esc="state.product.pricelist_name"/>
+)</small>
+                        </div>
+                        <div class="o_pc_kpi_value">
+                            <t t-esc="formatPrice(state.product.price, state.product)"/>
+                            <button class="btn btn-sm btn-outline-secondary o_pc_kpi_action_btn ms-2" t-on-click="() => this.onKpiAction('price')" title="Price action">
+                                <i class="fa fa-edit"/>
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary o_pc_create_pricelist_btn ms-1" t-on-click="() => this.createPricelistForProduct()" title="Create dedicated pricelist for this product" aria-label="Create pricelist for product" t-att-disabled="state.loading || !state.product">
+                                <i class="fa fa-plus-circle"/>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="o_pc_kpi o_pc_kpi_cost">
+                        <div class="o_pc_kpi_label">
+                            <i class="fa fa-dollar"/>
+ Cost
+                        </div>
+                        <div class="o_pc_kpi_value">
+                            <t t-esc="formatPrice(state.product.standard_price, state.product)"/>
+                            <button class="btn btn-sm btn-outline-secondary o_pc_kpi_action_btn ms-2" t-on-click="() => this.onKpiAction('cost')" title="Cost action">
+                                <i class="fa fa-dollar"/>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="o_pc_kpi o_pc_kpi_profit" t-att-class="{ 'o_pc_negative_profit': getProfitInfo(state.product).margin &lt; 0 }">
+                        <div class="o_pc_kpi_label">
+                            <i class="fa fa-line-chart"/>
+ Profit
+                        </div>
+                        <div class="o_pc_kpi_value">
+                            <t t-esc="formatPrice(getProfitInfo(state.product).margin, state.product)"/>
+                            <span t-attf-class="badge ms-2 {{ getProfitInfo(state.product).margin &lt; 0 ? 'bg-danger' : 'bg-success' }}">
+                                <t t-esc="getProfitInfo(state.product).percentage.toFixed(1)"/>
+%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="o_pc_kpi o_pc_kpi_stock" t-att-class="{ 'o_pc_out_of_stock': state.product.qty_on_hand &lt;= 0 }">
+                        <div class="o_pc_kpi_label">
+                            <i class="fa fa-cubes"/>
+ Stock On Hand
+                        </div>
+                        <div class="o_pc_kpi_value">
+                            <t t-esc="state.product.qty_on_hand"/>
+                            <small>
+                                <t t-esc="state.product.uom_name"/>
+                            </small>
+                            <button class="btn btn-sm btn-outline-secondary o_pc_kpi_action_btn ms-2" t-on-click="() => this.onKpiAction('stock')" title="Stock action">
+                                <i class="fa fa-cubes"/>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ INLINE PRODUCT OPTIONS (auto-save toggles) ============ -->
+                <div class="o_pc_options_row">
+                    <label class="o_pc_options_label">
+                        <i class="fa fa-cog"/>
+ Product Options
+                    </label>
+                    <div class="o_pc_options_grid">
+                        <div class="form-check form-switch o_pc_option_item">
+                            <input type="checkbox" class="form-check-input" id="opt_sale_ok" t-att-checked="state.product.sale_ok" t-att-disabled="state.savingOptionField === 'sale_ok'" t-on-change="(ev) => this.onProductFieldToggle('sale_ok', ev)"/>
+                            <label class="form-check-label" for="opt_sale_ok">
+                                <i class="fa fa-shopping-cart"/>
+ Can be Sold
+                            </label>
+                        </div>
+                        <div class="form-check form-switch o_pc_option_item">
+                            <input type="checkbox" class="form-check-input" id="opt_purchase_ok" t-att-checked="state.product.purchase_ok" t-att-disabled="state.savingOptionField === 'purchase_ok'" t-on-change="(ev) => this.onProductFieldToggle('purchase_ok', ev)"/>
+                            <label class="form-check-label" for="opt_purchase_ok">
+                                <i class="fa fa-truck"/>
+ Can be Purchased
+                            </label>
+                        </div>
+                        <div class="form-check form-switch o_pc_option_item">
+                            <input type="checkbox" class="form-check-input" id="opt_available_in_pos" t-att-checked="state.product.available_in_pos" t-att-disabled="state.savingOptionField === 'available_in_pos'" t-on-change="(ev) => this.onProductFieldToggle('available_in_pos', ev)"/>
+                            <label class="form-check-label" for="opt_available_in_pos">
+                                <i class="fa fa-shopping-bag"/>
+ Available in POS
+                            </label>
+                        </div>
+                        <div class="form-check form-switch o_pc_option_item">
+                            <input type="checkbox" class="form-check-input" id="opt_is_storable" t-att-checked="state.product.is_storable" t-att-disabled="state.savingOptionField === 'is_storable'" t-on-change="(ev) => this.onProductFieldToggle('is_storable', ev)"/>
+                            <label class="form-check-label" for="opt_is_storable">
+                                <i class="fa fa-cubes"/>
+ Track Inventory
+                            </label>
+                        </div>
+                        <div class="form-check form-switch o_pc_option_item">
+                            <input type="checkbox" class="form-check-input" id="opt_is_published" t-att-checked="state.product.is_published" t-att-disabled="state.savingOptionField === 'is_published'" t-on-change="(ev) => this.onProductFieldToggle('is_published', ev)"/>
+                            <label class="form-check-label" for="opt_is_published">
+                                <i class="fa fa-globe"/>
+ Published
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="o_pc_extra_info">
+                    <div class="o_pc_info_row">
+                        <span class="o_pc_label">Published on Website:</span>
+                        <span t-if="state.product.is_published" class="badge bg-success">Yes</span>
+                        <span t-else="" class="badge bg-secondary">No</span>
+                    </div>
+                    <div class="o_pc_meta_item o_pc_meta_item_pubcateg">
+                        <span class="o_pc_label">Ecommerce Cat.:</span>
+                        <span class="o_pc_value">
+                            <div class="o_pc_m2m_tags position-relative w-100">
+                                <!-- Unified input container: tags + input in one box -->
+                                <div class="o_pc_m2m_container" t-on-click="onPubCategContainerClick">
+                                    <!-- Inline tags -->
+                                    <t t-foreach="state.product.public_categ_ids" t-as="pc" t-key="pc.id">
+                                        <span class="o_pc_m2m_tag o_tag_color_0">
+                                            <span class="o_pc_m2m_tag_label">
+                                                <t t-esc="pc.name"/>
+                                            </span>
+                                            <span class="o_pc_m2m_tag_delete" t-on-mousedown.prevent="() => this.removePubCateg(pc.id)">
+                                                <i class="fa fa-times"/>
+                                            </span>
+                                        </span>
+                                    </t>
+                                    <!-- Inline input -->
+                                    <input type="text" class="o_pc_m2m_input" t-att-value="state.pubCategQuery" t-on-input="onPubCategInput" t-on-focus="onPubCategFocus" t-on-blur="onPubCategBlur" t-on-keydown="onPubCategKeydown" autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" t-att-placeholder="state.product.public_categ_ids.length ? '' : 'Search or create...'" t-att-aria-expanded="state.showPubCategDropdown ? 'true' : 'false'" />
+                                    <!-- Dropdown arrow button -->
+                                    <span class="o_pc_m2m_arrow" t-on-mousedown.prevent="togglePubCategDropdown">
+                                        <i class="fa fa-caret-down"/>
+                                    </span>
+                                </div>
+                                <!-- Dropdown -->
+                                <div t-if="state.showPubCategDropdown and state.pubCategSuggestions.length" class="o_pc_m2m_dropdown">
+                                    <div t-foreach="state.pubCategSuggestions" t-as="pc" t-key="pc.id" class="o_pc_m2m_dropdown_item" t-att-class="{ 'o_pc_active': pc_index === state.pubCategActiveSuggestion, 'o_pc_m2m_selected': pc._selected }" t-on-mousedown="() => this.selectPubCateg(pc)">
+                                        <t t-if="pc.isCreate">
+                                            <i class="fa fa-plus me-2 text-primary"/>
+                                            <span class="fst-italic">Create "<strong class="text-primary">
+                                                <t t-esc="pc._create_name"/>
+                                            </strong>"
+                                        </span>
+                                    </t>
+                                    <t t-else="">
+                                        <i t-if="pc._selected" class="fa fa-check-square-o me-2 text-primary"/>
+                                        <i t-else="" class="fa fa-square-o me-2 text-muted"/>
+                                        <span class="o_pc_m2m_item_label">
+                                            <t t-foreach="pc.parts" t-as="p" t-key="p_index">
+                                                <strong t-if="p.match" class="text-primary">
+                                                    <t t-esc="p.text"/>
+                                                </strong>
+                                                <t t-else="">
+                                                    <t t-esc="p.text"/>
+                                                </t>
+                                            </t>
+                                        </span>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </span>
+                </div>
+
+                <div class="o_pc_meta_item o_pc_meta_item_tag">
+                    <span class="o_pc_label">Product Tags:</span>
+                    <span class="o_pc_value">
+                        <div class="o_pc_m2m_tags position-relative w-100">
+                            <!-- Unified input container: tags + input in one box -->
+                            <div class="o_pc_m2m_container" t-on-click="onTagContainerClick">
+                                <!-- Inline tags -->
+                                <t t-foreach="state.product.product_tag_ids" t-as="tag" t-key="tag.id">
+                                    <span class="o_pc_m2m_tag o_tag_color_0">
+                                        <span class="o_pc_m2m_tag_label">
+                                            <t t-esc="tag.name"/>
+                                        </span>
+                                        <span class="o_pc_m2m_tag_delete" t-on-mousedown.prevent="() => this.removeTag(tag.id)">
+                                            <i class="fa fa-times"/>
+                                        </span>
+                                    </span>
+                                </t>
+                                <!-- Inline input -->
+                                <input type="text" class="o_pc_m2m_input" t-att-value="state.tagQuery" t-on-input="onTagInput" t-on-focus="onTagFocus" t-on-blur="onTagBlur" t-on-keydown="onTagKeydown" autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" t-att-placeholder="state.product.product_tag_ids.length ? '' : 'Search or create...'" t-att-aria-expanded="state.showTagDropdown ? 'true' : 'false'" />
+                                <!-- Dropdown arrow button -->
+                                <span class="o_pc_m2m_arrow" t-on-mousedown.prevent="toggleTagDropdown">
+                                    <i class="fa fa-caret-down"/>
+                                </span>
+                            </div>
+                            <!-- Dropdown -->
+                            <div t-if="state.showTagDropdown and state.tagSuggestions.length" class="o_pc_m2m_dropdown">
+                                <div t-foreach="state.tagSuggestions" t-as="tag" t-key="tag.id" class="o_pc_m2m_dropdown_item" t-att-class="{ 'o_pc_active': tag_index === state.tagActiveSuggestion, 'o_pc_m2m_selected': tag._selected }" t-on-mousedown="() => this.selectTag(tag)">
+                                    <t t-if="tag.isCreate">
+                                        <i class="fa fa-plus me-2 text-primary"/>
+                                        <span class="fst-italic">Create "<strong class="text-primary">
+                                            <t t-esc="tag._create_name"/>
+                                        </strong>"
+                                    </span>
+                                </t>
+                                <t t-else="">
+                                    <i t-if="tag._selected" class="fa fa-check-square-o me-2 text-primary"/>
+                                    <i t-else="" class="fa fa-square-o me-2 text-muted"/>
+                                    <span class="o_pc_m2m_item_label">
+                                        <t t-foreach="tag.parts" t-as="p" t-key="p_index">
+                                            <strong t-if="p.match" class="text-primary">
+                                                <t t-esc="p.text"/>
+                                            </strong>
+                                            <t t-else="">
+                                                <t t-esc="p.text"/>
+                                            </t>
+                                        </t>
+                                    </span>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </span>
+            </div>
+
+        </div>
+
+        <!-- Image Detail Modal -->
+        <div t-if="state.imageDetailOpen" class="o_pc_imgupdate_backdrop" t-on-click="closeImageDetail">
+            <div class="o_pc_imgdetail_modal" t-on-click.stop="">
+                <button class="btn btn-sm btn-outline-secondary o_pc_imgdetail_close" t-on-click="closeImageDetail" title="Close">
+                    <i class="fa fa-times"/>
+                </button>
+                <div class="o_pc_imgdetail_body">
+                    <img t-att-src="state.imageDetailUrl" alt="Product Detail"/>
+                </div>
+                <div class="o_pc_imgdetail_actions text-center mt-2">
+                    <a t-att-href="state.imageDetailUrl" t-att-target="'_blank'" class="btn btn-outline-primary me-2" title="Open in new tab">
+                        <i class="fa fa-external-link"/>
+ Open
+                    </a>
+                    <a t-att-href="state.imageDetailUrl" t-att-download="state.product &amp;&amp; state.product.name || 'product'" class="btn btn-primary" title="Download">
+                        <i class="fa fa-download"/>
+ Download
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="o_pc_actions">
+            <button class="btn btn-primary" t-on-click="openProductForm">
+                <i class="fa fa-external-link"/>
+ Open Full Product Form
+            </button>
+            <t t-if="isInPrintList(state.product.id)">
+                <button class="btn btn-outline-warning" disabled="disabled">
+                    <i class="fa fa-check"/>
+ Already in Print List
+                </button>
+            </t>
+            <t t-else="">
+                <button class="btn btn-warning" t-on-click="() => this.addToPrintList(false)">
+                    <i class="fa fa-print"/>
+ Add to Print List
+                </button>
+            </t>
+        </div>
+    </div>
+</div>
+</t>
+
+<!-- Product Not Found -->
+<t t-if="state.notFound and !state.loading and !state.showCreateForm">
+<div class="o_pc_not_found">
+    <i class="fa fa-exclamation-triangle fa-4x text-warning"/>
+    <h2>Product Not Found</h2>
+    <p>No product found for: <strong>
+        <t t-esc="state.searchedCode"/>
+    </strong>
+</p>
+<button class="btn btn-success btn-lg" t-on-click="openCreateForm">
+    <i class="fa fa-plus"/>
+ Create New Product
+</button>
+</div>
+</t>
+
+<!-- Empty State -->
+<t t-if="!state.product and !state.notFound and !state.loading and !state.showCreateForm">
+<div class="o_pc_empty_state">
+<i class="fa fa-barcode fa-5x"/>
+<h2>Scan a product to begin</h2>
+<p>Use your barcode scanner or type a barcode/code/name in the search field above.</p>
+</div>
+</t>
+
+<!-- Quick Create Form -->
+<t t-if="state.showCreateForm">
+<div class="o_pc_create_form">
+<h2>
+    <i class="fa fa-plus-circle"/>
+ Create New Product</h2>
+<div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label class="form-label">Name <span class="text-danger">*</span>
+            </label>
+            <div class="o_pc_name_input_group">
+                <button type="button" class="btn btn-outline-secondary o_pc_titlecase_btn" t-on-click="applyTitleCaseToName" title="Convert to Title Case (e.g. 'andyka noz' → 'Andyka Noz')">
+                    <i class="fa fa-font"/>
+                </button>
+                <input type="text" class="form-control" t-att-value="state.createForm.name" t-on-input="onNameInput"/>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Barcode</label>
+            <input type="text" class="form-control" t-att-value="state.createForm.barcode" t-on-input="onBarcodeFormInput"/>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Internal Reference</label>
+            <input type="text" class="form-control" t-att-value="state.createForm.default_code" t-on-input="onDefaultCodeInput"/>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Cost</label>
+            <input type="number" step="0.01" class="form-control" t-att-value="state.createForm.standard_price" t-on-input="onStandardPriceInput"/>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Sales Price (List Price)</label>
+            <input type="number" step="0.01" class="form-control" t-att-value="state.createForm.list_price" t-on-input="onListPriceInput"/>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <!--
+                                        Product Category — searchable single-select.
+                                        SelectMenu props:
+                                          choices  : [{value, label}, ...]
+                                          value    : current value
+                                          onSelect : callback(newValue)
+                                    -->
+        <div class="mb-3">
+            <label class="form-label">Product Category</label>
+            <SelectMenu choices="categoryChoices" value="state.createForm.categ_id" onSelect.bind="onCategorySelect" class="'w-100'" />
+        </div>
+
+        <!-- Pricelist (optional) — searchable single-select with None option -->
+        <div class="mb-3">
+            <label class="form-label">Pricelist (optional)</label>
+            <SelectMenu choices="pricelistChoicesWithNone" value="state.createForm.pricelist_id" onSelect.bind="onCreateFormPricelistSelect" class="'w-100'" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Pricelist Price (optional)</label>
+            <input type="number" step="0.01" class="form-control" t-att-value="state.createForm.pricelist_price" t-on-input="onPricelistPriceInput"/>
+        </div>
+
+        <!-- Product Options — default-on toggles for scanned-product workflow.
+                                         Mirrors the inline toggle row on the product card. -->
+        <div class="o_pc_create_options_row">
+            <label class="o_pc_create_options_label">
+                <i class="fa fa-cog"/>
+ Product Options
+            </label>
+            <div class="o_pc_create_options_grid">
+                <div class="form-check form-switch o_pc_create_option_item">
+                    <input type="checkbox" class="form-check-input" id="create_sale_ok" t-att-checked="state.createForm.sale_ok" t-on-change="(ev) => state.createForm.sale_ok = ev.target.checked"/>
+                    <label class="form-check-label" for="create_sale_ok">
+                        <i class="fa fa-shopping-cart"/>
+ Can be Sold
+                    </label>
+                </div>
+                <div class="form-check form-switch o_pc_create_option_item">
+                    <input type="checkbox" class="form-check-input" id="create_purchase_ok" t-att-checked="state.createForm.purchase_ok" t-on-change="(ev) => state.createForm.purchase_ok = ev.target.checked"/>
+                    <label class="form-check-label" for="create_purchase_ok">
+                        <i class="fa fa-truck"/>
+ Can be Purchased
+                    </label>
+                </div>
+                <div class="form-check form-switch o_pc_create_option_item">
+                    <input type="checkbox" class="form-check-input" id="create_available_in_pos" t-att-checked="state.createForm.available_in_pos" t-on-change="(ev) => state.createForm.available_in_pos = ev.target.checked"/>
+                    <label class="form-check-label" for="create_available_in_pos">
+                        <i class="fa fa-shopping-bag"/>
+ Available in POS
+                    </label>
+                </div>
+                <div class="form-check form-switch o_pc_create_option_item">
+                    <input type="checkbox" class="form-check-input" id="create_is_storable" t-att-checked="state.createForm.is_storable" t-on-change="(ev) => state.createForm.is_storable = ev.target.checked"/>
+                    <label class="form-check-label" for="create_is_storable">
+                        <i class="fa fa-cubes"/>
+ Track Inventory
+                    </label>
+                </div>
+                <div class="form-check form-switch o_pc_create_option_item">
+                    <input type="checkbox" class="form-check-input" id="create_is_published" t-att-checked="state.createForm.is_published" t-on-change="onIsPublishedToggle"/>
+                    <label class="form-check-label" for="create_is_published">
+                        <i class="fa fa-globe"/>
+ Published
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!--
+                                        Ecommerce Category — searchable multi-select. multiSelect=true makes SelectMenu accept an array of values.
+                                    -->
+        <div class="mb-3" t-if="state.publicCategories.length">
+            <label class="form-label">Ecommerce Category</label>
+            <SelectMenu choices="publicCategoryChoices" value="state.createForm.public_categ_ids" onSelect.bind="onPublicCategoriesSelect" multiSelect="true" class="'w-100'" />
+        </div>
+
+        <!-- Product Tags -->
+        <div class="mb-3" t-if="state.productTags.length">
+            <label class="form-label">Product Tags</label>
+            <SelectMenu choices="productTagChoices" value="state.createForm.product_tag_ids" onSelect.bind="onProductTagsSelect" multiSelect="true" class="'w-100'" />
+        </div>
+    </div>
+</div>
+<div class="o_pc_form_actions">
+    <button class="btn btn-success" t-on-click="submitCreateForm" t-att-disabled="state.loading">
+        <i class="fa fa-save"/>
+ Create Product
+    </button>
+    <button class="btn btn-secondary" t-on-click="cancelCreateForm">
+        <i class="fa fa-times"/>
+ Cancel
+    </button>
+</div>
+</div>
+</t>
+</div>
+
+<!-- Mobile backdrop for sidebar drawer -->
+<div class="o_pc_sidebar_backdrop" t-att-class="{ 'o_pc_backdrop_visible': state.sidebarOpen }" t-on-click="closeSidebar"/>
+
+<!-- Right: Scan History Sidebar -->
+<div class="o_pc_sidebar" t-att-class="{ 'o_pc_sidebar_open': state.sidebarOpen }">
+<div class="o_pc_sidebar_header">
+<h3>
+<i class="fa fa-history"/>
+ Scan History</h3>
+<div class="d-flex gap-2 align-items-center">
+<button class="btn btn-sm btn-outline-danger" t-on-click="clearHistory" t-att-disabled="!state.history.length">
+                                Clear
+</button>
+<button class="o_pc_sidebar_close" t-on-click="closeSidebar" title="Close">
+    <i class="fa fa-times"/>
+</button>
+</div>
+</div>
+<div class="o_pc_history_list">
+<t t-if="!state.history.length">
+<div class="o_pc_history_empty">
+    <i class="fa fa-inbox fa-2x"/>
+    <p>No scans yet</p>
+</div>
+</t>
+<t t-foreach="state.history" t-as="item" t-key="item.id">
+<div class="o_pc_history_item" t-on-click="() => this.onHistoryClick(item)">
+    <img t-att-src="item.image_url" class="o_pc_history_image"/>
+    <div class="o_pc_history_info">
+        <div class="o_pc_history_name">
+            <t t-esc="item.name"/>
+        </div>
+        <div class="o_pc_history_code">
+            <t t-if="item.barcode">
+                <i class="fa fa-barcode"/>
+                <t t-esc="item.barcode"/>
+            </t>
+            <t t-elif="item.default_code">
+                <i class="fa fa-hashtag"/>
+                <t t-esc="item.default_code"/>
+            </t>
+        </div>
+        <div class="o_pc_history_meta">
+            <span class="o_pc_history_price">
+                <t t-esc="formatPrice(item.price, item)"/>
+            </span>
+            <span class="o_pc_history_stock" t-att-class="{ 'text-danger': item.qty_on_hand &lt;= 0 }">
+                                            Stock: <t t-esc="item.qty_on_hand"/>
+            </span>
+        </div>
+        <div class="o_pc_history_time">
+            <t t-esc="item.timestamp"/>
+        </div>
+    </div>
+</div>
+</t>
+</div>
+</div>
+</div>
+
+<!-- Print List Modal/Panel -->
+<t t-if="state.printListPanelOpen">
+<div class="o_pc_printlist_backdrop" t-on-click="closePrintListPanel"/>
+<div class="o_pc_printlist_modal">
+<div class="o_pc_printlist_header">
+<h3>
+<i class="fa fa-print"/>
+ Print List
+<span class="badge bg-warning ms-2">
+    <t t-esc="state.printList.length"/>
+ items
+</span>
+</h3>
+<button class="o_pc_printlist_close" t-on-click="closePrintListPanel">
+<i class="fa fa-times"/>
+</button>
+</div>
+<div class="o_pc_printlist_body">
+<t t-if="!state.printList.length">
+<div class="o_pc_printlist_empty">
+    <i class="fa fa-print fa-3x"/>
+    <p>Print list is empty</p>
+    <small>Scan products and add them to the list</small>
+</div>
+</t>
+<t t-else="">
+<t t-foreach="state.printList" t-as="item" t-key="item.id">
+    <div class="o_pc_printlist_item">
+        <img t-att-src="item.image_url" class="o_pc_printlist_image"/>
+        <div class="o_pc_printlist_info">
+            <div class="o_pc_printlist_name">
+                <t t-esc="item.name"/>
+            </div>
+            <div class="o_pc_printlist_code">
+                <t t-if="item.barcode">
+                    <i class="fa fa-barcode"/>
+                    <t t-esc="item.barcode"/>
+                </t>
+                <t t-if="item.default_code">
+                    <span t-if="item.barcode" class="mx-2">|</span>
+                    <i class="fa fa-hashtag"/>
+                    <t t-esc="item.default_code"/>
+                </t>
+            </div>
+        </div>
+        <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeFromPrintList(item.id)" title="Remove">
+            <i class="fa fa-trash"/>
+        </button>
+    </div>
+</t>
+</t>
+</div>
+<div class="o_pc_printlist_footer">
+<button class="btn btn-outline-danger" t-on-click="clearPrintList" t-att-disabled="!state.printList.length">
+<i class="fa fa-trash"/>
+ Clear All
+</button>
+<button class="btn btn-primary" t-on-click="printLabels" t-att-disabled="!state.printList.length">
+<i class="fa fa-print"/>
+ Print Labels (<t t-esc="state.printList.length"/>
+)
+</button>
+</div>
+</div>
+</t>
+
+<!-- ============ CAMERA SCANNER MODAL ============ -->
+<div t-if="state.showCameraModal" class="o_pc_camera_backdrop">
+<div class="o_pc_camera_modal">
+<div class="o_pc_camera_header">
+<span>
+<t t-if="state.cameraMode === 'once'">Scan Barcode (Single)</t>
+<t t-else="">Scan Barcode (Continuous)</t>
+</span>
+<button class="o_pc_camera_close" t-on-click="closeCameraScanner" title="Close Camera">×</button>
+</div>
+
+<div class="o_pc_camera_video_wrap">
+<video t-ref="cameraVideo" autoplay="autoplay" playsinline="playsinline" muted="muted"/>
+<div class="o_pc_camera_overlay">
+<div class="o_pc_camera_target"/>
+</div>
+<div t-if="state.lastScanStatus" t-att-class="'o_pc_camera_flash o_pc_flash_' + state.lastScanStatus">
+<div t-if="state.lastScanMessage" class="o_pc_camera_toast">
+    <t t-esc="state.lastScanMessage"/>
+</div>
+</div>
+</div>
+
+<div class="o_pc_camera_status">
+<t t-if="state.cameraError">
+<span class="text-danger">
+    <t t-esc="state.cameraError"/>
+</span>
+</t>
+<t t-elif="state.cameraMode === 'continuous'">
+                            Scanned: <strong>
+<t t-esc="state.scannedCount"/>
+</strong> products
+<t t-if="state.lastDetected"> • Last: <t t-esc="state.lastDetected"/>
+</t>
+</t>
+<t t-elif="state.lastDetected">
+                            Detected: <strong>
+<t t-esc="state.lastDetected"/>
+</strong>
+</t>
+<t t-else="">Point Camera At A Barcode...</t>
+</div>
+
+<div class="o_pc_camera_controls">
+<button class="btn btn-secondary" t-on-click="toggleTorch" t-att-disabled="!state.torchSupported ? 'disabled' : null">
+<i class="fa fa-bolt"/>
+<span class="ms-1">
+<t t-if="state.torchOn">Flash On</t>
+<t t-else="">Flash Off</t>
+</span>
+</button>
+<button class="btn btn-secondary o_pc_camera_switch_btn" t-on-click="switchCamera" title="Switch Camera">
+<i class="fa fa-refresh"/>
+<span class="ms-1">
+<t t-if="state.cameraFacing === 'environment'">Front</t>
+<t t-else="">Back</t>
+</span>
+</button>
+<button class="btn btn-secondary" t-on-click="closeCameraScanner">
+<t t-if="state.cameraMode === 'continuous'">Done</t>
+<t t-else="">Cancel</t>
+</button>
+</div>
+</div>
+</div>
+
+<!-- ============ IMAGE UPDATE MODAL ============ -->
+<div t-if="state.showImageUpdateModal" class="o_pc_imgupdate_backdrop" t-on-click="closeImageUpdateModal">
+<div class="o_pc_imgupdate_modal" t-on-click.stop="">
+<h4>Update Product Image</h4>
+<p class="text-muted">Choose image source:</p>
+<div class="o_pc_imgupdate_options">
+<button class="btn btn-outline-primary o_pc_imgupdate_option" t-on-click="chooseFromGallery">
+<i class="fa fa-image fa-2x"/>
+<span>Gallery</span>
+</button>
+<button class="btn btn-outline-success o_pc_imgupdate_option" t-on-click="takePhoto">
+<i class="fa fa-camera fa-2x"/>
+<span>Camera</span>
+</button>
+</div>
+<div class="text-center mt-3">
+<button class="btn btn-secondary btn-sm" t-on-click="closeImageUpdateModal">
+                            Cancel
+</button>
+</div>
+</div>
+</div>
+
+<!-- ============ COST UPDATE MODAL ============ -->
+<div t-if="state.showCostUpdateModal" class="o_pc_imgupdate_backdrop" t-on-click="closeCostUpdateModal">
+<div class="o_pc_imgupdate_modal" t-on-click.stop="">
+<h4>Update Product Cost</h4>
+<p class="text-muted">Enter the new cost value for <t t-esc="state.product.name"/>
+.</p>
+<div class="mb-4 text-start">
+<label class="form-label fw-bold">Cost Price</label>
+<div class="input-group">
+<span class="input-group-text">
+<t t-esc="state.product.currency_symbol || '$'"/>
+</span>
+<input type="number" step="0.01" class="form-control form-control-lg" t-att-value="state.editCostValue" t-on-input="(ev) => state.editCostValue = ev.target.value" t-on-keydown="onCostInputKeydown" t-ref="costInput" autofocus="autofocus" />
+</div>
+</div>
+<div class="d-flex justify-content-end gap-2">
+<button class="btn btn-secondary" t-on-click="closeCostUpdateModal">
+                            Discard
+</button>
+<button class="btn btn-primary" t-on-click="saveCostUpdate" t-att-disabled="state.loading">
+<i class="fa fa-save"/>
+ Save
+</button>
+</div>
+</div>
+</div>
+
+<!-- ============ STOCK UPDATE MODAL ============ -->
+<div t-if="state.showStockUpdateModal" class="o_pc_imgupdate_backdrop" t-on-click="closeStockUpdateModal">
+<div class="o_pc_imgupdate_modal" t-on-click.stop="">
+<h4>Update Stock on Hand</h4>
+<p class="text-muted">Enter the new stock quantity for <t t-esc="state.product.name"/>
+.</p>
+<div class="mb-4 text-start">
+<label class="form-label fw-bold">Quantity (Inventory Adjustment)</label>
+<div class="input-group">
+<input type="number" step="0.01" class="form-control form-control-lg" t-att-value="state.editStockValue" t-on-input="(ev) => state.editStockValue = ev.target.value" t-on-keydown="onStockInputKeydown" t-ref="stockInput" autofocus="autofocus" />
+<span class="input-group-text">
+<t t-esc="state.product.uom_name || 'Units'"/>
+</span>
+</div>
+<small class="text-muted d-block mt-2">
+                            This will create and apply an inventory adjustment in the main warehouse automatically.
+</small>
+</div>
+<div class="d-flex justify-content-end gap-2">
+<button class="btn btn-secondary" t-on-click="closeStockUpdateModal">
+                            Discard
+</button>
+<button class="btn btn-primary" t-on-click="saveStockUpdate" t-att-disabled="state.loading">
+<i class="fa fa-save"/>
+ Apply Adjustment
+</button>
+</div>
+</div>
+</div>
+
+<!-- ============ TRACK INVENTORY ERROR MODAL ============ -->
+<div t-if="state.showTrackInventoryErrorModal" class="o_pc_imgupdate_backdrop" t-on-click="closeTrackInventoryErrorModal">
+<div class="o_pc_imgupdate_modal o_pc_track_inventory_modal" t-on-click.stop="">
+<h4>
+<i class="fa fa-exclamation-triangle text-warning"/>
+ Cannot Enable Track Inventory</h4>
+<div class="o_pc_ti_error_message">
+<t t-esc="state.trackInventoryErrorMessage"/>
+</div>
+<p class="o_pc_ti_explainer">
+                        This product likely already has transactions (purchases, sales, or stock moves).
+                        To recover, duplicate this product with Track Inventory already enabled and
+                        archive the original.
+</p>
+<ul class="o_pc_ti_steps">
+<li>The <strong>barcode</strong> and <strong>internal reference</strong> will be moved to the duplicate (so scanning still finds the right product)</li>
+<li>Cost, sales price, image, category, and per-product pricelist rules are copied</li>
+<li>The original product is archived automatically</li>
+</ul>
+<div class="d-flex justify-content-end gap-2 mt-3">
+<button class="btn btn-secondary" t-on-click="closeTrackInventoryErrorModal" t-att-disabled="state.loading">
+                            Cancel
+</button>
+<button class="btn btn-warning" t-on-click="duplicateAndArchive" t-att-disabled="state.loading">
+<i class="fa fa-copy"/>
+<t t-if="state.loading"> Processing...</t>
+<t t-else=""> Duplicate &amp; Archive</t>
+</button>
+</div>
+</div>
+</div>
+
+</div>
+</t>
+
+</templates>

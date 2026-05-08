@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_purchase_mobile.BarcodeScanner">
+        <div class="pm-scanner-overlay">
+
+            <!-- Top bar with close + torch toggle -->
+            <div class="pm-scanner-topbar">
+                <button class="pm-scanner-btn pm-scanner-close-btn"
+                        t-on-click="onCloseClick"
+                        title="Tutup scanner">×</button>
+                <div class="pm-scanner-title">Scan Barcode</div>
+                <button t-if="state.torchAvailable"
+                        class="pm-scanner-btn pm-scanner-torch-btn"
+                        t-att-class="state.torch ? 'pm-scanner-torch-btn pm-scanner-torch-on' : 'pm-scanner-btn pm-scanner-torch-btn'"
+                        t-on-click="toggleTorch"
+                        title="Toggle senter">
+                    <span t-if="state.torch">⚡</span>
+                    <span t-else="">🔦</span>
+                </button>
+                <span t-else="" class="pm-scanner-btn-spacer"/>
+            </div>
+
+            <!-- Live camera viewfinder -->
+            <div class="pm-scanner-viewport">
+                <video t-ref="video"
+                       class="pm-scanner-video"
+                       autoplay="true"
+                       playsinline="true"
+                       muted="true"/>
+
+                <!-- Reticle overlay so users know where to aim -->
+                <div t-if="state.scanning and !state.error"
+                     class="pm-scanner-reticle">
+                    <div class="pm-scanner-reticle-corner pm-scanner-reticle-tl"/>
+                    <div class="pm-scanner-reticle-corner pm-scanner-reticle-tr"/>
+                    <div class="pm-scanner-reticle-corner pm-scanner-reticle-bl"/>
+                    <div class="pm-scanner-reticle-corner pm-scanner-reticle-br"/>
+                </div>
+
+                <!-- Error state -->
+                <div t-if="state.error" class="pm-scanner-error">
+                    <div class="pm-scanner-error-msg" t-esc="state.error"/>
+                    <button class="pm-scanner-error-btn"
+                            t-on-click="onCloseClick">Tutup</button>
+                </div>
+            </div>
+
+            <!-- Hint text -->
+            <div t-if="state.scanning and !state.error"
+                 class="pm-scanner-hint">
+                Arahkan kamera ke barcode produk
+            </div>
+        </div>
+    </t>
+
+</templates>

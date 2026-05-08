@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="andykanoz_product_kanban_desktop.buttons" t-inherit="web.KanbanView.Buttons" t-inherit-mode="primary">
+        <xpath expr="." position="inside">
+            <div class="d-flex align-items-center ms-3 gap-2 flex-wrap">
+                <!-- Pricelist Dropdown -->
+                <select class="form-select form-select-sm" t-on-change="(ev) => this.onPricelistChange(ev)" t-att-value="this.desktopState.selectedPricelistId">
+                    <t t-foreach="this.desktopState.pricelists" t-as="pl" t-key="pl.id">
+                        <option t-att-value="pl.id">
+                            <t t-esc="pl.name"/>
+                        </option>
+                    </t>
+                </select>
+            </div>
+        </xpath>
+    </t>
+</templates>
+

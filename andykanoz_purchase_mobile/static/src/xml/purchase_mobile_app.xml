@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_purchase_mobile.App">
+        <div class="pm-app">
+
+            <!-- List view -->
+            <t t-if="state.view === 'list'">
+                <div class="pm-topbar">
+                    <span class="pm-title">Purchase Mobile</span>
+                    <span class="pm-phase" t-esc="state.phase"/>
+                </div>
+
+                <main class="pm-content">
+                    <button class="pm-new-po-btn" t-on-click="openNewEditor">
+                        + New Purchase Order
+                    </button>
+
+                    <POList onPickOrder.bind="openExistingEditor"/>
+                </main>
+
+                <footer class="pm-footer">
+                    <strong>Gopokaja</strong>
+                    <span> · </span>
+                    <span t-esc="state.user.name"/>
+                    <span> · v</span>
+                    <span t-esc="state.moduleVersion"/>
+                </footer>
+            </t>
+
+            <!-- Editor view -->
+            <t t-elif="state.view === 'editor'">
+                <POEditor poId="state.currentPoId"
+                          onBack.bind="backToList"/>
+            </t>
+
+        </div>
+    </t>
+
+</templates>

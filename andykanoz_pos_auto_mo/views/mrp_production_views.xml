@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Show POS reference on the MO list so the kitchen can see which order it's from -->
+    <record id="view_mrp_production_tree_pos" model="ir.ui.view">
+        <field name="name">mrp.production.tree.pos</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="pos_order_ref" optional="show" string="POS Ref"/>
+            </field>
+        </field>
+    </record>
+
+    <!--
+        Add POS order field on the MO form.
+        NOTE: we target user_id instead of `origin` because `origin` also exists
+        on stock.move (nested in move_raw_ids tree) and Odoo's XPath matches the
+        first occurrence, which was causing: "Field pos_order_id does not exist
+        in model stock.move".
+    -->
+    <record id="view_mrp_production_form_pos" model="ir.ui.view">
+        <field name="name">mrp.production.form.pos</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="pos_order_id" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Smart button on POS order form to jump to linked MOs -->
+    <record id="view_pos_order_form_mo_button" model="ir.ui.view">
+        <field name="name">pos.order.form.mo.button</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_mos"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-wrench"
+                        invisible="mo_count == 0">
+                    <field name="mo_count" widget="statinfo" string="MOs"/>
+                </button>
+            </div>
+        </field>
+    </record>
+
+</odoo>

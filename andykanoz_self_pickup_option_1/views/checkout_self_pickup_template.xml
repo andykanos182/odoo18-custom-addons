@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- CHECKOUT: Toggle Metode Penerimaan + Info Jarak/Biaya         -->
+    <!-- ============================================================ -->
+    <template id="self_pickup_checkout_option"
+              name="Self Pickup Checkout Option"
+              inherit_id="website_sale.checkout">
+
+        <xpath expr="//div[@id='shop_checkout']" position="inside">
+
+            <t t-set="company" t-value="request.env.company"/>
+            <t t-set="comp_partner" t-value="company.partner_id"/>
+
+            <!-- Toggle Metode Penerimaan -->
+            <div id="andyka_pickup_toggle" class="mb-4">
+                <h4 class="fs-6 small text-uppercase fw-bolder">Metode Penerimaan</h4>
+                <div class="list-group">
+
+                    <!-- Option: Diantar ke Alamat Saya -->
+                    <label class="list-group-item d-flex flex-column gap-1" id="andyka_delivery_label">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="radio" name="andyka_receive_method" value="delivery"
+                                   id="andyka_opt_delivery" checked="checked"
+                                   class="form-check-input m-0"/>
+                            <span class="fw-bold">Diantar ke Alamat Saya</span>
+                        </div>
+                        <div id="andyka_delivery_detail" class="ms-4 ps-1" style="display:none;">
+                            <small class="text-muted">
+                                <i class="fa fa-map-marker me-1"/>
+                                <span id="andyka_distance_text">Calculating...</span>
+                            </small>
+                            <br/>
+                            <small class="text-primary fw-bold">
+                                <i class="fa fa-motorcycle me-1"/>
+                                <span id="andyka_delivery_cost_text">-</span>
+                            </small>
+                        </div>
+                    </label>
+
+                    <!-- Option: Ambil Sendiri di Toko -->
+                    <label class="list-group-item d-flex flex-column gap-1" id="andyka_pickup_label">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="radio" name="andyka_receive_method" value="pickup"
+                                   id="andyka_opt_pickup"
+                                   class="form-check-input m-0"/>
+                            <span class="fw-bold">Ambil Sendiri di Toko</span>
+                            <span class="badge bg-success ms-auto">Gratis</span>
+                        </div>
+                        <div id="andyka_pickup_detail" class="ms-4 ps-1 mt-1" style="display:none;">
+                            <small class="text-muted">
+                                <i class="fa fa-store me-1"/>
+                                <strong><t t-esc="company.name"/></strong>
+                            </small>
+                            <br/>
+                            <small class="text-muted">
+                                <i class="fa fa-map-marker me-1"/>
+                                <t t-if="company.street"><t t-esc="company.street"/>, </t>
+                                <t t-if="company.city"><t t-esc="company.city"/></t>
+                                <t t-if="company.zip"> <t t-esc="company.zip"/></t>
+                            </small>
+                            <t t-if="comp_partner.gmaps_link">
+                                <br/>
+                                <small>
+                                    <a t-att-href="comp_partner.gmaps_link" target="_blank"
+                                       class="text-decoration-underline">
+                                        <i class="fa fa-external-link me-1"/>Google Maps
+                                    </a>
+                                </small>
+                            </t>
+                            <t t-if="company.phone">
+                                <t t-set="raw_phone" t-value="company.phone.replace(' ','').replace('-','').replace('(','').replace(')','')"/>
+                                <br/>
+                                <small>
+                                    <i class="fa fa-phone me-1"/>
+                                    <a t-attf-href="tel:#{raw_phone}" class="text-decoration-underline">
+                                        <t t-esc="company.phone"/>
+                                    </a>
+                                </small>
+                            </t>
+                        </div>
+                    </label>
+
+                </div>
+            </div>
+
+            <!-- JS -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var shopCheckout = document.getElementById('shop_checkout');
+                    var pickupToggle = document.getElementById('andyka_pickup_toggle');
+                    var optDelivery = document.getElementById('andyka_opt_delivery');
+                    var optPickup = document.getElementById('andyka_opt_pickup');
+                    var deliveryForm = document.getElementById('o_delivery_form');
+                    var deliveryAddressRow = document.getElementById('delivery_address_row');
+                    var deliveryDetail = document.getElementById('andyka_delivery_detail');
+                    var pickupDetail = document.getElementById('andyka_pickup_detail');
+
+                    if (!shopCheckout || !pickupToggle) return;
+
+                    shopCheckout.insertBefore(pickupToggle, shopCheckout.firstChild);
+
+                    if (deliveryForm) deliveryForm.style.display = 'none';
+                    var billingRow = document.getElementById('billing_address_row');
+                    if (billingRow) billingRow.style.display = 'none';
+                    if (!billingRow) {
+                        var t = document.getElementById('use_delivery_as_billing');
+                        if (t) { var s = t.closest('.mb-3, .mb-4'); if (s) s.style.display = 'none'; }
+                    }
+
+                    function findCarrierRadio(keyword) {
+                        var radios = document.querySelectorAll('#o_delivery_methods input[type="radio"]');
+                        var found = null;
+                        radios.forEach(function(r) {
+                            var li = r.closest('li');
+                            var label = li ? li.querySelector('.o_delivery_carrier_label') : null;
+                            var name = label ? label.textContent.trim().toLowerCase() : '';
+                            if (name.indexOf(keyword) !== -1) found = r;
+                        });
+                        return found;
+                    }
+
+                    function rpcCall(url, params) {
+                        return fetch(url, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ jsonrpc: '2.0', method: 'call', id: 1, params: params })
+                        }).then(function(res) { return res.json(); });
+                    }
+
+                    function setCarrierAndGetRate(dmId) {
+                        rpcCall('/shop/set_delivery_method', { dm_id: parseInt(dmId) })
+                        .then(function(data) {
+                            if (data.result) {
+                                updateCartSummary(data.result);
+                                return rpcCall('/shop/get_delivery_rate', { dm_id: parseInt(dmId) });
+                            }
+                        })
+                        .then(function(rateData) {
+                            if (rateData &amp;&amp; rateData.result) showDeliveryDetail(rateData.result);
+                        })
+                        .catch(function(err) { console.error('[Checkout] Error:', err); });
+                    }
+
+                    function setCarrierOnly(dmId) {
+                        rpcCall('/shop/set_delivery_method', { dm_id: parseInt(dmId) })
+                        .then(function(data) {
+                            if (data.result) updateCartSummary(data.result);
+                        })
+                        .catch(function(err) { console.error('[Checkout] Error:', err); });
+                    }
+
+                    function updateCartSummary(result) {
+                        var el;
+                        el = document.querySelector('#order_delivery .monetary_field');
+                        if (el &amp;&amp; result.amount_delivery != null) el.innerHTML = result.amount_delivery;
+                        el = document.querySelector('#order_total .monetary_field');
+                        if (el &amp;&amp; result.amount_total != null) el.innerHTML = result.amount_total;
+                        el = document.querySelector('#order_total_untaxed .monetary_field');
+                        if (el &amp;&amp; result.amount_untaxed != null) el.innerHTML = result.amount_untaxed;
+                    }
+
+                    function showDeliveryDetail(rate) {
+                        if (!deliveryDetail) return;
+                        var distEl = document.getElementById('andyka_distance_text');
+                        var costEl = document.getElementById('andyka_delivery_cost_text');
+
+                        if (rate.warning_message &amp;&amp; distEl) {
+                            distEl.textContent = rate.warning_message;
+                        } else if (distEl) {
+                            distEl.textContent = '';
+                        }
+
+                        if (rate.success &amp;&amp; rate.amount_delivery &amp;&amp; costEl) {
+                            costEl.innerHTML = rate.amount_delivery;
+                        } else if (rate.error_message &amp;&amp; costEl) {
+                            costEl.innerHTML = '<span class="text-danger">' + rate.error_message + '</span>';
+                        }
+
+                        deliveryDetail.style.display = 'block';
+                    }
+
+                    function switchToPickup() {
+                        if (pickupDetail) pickupDetail.style.display = 'block';
+                        if (deliveryDetail) deliveryDetail.style.display = 'none';
+                        if (deliveryAddressRow) deliveryAddressRow.style.display = 'none';
+                        var spRadio = findCarrierRadio('ambil sendiri') || findCarrierRadio('self pickup');
+                        if (spRadio) {
+                            var dmId = spRadio.dataset.dmId || spRadio.value;
+                            if (dmId) setCarrierOnly(dmId);
+                        }
+                    }
+
+                    function switchToDelivery() {
+                        if (pickupDetail) pickupDetail.style.display = 'none';
+                        if (deliveryAddressRow) deliveryAddressRow.style.display = '';
+                        var dlRadio = findCarrierRadio('berdasarkan jarak') || findCarrierRadio('gopokaja');
+                        if (dlRadio) {
+                            var dmId = dlRadio.dataset.dmId || dlRadio.value;
+                            if (dmId) setCarrierAndGetRate(dmId);
+                        }
+                    }
+
+                    if (optDelivery) optDelivery.addEventListener('change', function () { if (this.checked) switchToDelivery(); });
+                    if (optPickup) optPickup.addEventListener('change', function () { if (this.checked) switchToPickup(); });
+
+                    if (deliveryAddressRow) {
+                        deliveryAddressRow.addEventListener('click', function(e) {
+                            var card = e.target.closest('.o_wsale_address_card, .card');
+                            if (card &amp;&amp; optDelivery &amp;&amp; optDelivery.checked) {
+                                setTimeout(function() {
+                                    var dlRadio = findCarrierRadio('berdasarkan jarak') || findCarrierRadio('gopokaja');
+                                    if (dlRadio) {
+                                        var dmId = dlRadio.dataset.dmId || dlRadio.value;
+                                        if (dmId) setCarrierAndGetRate(dmId);
+                                    }
+                                }, 1500);
+                            }
+                        });
+                    }
+
+                    setTimeout(function() {
+                        if (optDelivery &amp;&amp; optDelivery.checked) {
+                            var dlRadio = findCarrierRadio('berdasarkan jarak') || findCarrierRadio('gopokaja');
+                            if (dlRadio) {
+                                var dmId = dlRadio.dataset.dmId || dlRadio.value;
+                                if (dmId) setCarrierAndGetRate(dmId);
+                            }
+                        }
+                    }, 800);
+                });
+            </script>
+        </xpath>
+    </template>
+
+    <!-- ============================================================ -->
+    <!-- CONFIRMATION: Button "View My Orders" setelah payment         -->
+    <!-- ============================================================ -->
+    <template id="confirmation_view_orders_button"
+              name="Confirmation View Orders Button"
+              inherit_id="website_sale.confirmation">
+
+        <xpath expr="//div[@id='oe_structure_website_sale_confirmation_2']" position="before">
+            <div class="text-center mt-4 mb-3">
+                <a href="/my/orders" class="btn btn-primary btn-lg">
+                    <i class="fa fa-list-alt me-2"/>View My Orders
+                </a>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- ============================================================ -->
+    <!-- PORTAL: Sales Order detail — Self Pickup section              -->
+    <!-- ============================================================ -->
+    <template id="self_pickup_portal_order"
+              name="Self Pickup Portal Order Info"
+              inherit_id="sale.sale_order_portal_content">
+
+        <xpath expr="//div[@id='sale_invoices']" position="after">
+            <t t-if="sale_order.carrier_id and sale_order.carrier_id.name and 'ambil sendiri' in sale_order.carrier_id.name.lower()">
+
+                <t t-set="pickup_pickings" t-value="sale_order.picking_ids.filtered(lambda p: p.picking_type_id.code == 'outgoing')"/>
+                <t t-set="pickup_state" t-value="pickup_pickings[:1].state if pickup_pickings else 'draft'"/>
+
+                <div class="col-12 col-lg-6 mb-4">
+                    <h5 class="mb-1">Self Pickup</h5>
+                    <hr class="mt-1 mb-2"/>
+
+                    <div class="text-center p-3 mb-3" style="background:#f0f7fa; border:2px dashed #17a2b8; border-radius:8px;">
+                        <small class="text-muted d-block mb-1">Kode Pengambilan</small>
+                        <span style="font-size:1.8rem; font-weight:bold; letter-spacing:2px; color:#0c5460;">
+                            <t t-esc="sale_order.name"/>
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <t t-if="pickup_state in ('draft', 'waiting', 'confirmed')">
+                            <span class="badge rounded-pill text-bg-warning"><i class="fa fa-clock-o me-1"/>Menunggu Konfirmasi</span>
+                            <p class="text-muted small mt-1 mb-0">Pesanan Anda sedang diproses.</p>
+                        </t>
+                        <t t-if="pickup_state == 'assigned'">
+                            <span class="badge rounded-pill text-bg-info"><i class="fa fa-check-circle me-1"/>Siap Diambil</span>
+                            <p class="text-muted small mt-1 mb-0">Pesanan Anda sudah siap! Silakan datang ke toko.</p>
+                        </t>
+                        <t t-if="pickup_state == 'done'">
+                            <span class="badge rounded-pill text-bg-success"><i class="fa fa-check me-1"/>Sudah Diambil</span>
+                            <p class="text-muted small mt-1 mb-0">Pesanan Anda sudah diambil. Terima kasih!</p>
+                        </t>
+                        <t t-if="pickup_state == 'cancel'">
+                            <span class="badge rounded-pill text-bg-danger"><i class="fa fa-times me-1"/>Dibatalkan</span>
+                        </t>
+                    </div>
+
+                    <t t-if="pickup_state not in ('done', 'cancel')">
+                        <div class="alert alert-light border mb-3" style="font-size:0.85em;">
+                            <p class="fw-bold mb-1"><i class="fa fa-info-circle me-1"/>Cara Pengambilan:</p>
+                            <ol class="mb-0 ps-3">
+                                <li>Datang ke toko pada jam operasional</li>
+                                <li>Tunjukkan kode <strong><t t-esc="sale_order.name"/></strong> kepada staff kasir</li>
+                                <li>Staff akan menyerahkan pesanan Anda</li>
+                            </ol>
+                        </div>
+                    </t>
+
+                    <t t-set="company" t-value="sale_order.company_id"/>
+                    <t t-set="comp_partner" t-value="company.partner_id"/>
+
+                    <div class="alert alert-info mb-0">
+                        <p class="mb-1 fw-bold"><i class="fa fa-store me-1"/>Alamat Toko:</p>
+                        <p class="mb-1">
+                            <strong><t t-esc="company.name"/></strong><br/>
+                            <t t-if="company.street"><t t-esc="company.street"/><br/></t>
+                            <t t-if="company.street2"><t t-esc="company.street2"/><br/></t>
+                            <t t-if="company.city"><t t-esc="company.city"/></t>
+                            <t t-if="company.state_id"> <t t-esc="company.state_id.name"/></t>
+                            <t t-if="company.zip"> <t t-esc="company.zip"/></t>
+                            <t t-if="company.country_id"><br/><t t-esc="company.country_id.name"/></t>
+                        </p>
+                        <t t-if="comp_partner.gmaps_link">
+                            <p class="mb-1">
+                                <i class="fa fa-map-marker me-1"/>
+                                <a t-att-href="comp_partner.gmaps_link" target="_blank" style="color: inherit; text-decoration: underline;">Lihat Lokasi di Google Maps</a>
+                            </p>
+                        </t>
+                        <t t-if="company.phone">
+                            <t t-set="raw_phone" t-value="company.phone.replace(' ','').replace('-','').replace('(','').replace(')','')"/>
+                            <p class="mb-1">
+                                <i class="fa fa-phone me-1"/>
+                                <a t-attf-href="tel:#{raw_phone}" style="color: inherit; text-decoration: underline;"><t t-esc="company.phone"/></a>
+                            </p>
+                            <t t-set="wa_number" t-value="raw_phone.replace('+','')"/>
+                            <t t-if="wa_number[:1] == '0'">
+                                <t t-set="wa_number" t-value="'62' + wa_number[1:]"/>
+                            </t>
+                            <p class="mb-0 mt-2">
+                                <a t-attf-href="https://wa.me/#{wa_number}?text=Halo%20#{company.name}%2C%20saya%20akan%20datang%20mengambil%20pesanan%20#{sale_order.name}."
+                                   target="_blank" class="btn btn-sm btn-success">
+                                    <i class="fa fa-whatsapp me-1"/>Chat via WhatsApp
+                                </a>
+                            </p>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+
+    </template>
+
+</odoo>

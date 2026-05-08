@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Link Maps tidak perlu ditambahkan di res.company form,
+         karena sudah muncul otomatis dari res.partner gmaps_link
+         yang ada di Contact Company -->
+</odoo>

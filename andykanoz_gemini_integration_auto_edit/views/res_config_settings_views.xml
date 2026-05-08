@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_auto_edit" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.auto.edit</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='integration']" position="inside">
+
+                <setting id="ai_gemini_configuration" string="AI Gemini Configuration" help="Configuration for Gemini Auto Edit (API key, presets, and output options).">
+                    <label for="auto_edit_gemini_api_key"/>
+                    <div class="text-muted mb-2">
+                        Get your free API key from
+                        <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>
+                    </div>
+                    <field name="auto_edit_gemini_api_key" placeholder="AIza..." password="True"/>
+                    <div class="mt-2">
+                        <label for="auto_edit_daily_quota_limit" string="Daily Quota Limit"/>
+                        <field name="auto_edit_daily_quota_limit" class="oe_inline"/>
+                        <div class="text-muted">
+                            Maximum number of Auto Edit calls allowed per day (across all users).
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="auto_edit_preset" string="Preset"/>
+                        <field name="auto_edit_preset" class="oe_inline"/>
+                        <div class="text-muted mb-2">
+                            Choose a built-in prompt preset. "Default" preserves current behaviour.
+                        </div>
+
+                        <label for="auto_edit_output_format" string="Output Format"/>
+                        <field name="auto_edit_output_format" class="oe_inline"/>
+                        <div class="text-muted mb-2">
+                            Select the desired output format. JPEG keeps white background; PNG yields transparency.
+                        </div>
+
+                        <label for="auto_edit_refine_edges" string="Refine edges"/>
+                        <field name="auto_edit_refine_edges" class="oe_inline"/>
+                        <div class="text-muted mb-2">Attempt to refine cutout edges to avoid halos.</div>
+
+                        <label for="auto_edit_preserve_shadows" string="Preserve shadows"/>
+                        <field name="auto_edit_preserve_shadows" class="oe_inline"/>
+                        <div class="text-muted mb-2">Keep subtle natural shadows for a professional look.</div>
+
+                        <label for="auto_edit_max_dimension" string="Max dimension (px)"/>
+                        <field name="auto_edit_max_dimension" class="oe_inline"/>
+                        <div class="text-muted mb-2">If &gt;0, images may be resized before sending to reduce API cost (not active in Phase 1).</div>
+
+                        <label for="auto_edit_custom_prompt" string="Custom Prompt"/>
+                        <field name="auto_edit_custom_prompt"/>
+                        <div class="text-muted">When preset = Custom, this prompt will be sent to Gemini.</div>
+                    </div>
+                </setting>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

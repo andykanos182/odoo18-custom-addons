@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"D:\\\\MyServer\\\\Odoo18\\\\Addons\\\\andykanoz_kitchen_notify\" -Recurse -Force)",
+      "Bash(Select-Object FullName, Name)",
+      "Bash(Get-ChildItem -Path \"D:\\\\MyServer\\\\Odoo18\\\\Addons\\\\andykanoz_doku_payment_geteway\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)"
+    ]
+  }
+}

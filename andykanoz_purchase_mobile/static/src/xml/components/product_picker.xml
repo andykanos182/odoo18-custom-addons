@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_purchase_mobile.ProductPicker">
+        <div class="pm-modal-backdrop" t-on-click="onBackdropClick">
+            <div class="pm-modal pm-modal-product-picker">
+
+                <div class="pm-modal-header">
+                    <div class="pm-modal-title">Pilih Produk</div>
+                    <button class="pm-modal-close"
+                            t-on-click="props.onClose"
+                            title="Tutup">×</button>
+                </div>
+
+                <div class="pm-modal-search">
+                    <div class="pm-modal-search-with-scan">
+                        <input type="text"
+                               t-ref="searchInput"
+                               class="pm-modal-search-input"
+                               placeholder="Cari barcode, SKU, atau nama..."
+                               t-att-value="state.query"
+                               t-on-input="onQueryInput"/>
+                        <button t-if="scannerSupported"
+                                class="pm-modal-scan-btn"
+                                t-on-click="openScanner"
+                                title="Scan barcode dengan kamera">📷</button>
+                    </div>
+                </div>
+
+                <div class="pm-modal-body">
+                    <div t-if="state.loading" class="pm-modal-state">
+                        Searching...
+                    </div>
+                    <div t-elif="state.error" class="pm-modal-state pm-modal-state-err"
+                         t-esc="state.error"/>
+                    <div t-elif="!state.results.length" class="pm-modal-state">
+                        Tidak ada produk ditemukan.
+                    </div>
+                    <div t-else="" class="pm-product-list">
+                        <div t-foreach="state.results"
+                             t-as="p"
+                             t-key="p.id"
+                             class="pm-product-item"
+                             t-on-click="() => this.onResultClick(p)">
+                            <img class="pm-product-thumb"
+                                 t-att-src="p.image_url"
+                                 alt=""
+                                 onerror="this.style.visibility='hidden'"/>
+                            <div class="pm-product-info">
+                                <div class="pm-product-name" t-esc="p.name"/>
+                                <div t-if="p.default_code"
+                                     class="pm-product-sku"
+                                     t-esc="'SKU: ' + p.default_code"/>
+                            </div>
+                            <div class="pm-product-price"
+                                 t-esc="formatMoney(p.unit_price)"/>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Phase 8: barcode scanner overlay (camera viewfinder).
+                 Renders on top of the modal when active. -->
+            <BarcodeScanner t-if="state.showScanner"
+                            onDetect.bind="onBarcodeDetected"
+                            onClose.bind="closeScanner"/>
+        </div>
+    </t>
+
+</templates>

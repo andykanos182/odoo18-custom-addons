@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Packaging: Enhance Tree and Form Views -->
+    <record id="product_packaging_tree_view_enhanced" model="ir.ui.view">
+        <field name="name">product.packaging.tree.enhanced</field>
+        <field name="model">product.packaging</field>
+        <field name="inherit_id" ref="product.product_packaging_tree_view"/>
+        <field name="arch" type="xml">
+            <!-- Make tree view editable from the bottom -->
+            <xpath expr="/list" position="attributes">
+                <attribute name="editable">bottom</attribute>
+            </xpath>
+            <!-- Add barcode field with camera widget after qty -->
+            <xpath expr="//field[@name='qty']" position="after">
+                <field name="barcode" widget="barcode_camera" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <record id="product_packaging_form_view_enhanced" model="ir.ui.view">
+        <field name="name">product.packaging.form.enhanced</field>
+        <field name="model">product.packaging</field>
+        <field name="inherit_id" ref="product.product_packaging_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='barcode']" position="attributes">
+                <attribute name="widget">barcode_camera</attribute>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Mobile-friendly Kanban View for Product Packaging -->
+    <record id="product_packaging_kanban_view" model="ir.ui.view">
+        <field name="name">product.packaging.kanban</field>
+        <field name="model">product.packaging</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="row mb-1">
+                                <div class="col-8">
+                                    <strong><field name="name"/></strong>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <span class="badge rounded-pill text-bg-info">
+                                        <field name="qty"/>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col-12 text-muted">
+                                    <i class="fa fa-cube me-1" title="Product"/> <field name="product_id"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <i class="fa fa-barcode me-1" title="Barcode"/> 
+                                    <field name="barcode"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Update the action to include kanban view (if accessed from menus) -->
+    <record id="product.action_packaging_view" model="ir.actions.act_window">
+        <field name="view_mode">list,kanban,form</field>
+    </record>
+</odoo>

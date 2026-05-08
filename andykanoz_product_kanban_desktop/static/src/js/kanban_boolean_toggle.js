@@ -1,0 +1,44 @@
+/** @odoo-module **/
+
+import { Component } from "@odoo/owl";
+import { registry } from "@web/core/registry";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { useService } from "@web/core/utils/hooks";
+
+export class KanbanBooleanToggle extends Component {
+    static template = "andykanoz_product_kanban_desktop.KanbanBooleanToggle";
+    static props = { ...standardFieldProps };
+
+    setup() {
+        this.orm = useService("orm");
+    }
+
+    get isActive() {
+        return !!this.props.record.data[this.props.name];
+    }
+
+    get fieldLabel() {
+        const fieldDef = this.props.record.fields[this.props.name];
+        return fieldDef ? (fieldDef.string || this.props.name) : this.props.name;
+    }
+
+    async onToggle(ev) {
+        ev.stopPropagation();
+        ev.preventDefault();
+        const recordId = this.props.record.resId;
+        const fieldName = this.props.name;
+        const newVal = !this.isActive;
+        try {
+            await this.orm.write(this.props.record.resModel, [recordId], {
+                [fieldName]: newVal,
+            });
+            await this.props.record.load();
+        } catch (e) {
+            console.error("KanbanBooleanToggle write error:", e);
+        }
+    }
+}
+
+registry.category("fields").add("kanban_boolean_toggle", {
+    component: KanbanBooleanToggle,
+});

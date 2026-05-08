@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_kanban_view_desktop" model="ir.ui.view">
+        <field name="name">product.template.kanban.desktop</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <kanban js_class="product_kanban_desktop" class="o_product_kanban_desktop" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="default_code"/>
+                <field name="currency_id"/>
+                <field name="list_price"/>
+                <field name="standard_price"/>
+                <field name="dynamic_pricelist_price"/>
+                <field name="dynamic_profit"/>
+                <field name="categ_id"/>
+                <field name="public_categ_ids"/>
+                <field name="pos_categ_ids"/>
+                <field name="sale_ok"/>
+                <field name="purchase_ok"/>
+                <field name="available_in_pos"/>
+                <field name="is_published"/>
+                <field name="image_128"/>
+                <field name="product_variant_count"/>
+                <field name="activity_state"/>
+                <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
+                <templates>
+                    <t t-name="card">
+                        <!-- Large image on top, centered -->
+                        <div class="akd_card_image">
+                            <field t-if="record.image_128.value" name="image_128" widget="image" alt="Product" options="{'img_class': 'w-100 h-100', 'preview_image': 'image_128'}"/>
+                            <span t-else="" class="akd_no_image">
+                                <i class="fa fa-image"/>
+                            </span>
+                        </div>
+
+                        <!-- Card body -->
+                        <div class="akd_card_body">
+                            <!-- Product Name and Code -->
+                            <div class="fw-bold text-truncate" t-att-title="record.name.value">
+                                <field name="name"/>
+                            </div>
+                            <div class="small text-muted">
+                                <span t-if="record.default_code.value">
+                                    [                                    <field name="default_code"/>
+]
+                                </span>
+                                <strong t-if="record.product_variant_count.value &gt; 1" class="ms-1 text-primary">
+                                    <field name="product_variant_count"/>
+ Var
+                                </strong>
+                            </div>
+
+                            <!-- Pricing -->
+                            <div class="small mt-1">
+                                <div class="text-muted">
+                                    Cost:
+                                    <field name="standard_price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </div>
+                                <div class="fw-semibold">
+                                    Pricelist:
+                                    <field name="dynamic_pricelist_price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </div>
+                                <div>
+                                    Profit:
+                                    <field name="dynamic_profit" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <i t-if="record.dynamic_profit.raw_value &gt; 0" class="fa fa-arrow-up text-success ms-1"/>
+                                    <i t-elif="record.dynamic_profit.raw_value &lt; 0" class="fa fa-arrow-down text-danger ms-1"/>
+                                </div>
+                            </div>
+
+                            <!-- Boolean toggles -->
+                            <div class="d-flex flex-wrap mt-2 gap-1">
+                                <field name="sale_ok" widget="kanban_boolean_toggle"/>
+                                <field name="purchase_ok" widget="kanban_boolean_toggle"/>
+                                <field name="available_in_pos" widget="kanban_boolean_toggle"/>
+                                <field name="is_published" widget="kanban_boolean_toggle"/>
+                            </div>
+
+                            <!-- Categories -->
+                            <div class="mt-2 border-top pt-2">
+                                <field name="categ_id" widget="kanban_category_select"/>
+                                <field name="public_categ_ids" widget="kanban_category_select"/>
+                                <field name="pos_categ_ids" widget="kanban_category_select"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="product_product_kanban_view_desktop" model="ir.ui.view">
+        <field name="name">product.product.kanban.desktop</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <kanban js_class="product_kanban_desktop" class="o_product_kanban_desktop" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="default_code"/>
+                <field name="currency_id"/>
+                <field name="lst_price"/>
+                <field name="standard_price"/>
+                <field name="dynamic_pricelist_price"/>
+                <field name="dynamic_profit"/>
+                <field name="categ_id"/>
+                <field name="public_categ_ids"/>
+                <field name="pos_categ_ids"/>
+                <field name="sale_ok"/>
+                <field name="purchase_ok"/>
+                <field name="available_in_pos"/>
+                <field name="is_published"/>
+                <field name="image_128"/>
+                <field name="product_variant_count"/>
+                <field name="activity_state"/>
+                <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
+                <templates>
+                    <t t-name="card">
+                        <div class="akd_card_image">
+                            <field t-if="record.image_128.value" name="image_128" widget="image" alt="Product" options="{'img_class': 'w-100 h-100', 'preview_image': 'image_128'}"/>
+                            <span t-else="" class="akd_no_image">
+                                <i class="fa fa-image"/>
+                            </span>
+                        </div>
+
+                        <div class="akd_card_body">
+                            <div class="fw-bold text-truncate" t-att-title="record.name.value">
+                                <field name="name"/>
+                            </div>
+                            <div class="small text-muted">
+                                <span t-if="record.default_code.value">
+                                        [                                    <field name="default_code"/>
+]
+                                </span>
+                                <strong t-if="record.product_variant_count.value &gt; 1" class="ms-1 text-primary">
+                                    <field name="product_variant_count"/>
+ Var
+                                </strong>
+                            </div>
+
+                            <div class="small mt-1">
+                                <div class="text-muted">
+                                        Cost:
+                                    <field name="standard_price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </div>
+                                <div class="fw-semibold">
+                                        Pricelist:
+                                    <field name="dynamic_pricelist_price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </div>
+                                <div>
+                                        Profit:
+                                    <field name="dynamic_profit" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <i t-if="record.dynamic_profit.raw_value &gt; 0" class="fa fa-arrow-up text-success ms-1"/>
+                                    <i t-elif="record.dynamic_profit.raw_value &lt; 0" class="fa fa-arrow-down text-danger ms-1"/>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap mt-2 gap-1">
+                                <field name="sale_ok" widget="kanban_boolean_toggle"/>
+                                <field name="purchase_ok" widget="kanban_boolean_toggle"/>
+                                <field name="available_in_pos" widget="kanban_boolean_toggle"/>
+                                <field name="is_published" widget="kanban_boolean_toggle"/>
+                            </div>
+
+                            <div class="mt-2 border-top pt-2">
+                                <field name="categ_id" widget="kanban_category_select"/>
+                                <field name="public_categ_ids" widget="kanban_category_select"/>
+                                <field name="pos_categ_ids" widget="kanban_category_select"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>

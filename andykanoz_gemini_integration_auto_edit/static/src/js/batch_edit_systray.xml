@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="andykanoz_gemini_integration_auto_edit.BatchEditSystray">
+        <div t-if="isVisible"
+             t-att-class="cssClass"
+             t-on-click="onClick"
+             title="Auto White BG batch — click to open">
+            <i class="fa fa-magic o_andykanoz_gemini_integration_auto_edit_icon"/>
+            <span class="o_andykanoz_gemini_integration_auto_edit_badge">
+                <t t-esc="processed"/>/<t t-esc="total"/>
+            </span>
+        </div>
+    </t>
+
+</templates>
